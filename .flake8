@@ -1,0 +1,4 @@
+[flake8]
+ignore = E501, W503, E712, D106
+per-file-ignores =
+  iridium/inveniordm/models/*.py: D100,D101,D102,D200,D205,D400
