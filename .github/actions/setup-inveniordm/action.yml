@@ -1,0 +1,64 @@
+name: 'Setup Invenio RDM Test Instance'
+description: 'Prepares containerized Invenio RDM instance and returns a test user and API token'
+
+inputs:
+  rdm-version:
+    description: 'Invenio RDM version tag for checkout'
+    required: true
+  rdm-user:
+    description: 'Invenio RDM user e-mail'
+    required: false
+    default: 'tester@example.com'
+  rdm-password:
+    description: 'Password of Invenio RDM test user'
+    required: false
+    default: '123456'
+  dotenv-path:
+    description: 'If set, will store URL and API token in given file.'
+    required: false
+    default: ''
+
+outputs:
+  rdm-url:
+    description: "Invenio RDM instance URL"
+    value: ${{ steps.env-to-output.outputs.rdm-url }}
+  rdm-token:
+    description: "Invenio RDM API token of created test user"
+    value: ${{ steps.env-to-output.outputs.rdm-token }}
+
+runs:
+  using: "composite"
+  steps:
+    - uses: actions/setup-node@v2
+      with:
+        node-version: '14'
+
+    - name: Install Invenio RDM
+      shell: bash
+      run: |
+        # pip install invenio-cli
+        python -m pip install git+https://github.com/Materials-Data-Science-and-Informatics/invenio-cli.git
+        invenio-cli check-requirements --development
+        invenio-cli init rdm -c ${{ inputs.rdm-version }} --no-input --config ${{ github.action_path }}/inveniordm-test.config.ini
+        cd inveniordm-test
+        invenio-cli containers start --lock --build --setup
+
+    - name: Create API token for test user
+      shell: bash
+      run: ${{ github.action_path }}/setup_api_user.sh ${{ inputs.rdm-user }} ${{ inputs.rdm-password }} >> $GITHUB_ENV
+
+    - name: Wait for Demo Records
+      shell: bash
+      run: ${{ github.action_path }}/wait_for_index.sh
+
+    - id: env-to-output
+      shell: bash
+      run: |
+          echo "::set-output name=rdm-url::$(echo $INVENIORDM_URL)"
+          echo "::set-output name=rdm-token::$(echo $INVENIORDM_TOKEN)"
+    - if: inputs.dotenv-path != ''
+      shell: bash
+      run: |
+          touch ${{ inputs.dotenv-path }}
+          echo "INVENIORDM_URL=$(echo $INVENIORDM_URL)" >> ${{ inputs.dotenv-path }}
+          echo "INVENIORDM_TOKEN=$(echo $INVENIORDM_TOKEN)" >> ${{ inputs.dotenv-path }}

@@ -3,8 +3,7 @@ from datetime import date, datetime
 from enum import Enum
 from typing import Any, Dict, List, Optional
 
-from pydantic import AnyHttpUrl, Extra, Field, root_validator
-from typing_extensions import Annotated
+from pydantic import AnyHttpUrl, Extra, root_validator
 
 from .base import JSONModel
 from .biblio import BibMetadata
@@ -51,7 +50,10 @@ class ParentAccess(JSONModel):
     https://github.com/inveniosoftware/invenio-rdm-records/blob/master/invenio_rdm_records/services/schemas/parent/access.py#L50
     """
 
-    owned_by: Annotated[List[Agent], Field(min_items=1)]
+    # owned_by: Annotated[List[Agent], Field(min_items=1)]
+    # empirically observed that the list can be empty (at least for demo records)
+    owned_by: List[Agent]
+
     grants: Optional[List[Grant]]
     links: Optional[List[AccessLink]]
 
