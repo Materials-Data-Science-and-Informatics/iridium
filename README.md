@@ -17,15 +17,14 @@
 -->
 
 The metal Iridium is used to refine and enhance metal alloys.
-Similarly, this package provides an enhanced coating
-around the Invenio RDM APIs and is a central piece of the Ardiem platform.
+Similarly, this package provides an enhanced Python coating around the Invenio RDM APIs.
 
 It provides:
 * a lower-level Python API wrapping the public Invenio RDM backend APIs
+* a higher-level object-oriented convenience API (in progress)
 
-* a higher-level object-oriented convenience API (TODO)
-* a JSON Schema based concept of "dataset profiles" for Invenio records (TODO)
-* transparent support for storage and retrieval of additional validated metadata (TODO)
+Currently only the Vocabulary and Draft/Record APIs are supported.
+Other APIs might follow when there is interest and the REST APIs are stabilized.
 
 ## Development
 

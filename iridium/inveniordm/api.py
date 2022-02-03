@@ -33,20 +33,23 @@ from .models import (
 
 # TODO: if big file downloads make problems with memory, check out client.stream()
 
+debug = False
+"""If set to true, will print HTTP returned exceptions."""
+
 
 def raise_on_error_status(r):
     """Raise an exception on 4XX and 5XX status codes + print the response body, if any."""
     try:
         r.raise_for_status()
     except httpx.HTTPStatusError as e:
-        print(
-            f"Error response {e.response.status_code} while requesting {e.request.url!r}:"
-        )
-        try:
-            print(json.dumps(e.response.json(), indent=2))
-        except json.JSONDecodeError:
-            # print(e.response.text) # Annoying if it is a huge HTML page
-            pass
+        if debug:
+            print(
+                f"Error response {e.response.status_code} while requesting {e.request.url!r}:"
+            )
+            try:
+                print(json.dumps(e.response.json(), indent=2))
+            except json.JSONDecodeError:
+                print(e.response.text)  # Annoying if it is a huge HTML page
         raise e
 
 
