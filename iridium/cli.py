@@ -12,9 +12,8 @@ import typer
 
 from .inveniordm.api import InvenioRDMClient, Results, VocType
 
-# Get access to API based on configured INVENIORDM_URL and INVENIORDM_TOKEN env vars.
-# passing verify=False allows to use the self-signed certificate
-rdm = InvenioRDMClient.from_env(httpx_kwargs={"verify": False})
+rdm: InvenioRDMClient = None  # type: ignore
+"""API instance used by the CLI."""
 
 
 def pprint_results(res: Results, size: int, page: int):
@@ -57,7 +56,7 @@ def records(
 def rec_files(rec_id: str):
     """List files attached to a record."""
     print("Attached files:")
-    for fm in rdm.record.files(rec_id).entries:
+    for fm in rdm.record.files(rec_id).entries:  # type: ignore
         print(f"\t{fm.key}")
 
 
@@ -98,4 +97,8 @@ def voc_term(type: VocType, term: str):
 
 
 if __name__ == "__main__":
+    # Get access to API based on configured INVENIORDM_URL and INVENIORDM_TOKEN env vars.
+    # passing verify=False allows to use the self-signed certificate
+    rdm = InvenioRDMClient.from_env(httpx_kwargs={"verify": False})
+
     typer.run(app)
