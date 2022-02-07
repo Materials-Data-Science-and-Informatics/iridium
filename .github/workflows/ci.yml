@@ -23,9 +23,9 @@ jobs:
   # see https://github.com/peaceiris/actions-gh-pages#%EF%B8%8F-first-deployment-with-github_token
   # to do inital setup of the gh-pages branch
   docs:
-    # needs: test
+    needs: test
     runs-on: ubuntu-latest
-    # if: ${{ github.ref == 'refs/heads/main' }}
+    if: ${{ github.ref == 'refs/heads/main' }}
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-python@v2
