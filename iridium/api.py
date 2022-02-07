@@ -2,72 +2,55 @@
 
 from typing import Any, Dict
 
-import httpx
-
-from .generic import PaginatedList
+from .generic import AccessProxy, Query
 from .inveniordm import models as m
 from .inveniordm.api import InvenioRDMClient
 
 
-class Vocabulary(PaginatedList):
-    """
-    Class for convenient access to vocabularies with list- and dict-like interface.
+class RecordQuery(Query):
+    def __init__(self, cl: InvenioRDMClient, user_only: bool, **kwargs):
+        super().__init__(**kwargs)
+        self._client = cl
+        self._user_only = user_only
 
-    Access through numeric index corresponds to entries in search result order,
-    Access through string identifier will look up the specified term.
+    def _query_items(self, **kwargs):
+        return self._client.query.records(self._user_only, **kwargs)
 
-    Allowed keyword arguments: `VocQueryArgs` without 'page'
-    """
 
+class VocabularyQuery(Query):
     def __init__(self, cl: InvenioRDMClient, voc_type: m.VocType, **kwargs):
-        pgsz = None
-        if "size" in kwargs:
-            pgsz = kwargs["size"]
-            del kwargs["size"]
-        if "page" in kwargs:
-            raise ValueError("Forbidden keyword argument 'page'!")
-
-        super().__init__(pgsz)
+        super().__init__(**kwargs)
         self._client = cl
         self._voc_type = voc_type
-        self._query_args = kwargs
 
-    def _get_batch(self, bidx):
-        ret = self._client.query.vocabulary(
-            self._voc_type, page=bidx + 1, size=self._BATCH_SIZE, **self._query_args
-        )
-        return (ret.hits.hits, ret.hits.total)
+    def _query_items(self, **kwargs):
+        return self._client.query.vocabulary(self._voc_type, **kwargs)
 
-    def __getitem__(self, key):
-        if isinstance(key, int):
-            return super().__getitem__(key)
-        if isinstance(key, str):
-            try:
-                return self._client.query.term(self._voc_type, key)
-            except httpx.HTTPStatusError as e:
-                raise KeyError(e.response)
-        raise TypeError("Key must be an int or str!")
 
-    def __contains__(self, obj):
-        """
-        Check whether a term exists in the vocabulary query results.
+class Records(AccessProxy):
+    """Access to records with list- and dict-like interface."""
 
-        If given a string, will perform O(1) lookup.
-        Otherwise, will need O(n) to load all results.
-        """
-        if isinstance(obj, str):
-            # if string, interpret as term id and look it up directly in DB
-            try:
-                self.__getitem__(obj)
-                return True
-            except KeyError:
-                return False
-        else:  # inefficient list traversal
-            super().__contains__(obj)
+    def _get_query(self, user: bool = False, *args, **kwargs) -> Query:
+        """Query for a subset of records (returns a sequence)."""
+        return RecordQuery(self._client, user, **kwargs)
 
-    def dict(self):
-        """Convert to a real `dict` (this downloads all query results!)."""
-        return {r.id: r for r in self}
+    def _get_entity(self, record_id: str):
+        return self._client.record.get(record_id)
+
+
+class Vocabulary(AccessProxy):
+    """Access to vocabularies with list- and dict-like interface."""
+
+    def __init__(self, client, voc_type: m.VocType):
+        super().__init__(client)
+        self._voc_type = voc_type
+
+    def _get_query(self, **kwargs):
+        """Query for a subset of terms (returns a sequence)."""
+        return VocabularyQuery(self._client, self._voc_type, **kwargs)
+
+    def _get_entity(self, term_id: str):
+        return self._client.query.term(self._voc_type, term_id)
 
 
 class Repository:
@@ -79,12 +62,12 @@ class Repository:
         else:
             self._client = InvenioRDMClient(*args)
 
+        self.records = Records(self._client)
+        self.vocabulary = {vt: Vocabulary(self._client, vt) for vt in m.VocType}
+
     @staticmethod
     def from_env(httpx_kwargs: Dict[str, Any] = {}):
         return Repository(client=InvenioRDMClient.from_env(httpx_kwargs))
 
     def connected(self) -> bool:
         return self._client.connected()
-
-    def vocabulary(self, voc_type: m.VocType, **kwargs):
-        return Vocabulary(self._client, voc_type, **kwargs)
