@@ -6,7 +6,7 @@ import json
 from datetime import datetime
 from io import BytesIO
 from pathlib import Path
-from typing import Any, Dict, Optional
+from typing import Any, BinaryIO, Dict, Optional
 
 import httpx
 from dotenv import load_dotenv
@@ -17,7 +17,6 @@ from .models import (
     AccessLink,
     AccessPolicy,
     BibMetadata,
-    Draft,
     FileMetadata,
     Files,
     LinkPermission,
@@ -339,7 +338,7 @@ class RecordAPI(SubAPI):
 class DraftAPI(SubAPI):
     """Draft sub-API."""
 
-    def get(self, draft_id: str) -> Draft:
+    def get(self, draft_id: str) -> Record:
         """
         Get metadata of a record draft (does not contain information about files).
 
@@ -347,7 +346,7 @@ class DraftAPI(SubAPI):
         """
         r = self._p.client.get(self._p.endpoint(f"/records/{draft_id}/draft"))
         raise_on_error_status(r)
-        return Draft.parse_obj(r.json())
+        return Record.parse_obj(r.json())
 
     def delete(self, draft_id: str):
         """
@@ -369,7 +368,7 @@ class DraftAPI(SubAPI):
         raise_on_error_status(r)
         return Record.parse_obj(r.json())
 
-    def from_record(self, record_id: str) -> Draft:
+    def from_record(self, record_id: str) -> Record:
         """
         Create a draft from a published record version (to update attached metadata).
 
@@ -377,9 +376,9 @@ class DraftAPI(SubAPI):
         """
         r = self._p.client.post(self._p.endpoint(f"/records/{record_id}/draft"))
         raise_on_error_status(r)
-        return Draft.parse_obj(r.json())
+        return Record.parse_obj(r.json())
 
-    def new_version(self, record_id: str) -> Draft:
+    def new_version(self, record_id: str) -> Record:
         """
         Create a draft from a published record as a new version (that gets a new id).
 
@@ -390,7 +389,7 @@ class DraftAPI(SubAPI):
         """
         r = self._p.client.post(self._p.endpoint(f"/records/{record_id}/versions"))
         raise_on_error_status(r)
-        return Draft.parse_obj(r.json())
+        return Record.parse_obj(r.json())
 
     def create(
         self,
@@ -399,7 +398,7 @@ class DraftAPI(SubAPI):
         files: Optional[Files] = None,
         draft_id: Optional[str] = None,
         pids: PIDs = None,
-    ) -> Draft:
+    ) -> Record:
         """
         Create a record draft (or update an existing draft, if draft_id provided).
 
@@ -437,9 +436,9 @@ class DraftAPI(SubAPI):
             r = self._p.client.put(url, json=req)
         raise_on_error_status(r)
 
-        return Draft.parse_obj(r.json())
+        return Record.parse_obj(r.json())
 
-    def update(self, draft: Draft) -> Draft:
+    def update(self, draft: Record) -> Record:
         """
         Update a record draft (from a modified draft object).
 
@@ -516,7 +515,7 @@ class DraftAPI(SubAPI):
         return FileMetadata.parse_obj(r.json())
 
     def file_upload_content(
-        self, draft_id: str, filename: str, file: Path
+        self, draft_id: str, filename: str, data: BinaryIO
     ) -> FileMetadata:
         """
         Upload file content to a registered filename.
@@ -525,7 +524,7 @@ class DraftAPI(SubAPI):
         """
         url = self._p.endpoint(f"/records/{draft_id}/draft/files/{filename}/content")
         hdr = {"content-type": "application/octet-stream"}
-        r = self._p.client.put(url, content=open(file, "rb"), headers=hdr)
+        r = self._p.client.put(url, content=data, headers=hdr)
         raise_on_error_status(r)
         return FileMetadata.parse_obj(r.json())
 
@@ -545,7 +544,7 @@ class DraftAPI(SubAPI):
         assert file.is_file()
 
         self.file_upload_start(draft_id, file.name)
-        self.file_upload_content(draft_id, file.name, file)
+        self.file_upload_content(draft_id, file.name, open(file, "rb"))
 
         fmeta = self.file_upload_complete(draft_id, file.name)
         assert fmeta.checksum is not None

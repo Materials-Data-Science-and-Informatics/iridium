@@ -97,7 +97,7 @@ def test_new_draft(rdm, dummy_file, get_test_record):
     assert len(fs.entries) == 1
     assert fs.entries[0].status == "pending"
 
-    fs2 = rdm.draft.file_upload_content(drft.id, somefile.name, somefile)
+    fs2 = rdm.draft.file_upload_content(drft.id, somefile.name, open(somefile, "rb"))
     assert fs.entries[0] == fs2
 
     # check that upload is completed successfully and checksum is correct
@@ -196,7 +196,7 @@ def test_version_from_record(rdm, get_test_record, dummy_file):
     rdm.draft.files_import(drft.id)
     rdm.draft.file_delete(drft.id, file1.name)
     rdm.draft.file_upload_start(drft.id, file1.name)
-    rdm.draft.file_upload_content(drft.id, file1.name, file2)
+    rdm.draft.file_upload_content(drft.id, file1.name, open(file2, "rb"))
     rdm.draft.file_upload_complete(drft.id, file1.name)
     rdm.draft.file_upload(drft.id, file3)
     rdm.draft.publish(drft.id)

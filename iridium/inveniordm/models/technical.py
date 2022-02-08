@@ -264,9 +264,3 @@ class Record(Entity):
 
     # this does not seem to be useful, should rather rely on own validation
     errors: Optional[Dict[str, Any]]  # seems to be only used in drafts
-
-
-class Draft(Record):
-    """A draft is just an unpublished record."""
-
-    pass

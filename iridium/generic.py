@@ -75,7 +75,7 @@ class PaginatedList(Sequence):
 
         bidx, boff = self._index_to_batch(idx)
         if bidx < 0:
-            raise IndexError(f"Index {idx} is out of range [0-{self._total-1}]!")
+            raise IndexError(f"Index {idx} is out of range!")
 
         # load batch if needed (unknown size or uncached index)
         if self._total is None or bidx not in self._results:
@@ -83,7 +83,7 @@ class PaginatedList(Sequence):
 
         assert self._total is not None
         if not (0 <= idx < self._total):  # really out of bounds
-            raise IndexError(f"Index {idx} is out of range [0-{self._total-1}]!")
+            raise IndexError(f"Index {idx} is out of range!")
 
         return self._results[bidx][boff]
 
@@ -186,6 +186,12 @@ class Query(PaginatedList):
         """Return entities in query result order."""
         return iter(self)
 
+    # as a generic preview we can just list the ids
+
+    def __str__(self) -> str:
+        """Print ids of all accessible entities (this will load all of them)."""
+        return str(list(self.keys()))
+
 
 class AccessProxy(ABC):
     """Access to individual entities as well as queries with applied filters."""
@@ -194,15 +200,17 @@ class AccessProxy(ABC):
         self._client = client
 
     def __call__(self, *args, **kwargs):
-        return self._get_query(*args, **kwargs)
+        if len(args) > 0:  # to give more helpful error message than the default
+            raise TypeError("Only keyword parameters may be passed to the query!")
+        return self._get_query(**kwargs)
 
     @abstractmethod
-    def _get_query(self, *args, **kwargs) -> Query:
+    def _get_query(self, **kwargs) -> Query:
         """
         Return a query configured to return certain results.
 
-        Without arguments shall return all possible results.
-        Otherwise should pass query arguments.
+        Without arguments shall return all possible results without filtering.
+        Otherwise should pass on query arguments and provide filtered results.
         """
 
     @abstractmethod
@@ -225,12 +233,26 @@ class AccessProxy(ABC):
         """Iterate through all accessible entities."""
         return iter(self())
 
-    def __getitem__(self, key: str) -> Any:
-        """Get an entity by id."""
-        try:
-            return self._get_entity(key)
-        except httpx.HTTPStatusError as e:
-            raise KeyError(e.response)
+    def __str__(self) -> str:
+        """Print ids of all accessible entities."""
+        return str(self())
+
+    def __getitem__(self, key) -> Any:
+        """
+        Get an entity.
+
+        If passed a string, will look up by id.
+        If passed an int, will perform filterless query and take n-th result.
+        """
+        if isinstance(key, str):
+            try:
+                return self._get_entity(key)
+            except httpx.HTTPStatusError as e:
+                raise KeyError(e.response)
+        elif isinstance(key, int):
+            return self()[key]
+        else:
+            raise TypeError("Passed key must be either string id or an int!")
 
     def __contains__(self, obj: str) -> bool:
         """Check whether an entity exists."""
