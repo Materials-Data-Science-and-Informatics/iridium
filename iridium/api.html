@@ -31,39 +31,6 @@
                     <h2>API Documentation</h2>
                         <ul class="memberlist">
             <li>
-                    <a class="class" href="#RecordQuery">RecordQuery</a>
-                            <ul class="memberlist">
-                        <li>
-                                <a class="function" href="#RecordQuery.__init__">RecordQuery</a>
-                        </li>
-                </ul>
-
-            </li>
-            <li>
-                    <a class="class" href="#VocabularyQuery">VocabularyQuery</a>
-                            <ul class="memberlist">
-                        <li>
-                                <a class="function" href="#VocabularyQuery.__init__">VocabularyQuery</a>
-                        </li>
-                </ul>
-
-            </li>
-            <li>
-                    <a class="class" href="#Records">Records</a>
-                            <ul class="memberlist">
-                </ul>
-
-            </li>
-            <li>
-                    <a class="class" href="#Vocabulary">Vocabulary</a>
-                            <ul class="memberlist">
-                        <li>
-                                <a class="function" href="#Vocabulary.__init__">Vocabulary</a>
-                        </li>
-                </ul>
-
-            </li>
-            <li>
                     <a class="class" href="#Repository">Repository</a>
                             <ul class="memberlist">
                         <li>
@@ -103,55 +70,9 @@
 
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Dict</span>
 
-<span class="kn">from</span> <span class="nn">.generic</span> <span class="kn">import</span> <span class="n">AccessProxy</span><span class="p">,</span> <span class="n">Query</span>
-<span class="kn">from</span> <span class="nn">.inveniordm</span> <span class="kn">import</span> <span class="n">models</span> <span class="k">as</span> <span class="n">m</span>
 <span class="kn">from</span> <span class="nn">.inveniordm.api</span> <span class="kn">import</span> <span class="n">InvenioRDMClient</span>
-
-
-<span class="k">class</span> <span class="nc">RecordQuery</span><span class="p">(</span><span class="n">Query</span><span class="p">):</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cl</span><span class="p">:</span> <span class="n">InvenioRDMClient</span><span class="p">,</span> <span class="n">user_only</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_client</span> <span class="o">=</span> <span class="n">cl</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_user_only</span> <span class="o">=</span> <span class="n">user_only</span>
-
-    <span class="k">def</span> <span class="nf">_query_items</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="o">.</span><span class="n">query</span><span class="o">.</span><span class="n">records</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_user_only</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-
-
-<span class="k">class</span> <span class="nc">VocabularyQuery</span><span class="p">(</span><span class="n">Query</span><span class="p">):</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cl</span><span class="p">:</span> <span class="n">InvenioRDMClient</span><span class="p">,</span> <span class="n">voc_type</span><span class="p">:</span> <span class="n">m</span><span class="o">.</span><span class="n">VocType</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_client</span> <span class="o">=</span> <span class="n">cl</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_voc_type</span> <span class="o">=</span> <span class="n">voc_type</span>
-
-    <span class="k">def</span> <span class="nf">_query_items</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="o">.</span><span class="n">query</span><span class="o">.</span><span class="n">vocabulary</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_voc_type</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-
-
-<span class="k">class</span> <span class="nc">Records</span><span class="p">(</span><span class="n">AccessProxy</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Access to records with list- and dict-like interface.&quot;&quot;&quot;</span>
-
-    <span class="k">def</span> <span class="nf">_get_query</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">user</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Query</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Query for a subset of records (returns a sequence).&quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="n">RecordQuery</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="p">,</span> <span class="n">user</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-
-    <span class="k">def</span> <span class="nf">_get_entity</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">record_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="o">.</span><span class="n">record</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">record_id</span><span class="p">)</span>
-
-
-<span class="k">class</span> <span class="nc">Vocabulary</span><span class="p">(</span><span class="n">AccessProxy</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Access to vocabularies with list- and dict-like interface.&quot;&quot;&quot;</span>
-
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">client</span><span class="p">,</span> <span class="n">voc_type</span><span class="p">:</span> <span class="n">m</span><span class="o">.</span><span class="n">VocType</span><span class="p">):</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">client</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_voc_type</span> <span class="o">=</span> <span class="n">voc_type</span>
-
-    <span class="k">def</span> <span class="nf">_get_query</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Query for a subset of terms (returns a sequence).&quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="n">VocabularyQuery</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_voc_type</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-
-    <span class="k">def</span> <span class="nf">_get_entity</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">term_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="o">.</span><span class="n">query</span><span class="o">.</span><span class="n">term</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_voc_type</span><span class="p">,</span> <span class="n">term_id</span><span class="p">)</span>
+<span class="kn">from</span> <span class="nn">.inveniordm.models</span> <span class="kn">import</span> <span class="n">VocType</span>
+<span class="kn">from</span> <span class="nn">.query</span> <span class="kn">import</span> <span class="n">Drafts</span><span class="p">,</span> <span class="n">Records</span><span class="p">,</span> <span class="n">Vocabulary</span>
 
 
 <span class="k">class</span> <span class="nc">Repository</span><span class="p">:</span>
@@ -164,7 +85,8 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">_client</span> <span class="o">=</span> <span class="n">InvenioRDMClient</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">records</span> <span class="o">=</span> <span class="n">Records</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">vocabulary</span> <span class="o">=</span> <span class="p">{</span><span class="n">vt</span><span class="p">:</span> <span class="n">Vocabulary</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="p">,</span> <span class="n">vt</span><span class="p">)</span> <span class="k">for</span> <span class="n">vt</span> <span class="ow">in</span> <span class="n">m</span><span class="o">.</span><span class="n">VocType</span><span class="p">}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">drafts</span> <span class="o">=</span> <span class="n">Drafts</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">vocabulary</span> <span class="o">=</span> <span class="p">{</span><span class="n">vt</span><span class="p">:</span> <span class="n">Vocabulary</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="p">,</span> <span class="n">vt</span><span class="p">)</span> <span class="k">for</span> <span class="n">vt</span> <span class="ow">in</span> <span class="n">VocType</span><span class="p">}</span>
 
     <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">from_env</span><span class="p">(</span><span class="n">httpx_kwargs</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}):</span>
@@ -177,264 +99,6 @@
         </details>
 
             </section>
-                <section id="RecordQuery">
-                                <div class="attr class">
-        <a class="headerlink" href="#RecordQuery">#&nbsp;&nbsp</a>
-
-        
-        <span class="def">class</span>
-        <span class="name">RecordQuery</span><wbr>(<span class="base"><a href="generic.html#Query">iridium.generic.Query</a></span>):
-    </div>
-
-                <details>
-            <summary>View Source</summary>
-            <div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">RecordQuery</span><span class="p">(</span><span class="n">Query</span><span class="p">):</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cl</span><span class="p">:</span> <span class="n">InvenioRDMClient</span><span class="p">,</span> <span class="n">user_only</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_client</span> <span class="o">=</span> <span class="n">cl</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_user_only</span> <span class="o">=</span> <span class="n">user_only</span>
-
-    <span class="k">def</span> <span class="nf">_query_items</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="o">.</span><span class="n">query</span><span class="o">.</span><span class="n">records</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_user_only</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-</pre></div>
-
-        </details>
-
-            <div class="docstring"><p>Class for convenient access to query results (that are assumed to have an id).</p>
-
-<p>Allowed keyword arguments: normal query args, but without 'page'.</p>
-
-<p>Access through numeric index corresponds to entries in search result order.
-<code>__contains__</code> supports lookup by id string, but __getitem__ does not,
-because this would be extremely inefficient (for this, use <code><a href="#RecordQuery.dict">dict()</a></code>).</p>
-
-<p>Usage (for developers): Subclass and implement <code>_query_items</code>.</p>
-</div>
-
-
-                            <div id="RecordQuery.__init__" class="classattr">
-                                        <div class="attr function"><a class="headerlink" href="#RecordQuery.__init__">#&nbsp;&nbsp</a>
-
-        
-            <span class="name">RecordQuery</span><span class="signature">(
-    cl: <a href="inveniordm/api.html#InvenioRDMClient">iridium.inveniordm.api.InvenioRDMClient</a>,
-    user_only: bool,
-    **kwargs
-)</span>
-    </div>
-
-                <details>
-            <summary>View Source</summary>
-            <div class="codehilite"><pre><span></span>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cl</span><span class="p">:</span> <span class="n">InvenioRDMClient</span><span class="p">,</span> <span class="n">user_only</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_client</span> <span class="o">=</span> <span class="n">cl</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_user_only</span> <span class="o">=</span> <span class="n">user_only</span>
-</pre></div>
-
-        </details>
-
-            <div class="docstring"><p>Initialize with a batch fetcher and possibly custom batch size.</p>
-</div>
-
-
-                            </div>
-                            <div class="inherited">
-                                <h5>Inherited Members</h5>
-                                <dl>
-                                    <div><dt><a href="generic.html#Query">iridium.generic.Query</a></dt>
-                                <dd id="RecordQuery.dict" class="function"><a href="generic.html#Query.dict">dict</a></dd>
-                <dd id="RecordQuery.items" class="function"><a href="generic.html#Query.items">items</a></dd>
-                <dd id="RecordQuery.keys" class="function"><a href="generic.html#Query.keys">keys</a></dd>
-                <dd id="RecordQuery.values" class="function"><a href="generic.html#Query.values">values</a></dd>
-
-            </div>
-            <div><dt><a href="generic.html#PaginatedList">iridium.generic.PaginatedList</a></dt>
-                                <dd id="RecordQuery.DEF_BATCH_SIZE" class="variable"><a href="generic.html#PaginatedList.DEF_BATCH_SIZE">DEF_BATCH_SIZE</a></dd>
-                <dd id="RecordQuery.PaginatedListIterator" class="class"><a href="generic.html#PaginatedList.PaginatedListIterator">PaginatedListIterator</a></dd>
-
-            </div>
-            <div><dt>collections.abc.Sequence</dt>
-                                <dd id="RecordQuery.index" class="function">index</dd>
-                <dd id="RecordQuery.count" class="function">count</dd>
-
-            </div>
-                                </dl>
-                            </div>
-                </section>
-                <section id="VocabularyQuery">
-                                <div class="attr class">
-        <a class="headerlink" href="#VocabularyQuery">#&nbsp;&nbsp</a>
-
-        
-        <span class="def">class</span>
-        <span class="name">VocabularyQuery</span><wbr>(<span class="base"><a href="generic.html#Query">iridium.generic.Query</a></span>):
-    </div>
-
-                <details>
-            <summary>View Source</summary>
-            <div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">VocabularyQuery</span><span class="p">(</span><span class="n">Query</span><span class="p">):</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cl</span><span class="p">:</span> <span class="n">InvenioRDMClient</span><span class="p">,</span> <span class="n">voc_type</span><span class="p">:</span> <span class="n">m</span><span class="o">.</span><span class="n">VocType</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_client</span> <span class="o">=</span> <span class="n">cl</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_voc_type</span> <span class="o">=</span> <span class="n">voc_type</span>
-
-    <span class="k">def</span> <span class="nf">_query_items</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="o">.</span><span class="n">query</span><span class="o">.</span><span class="n">vocabulary</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_voc_type</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-</pre></div>
-
-        </details>
-
-            <div class="docstring"><p>Class for convenient access to query results (that are assumed to have an id).</p>
-
-<p>Allowed keyword arguments: normal query args, but without 'page'.</p>
-
-<p>Access through numeric index corresponds to entries in search result order.
-<code>__contains__</code> supports lookup by id string, but __getitem__ does not,
-because this would be extremely inefficient (for this, use <code><a href="#VocabularyQuery.dict">dict()</a></code>).</p>
-
-<p>Usage (for developers): Subclass and implement <code>_query_items</code>.</p>
-</div>
-
-
-                            <div id="VocabularyQuery.__init__" class="classattr">
-                                        <div class="attr function"><a class="headerlink" href="#VocabularyQuery.__init__">#&nbsp;&nbsp</a>
-
-        
-            <span class="name">VocabularyQuery</span><span class="signature">(
-    cl: <a href="inveniordm/api.html#InvenioRDMClient">iridium.inveniordm.api.InvenioRDMClient</a>,
-    voc_type: <a href="inveniordm/models/query.html#VocType">iridium.inveniordm.models.query.VocType</a>,
-    **kwargs
-)</span>
-    </div>
-
-                <details>
-            <summary>View Source</summary>
-            <div class="codehilite"><pre><span></span>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cl</span><span class="p">:</span> <span class="n">InvenioRDMClient</span><span class="p">,</span> <span class="n">voc_type</span><span class="p">:</span> <span class="n">m</span><span class="o">.</span><span class="n">VocType</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_client</span> <span class="o">=</span> <span class="n">cl</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_voc_type</span> <span class="o">=</span> <span class="n">voc_type</span>
-</pre></div>
-
-        </details>
-
-            <div class="docstring"><p>Initialize with a batch fetcher and possibly custom batch size.</p>
-</div>
-
-
-                            </div>
-                            <div class="inherited">
-                                <h5>Inherited Members</h5>
-                                <dl>
-                                    <div><dt><a href="generic.html#Query">iridium.generic.Query</a></dt>
-                                <dd id="VocabularyQuery.dict" class="function"><a href="generic.html#Query.dict">dict</a></dd>
-                <dd id="VocabularyQuery.items" class="function"><a href="generic.html#Query.items">items</a></dd>
-                <dd id="VocabularyQuery.keys" class="function"><a href="generic.html#Query.keys">keys</a></dd>
-                <dd id="VocabularyQuery.values" class="function"><a href="generic.html#Query.values">values</a></dd>
-
-            </div>
-            <div><dt><a href="generic.html#PaginatedList">iridium.generic.PaginatedList</a></dt>
-                                <dd id="VocabularyQuery.DEF_BATCH_SIZE" class="variable"><a href="generic.html#PaginatedList.DEF_BATCH_SIZE">DEF_BATCH_SIZE</a></dd>
-                <dd id="VocabularyQuery.PaginatedListIterator" class="class"><a href="generic.html#PaginatedList.PaginatedListIterator">PaginatedListIterator</a></dd>
-
-            </div>
-            <div><dt>collections.abc.Sequence</dt>
-                                <dd id="VocabularyQuery.index" class="function">index</dd>
-                <dd id="VocabularyQuery.count" class="function">count</dd>
-
-            </div>
-                                </dl>
-                            </div>
-                </section>
-                <section id="Records">
-                                <div class="attr class">
-        <a class="headerlink" href="#Records">#&nbsp;&nbsp</a>
-
-        
-        <span class="def">class</span>
-        <span class="name">Records</span><wbr>(<span class="base"><a href="generic.html#AccessProxy">iridium.generic.AccessProxy</a></span>):
-    </div>
-
-                <details>
-            <summary>View Source</summary>
-            <div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">Records</span><span class="p">(</span><span class="n">AccessProxy</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Access to records with list- and dict-like interface.&quot;&quot;&quot;</span>
-
-    <span class="k">def</span> <span class="nf">_get_query</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">user</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Query</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Query for a subset of records (returns a sequence).&quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="n">RecordQuery</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="p">,</span> <span class="n">user</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-
-    <span class="k">def</span> <span class="nf">_get_entity</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">record_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="o">.</span><span class="n">record</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">record_id</span><span class="p">)</span>
-</pre></div>
-
-        </details>
-
-            <div class="docstring"><p>Access to records with list- and dict-like interface.</p>
-</div>
-
-
-                            <div class="inherited">
-                                <h5>Inherited Members</h5>
-                                <dl>
-                                    <div><dt><a href="generic.html#AccessProxy">iridium.generic.AccessProxy</a></dt>
-                                <dd id="Records.__init__" class="function"><a href="generic.html#AccessProxy.__init__">AccessProxy</a></dd>
-
-            </div>
-                                </dl>
-                            </div>
-                </section>
-                <section id="Vocabulary">
-                                <div class="attr class">
-        <a class="headerlink" href="#Vocabulary">#&nbsp;&nbsp</a>
-
-        
-        <span class="def">class</span>
-        <span class="name">Vocabulary</span><wbr>(<span class="base"><a href="generic.html#AccessProxy">iridium.generic.AccessProxy</a></span>):
-    </div>
-
-                <details>
-            <summary>View Source</summary>
-            <div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">Vocabulary</span><span class="p">(</span><span class="n">AccessProxy</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Access to vocabularies with list- and dict-like interface.&quot;&quot;&quot;</span>
-
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">client</span><span class="p">,</span> <span class="n">voc_type</span><span class="p">:</span> <span class="n">m</span><span class="o">.</span><span class="n">VocType</span><span class="p">):</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">client</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_voc_type</span> <span class="o">=</span> <span class="n">voc_type</span>
-
-    <span class="k">def</span> <span class="nf">_get_query</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Query for a subset of terms (returns a sequence).&quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="n">VocabularyQuery</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_voc_type</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-
-    <span class="k">def</span> <span class="nf">_get_entity</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">term_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="o">.</span><span class="n">query</span><span class="o">.</span><span class="n">term</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_voc_type</span><span class="p">,</span> <span class="n">term_id</span><span class="p">)</span>
-</pre></div>
-
-        </details>
-
-            <div class="docstring"><p>Access to vocabularies with list- and dict-like interface.</p>
-</div>
-
-
-                            <div id="Vocabulary.__init__" class="classattr">
-                                        <div class="attr function"><a class="headerlink" href="#Vocabulary.__init__">#&nbsp;&nbsp</a>
-
-        
-            <span class="name">Vocabulary</span><span class="signature">(client, voc_type: <a href="inveniordm/models/query.html#VocType">iridium.inveniordm.models.query.VocType</a>)</span>
-    </div>
-
-                <details>
-            <summary>View Source</summary>
-            <div class="codehilite"><pre><span></span>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">client</span><span class="p">,</span> <span class="n">voc_type</span><span class="p">:</span> <span class="n">m</span><span class="o">.</span><span class="n">VocType</span><span class="p">):</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">client</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_voc_type</span> <span class="o">=</span> <span class="n">voc_type</span>
-</pre></div>
-
-        </details>
-
-    
-
-                            </div>
-                </section>
                 <section id="Repository">
                                 <div class="attr class">
         <a class="headerlink" href="#Repository">#&nbsp;&nbsp</a>
@@ -456,7 +120,8 @@ because this would be extremely inefficient (for this, use <code><a href="#Vocab
             <span class="bp">self</span><span class="o">.</span><span class="n">_client</span> <span class="o">=</span> <span class="n">InvenioRDMClient</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">records</span> <span class="o">=</span> <span class="n">Records</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">vocabulary</span> <span class="o">=</span> <span class="p">{</span><span class="n">vt</span><span class="p">:</span> <span class="n">Vocabulary</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="p">,</span> <span class="n">vt</span><span class="p">)</span> <span class="k">for</span> <span class="n">vt</span> <span class="ow">in</span> <span class="n">m</span><span class="o">.</span><span class="n">VocType</span><span class="p">}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">drafts</span> <span class="o">=</span> <span class="n">Drafts</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">vocabulary</span> <span class="o">=</span> <span class="p">{</span><span class="n">vt</span><span class="p">:</span> <span class="n">Vocabulary</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="p">,</span> <span class="n">vt</span><span class="p">)</span> <span class="k">for</span> <span class="n">vt</span> <span class="ow">in</span> <span class="n">VocType</span><span class="p">}</span>
 
     <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">from_env</span><span class="p">(</span><span class="n">httpx_kwargs</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}):</span>
@@ -488,7 +153,8 @@ because this would be extremely inefficient (for this, use <code><a href="#Vocab
             <span class="bp">self</span><span class="o">.</span><span class="n">_client</span> <span class="o">=</span> <span class="n">InvenioRDMClient</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">records</span> <span class="o">=</span> <span class="n">Records</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">vocabulary</span> <span class="o">=</span> <span class="p">{</span><span class="n">vt</span><span class="p">:</span> <span class="n">Vocabulary</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="p">,</span> <span class="n">vt</span><span class="p">)</span> <span class="k">for</span> <span class="n">vt</span> <span class="ow">in</span> <span class="n">m</span><span class="o">.</span><span class="n">VocType</span><span class="p">}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">drafts</span> <span class="o">=</span> <span class="n">Drafts</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">vocabulary</span> <span class="o">=</span> <span class="p">{</span><span class="n">vt</span><span class="p">:</span> <span class="n">Vocabulary</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="p">,</span> <span class="n">vt</span><span class="p">)</span> <span class="k">for</span> <span class="n">vt</span> <span class="ow">in</span> <span class="n">VocType</span><span class="p">}</span>
 </pre></div>
 
         </details>

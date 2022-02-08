@@ -212,7 +212,7 @@
 <span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span>
 <span class="kn">from</span> <span class="nn">io</span> <span class="kn">import</span> <span class="n">BytesIO</span>
 <span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Optional</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">BinaryIO</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Optional</span>
 
 <span class="kn">import</span> <span class="nn">httpx</span>
 <span class="kn">from</span> <span class="nn">dotenv</span> <span class="kn">import</span> <span class="n">load_dotenv</span>
@@ -223,7 +223,6 @@
     <span class="n">AccessLink</span><span class="p">,</span>
     <span class="n">AccessPolicy</span><span class="p">,</span>
     <span class="n">BibMetadata</span><span class="p">,</span>
-    <span class="n">Draft</span><span class="p">,</span>
     <span class="n">FileMetadata</span><span class="p">,</span>
     <span class="n">Files</span><span class="p">,</span>
     <span class="n">LinkPermission</span><span class="p">,</span>
@@ -545,7 +544,7 @@
 <span class="k">class</span> <span class="nc">DraftAPI</span><span class="p">(</span><span class="n">SubAPI</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Draft sub-API.&quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="nf">get</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">draft_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Draft</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">get</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">draft_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Record</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get metadata of a record draft (does not contain information about files).</span>
 
@@ -553,7 +552,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">r</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_p</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_p</span><span class="o">.</span><span class="n">endpoint</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;/records/</span><span class="si">{</span><span class="n">draft_id</span><span class="si">}</span><span class="s2">/draft&quot;</span><span class="p">))</span>
         <span class="n">raise_on_error_status</span><span class="p">(</span><span class="n">r</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">Draft</span><span class="o">.</span><span class="n">parse_obj</span><span class="p">(</span><span class="n">r</span><span class="o">.</span><span class="n">json</span><span class="p">())</span>
+        <span class="k">return</span> <span class="n">Record</span><span class="o">.</span><span class="n">parse_obj</span><span class="p">(</span><span class="n">r</span><span class="o">.</span><span class="n">json</span><span class="p">())</span>
 
     <span class="k">def</span> <span class="nf">delete</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">draft_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -575,7 +574,7 @@
         <span class="n">raise_on_error_status</span><span class="p">(</span><span class="n">r</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">Record</span><span class="o">.</span><span class="n">parse_obj</span><span class="p">(</span><span class="n">r</span><span class="o">.</span><span class="n">json</span><span class="p">())</span>
 
-    <span class="k">def</span> <span class="nf">from_record</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">record_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Draft</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">from_record</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">record_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Record</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Create a draft from a published record version (to update attached metadata).</span>
 
@@ -583,9 +582,9 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">r</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_p</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_p</span><span class="o">.</span><span class="n">endpoint</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;/records/</span><span class="si">{</span><span class="n">record_id</span><span class="si">}</span><span class="s2">/draft&quot;</span><span class="p">))</span>
         <span class="n">raise_on_error_status</span><span class="p">(</span><span class="n">r</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">Draft</span><span class="o">.</span><span class="n">parse_obj</span><span class="p">(</span><span class="n">r</span><span class="o">.</span><span class="n">json</span><span class="p">())</span>
+        <span class="k">return</span> <span class="n">Record</span><span class="o">.</span><span class="n">parse_obj</span><span class="p">(</span><span class="n">r</span><span class="o">.</span><span class="n">json</span><span class="p">())</span>
 
-    <span class="k">def</span> <span class="nf">new_version</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">record_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Draft</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">new_version</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">record_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Record</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Create a draft from a published record as a new version (that gets a new id).</span>
 
@@ -596,7 +595,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">r</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_p</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_p</span><span class="o">.</span><span class="n">endpoint</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;/records/</span><span class="si">{</span><span class="n">record_id</span><span class="si">}</span><span class="s2">/versions&quot;</span><span class="p">))</span>
         <span class="n">raise_on_error_status</span><span class="p">(</span><span class="n">r</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">Draft</span><span class="o">.</span><span class="n">parse_obj</span><span class="p">(</span><span class="n">r</span><span class="o">.</span><span class="n">json</span><span class="p">())</span>
+        <span class="k">return</span> <span class="n">Record</span><span class="o">.</span><span class="n">parse_obj</span><span class="p">(</span><span class="n">r</span><span class="o">.</span><span class="n">json</span><span class="p">())</span>
 
     <span class="k">def</span> <span class="nf">create</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
@@ -605,7 +604,7 @@
         <span class="n">files</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Files</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">draft_id</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">pids</span><span class="p">:</span> <span class="n">PIDs</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Draft</span><span class="p">:</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Record</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Create a record draft (or update an existing draft, if draft_id provided).</span>
 
@@ -643,9 +642,9 @@
             <span class="n">r</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_p</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">json</span><span class="o">=</span><span class="n">req</span><span class="p">)</span>
         <span class="n">raise_on_error_status</span><span class="p">(</span><span class="n">r</span><span class="p">)</span>
 
-        <span class="k">return</span> <span class="n">Draft</span><span class="o">.</span><span class="n">parse_obj</span><span class="p">(</span><span class="n">r</span><span class="o">.</span><span class="n">json</span><span class="p">())</span>
+        <span class="k">return</span> <span class="n">Record</span><span class="o">.</span><span class="n">parse_obj</span><span class="p">(</span><span class="n">r</span><span class="o">.</span><span class="n">json</span><span class="p">())</span>
 
-    <span class="k">def</span> <span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">draft</span><span class="p">:</span> <span class="n">Draft</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Draft</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">draft</span><span class="p">:</span> <span class="n">Record</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Record</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Update a record draft (from a modified draft object).</span>
 
@@ -722,7 +721,7 @@
         <span class="k">return</span> <span class="n">FileMetadata</span><span class="o">.</span><span class="n">parse_obj</span><span class="p">(</span><span class="n">r</span><span class="o">.</span><span class="n">json</span><span class="p">())</span>
 
     <span class="k">def</span> <span class="nf">file_upload_content</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span> <span class="n">draft_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">file</span><span class="p">:</span> <span class="n">Path</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">draft_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="n">BinaryIO</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">FileMetadata</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Upload file content to a registered filename.</span>
@@ -731,7 +730,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">url</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_p</span><span class="o">.</span><span class="n">endpoint</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;/records/</span><span class="si">{</span><span class="n">draft_id</span><span class="si">}</span><span class="s2">/draft/files/</span><span class="si">{</span><span class="n">filename</span><span class="si">}</span><span class="s2">/content&quot;</span><span class="p">)</span>
         <span class="n">hdr</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;content-type&quot;</span><span class="p">:</span> <span class="s2">&quot;application/octet-stream&quot;</span><span class="p">}</span>
-        <span class="n">r</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_p</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">content</span><span class="o">=</span><span class="nb">open</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="s2">&quot;rb&quot;</span><span class="p">),</span> <span class="n">headers</span><span class="o">=</span><span class="n">hdr</span><span class="p">)</span>
+        <span class="n">r</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_p</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">content</span><span class="o">=</span><span class="n">data</span><span class="p">,</span> <span class="n">headers</span><span class="o">=</span><span class="n">hdr</span><span class="p">)</span>
         <span class="n">raise_on_error_status</span><span class="p">(</span><span class="n">r</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">FileMetadata</span><span class="o">.</span><span class="n">parse_obj</span><span class="p">(</span><span class="n">r</span><span class="o">.</span><span class="n">json</span><span class="p">())</span>
 
@@ -751,7 +750,7 @@
         <span class="k">assert</span> <span class="n">file</span><span class="o">.</span><span class="n">is_file</span><span class="p">()</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">file_upload_start</span><span class="p">(</span><span class="n">draft_id</span><span class="p">,</span> <span class="n">file</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">file_upload_content</span><span class="p">(</span><span class="n">draft_id</span><span class="p">,</span> <span class="n">file</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">file</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">file_upload_content</span><span class="p">(</span><span class="n">draft_id</span><span class="p">,</span> <span class="n">file</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="nb">open</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="s2">&quot;rb&quot;</span><span class="p">))</span>
 
         <span class="n">fmeta</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">file_upload_complete</span><span class="p">(</span><span class="n">draft_id</span><span class="p">,</span> <span class="n">file</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
         <span class="k">assert</span> <span class="n">fmeta</span><span class="o">.</span><span class="n">checksum</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
@@ -1920,7 +1919,7 @@ Basically searches for all entries with same parent.id and sorts by version.
             <div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">DraftAPI</span><span class="p">(</span><span class="n">SubAPI</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Draft sub-API.&quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="nf">get</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">draft_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Draft</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">get</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">draft_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Record</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get metadata of a record draft (does not contain information about files).</span>
 
@@ -1928,7 +1927,7 @@ Basically searches for all entries with same parent.id and sorts by version.
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">r</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_p</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_p</span><span class="o">.</span><span class="n">endpoint</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;/records/</span><span class="si">{</span><span class="n">draft_id</span><span class="si">}</span><span class="s2">/draft&quot;</span><span class="p">))</span>
         <span class="n">raise_on_error_status</span><span class="p">(</span><span class="n">r</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">Draft</span><span class="o">.</span><span class="n">parse_obj</span><span class="p">(</span><span class="n">r</span><span class="o">.</span><span class="n">json</span><span class="p">())</span>
+        <span class="k">return</span> <span class="n">Record</span><span class="o">.</span><span class="n">parse_obj</span><span class="p">(</span><span class="n">r</span><span class="o">.</span><span class="n">json</span><span class="p">())</span>
 
     <span class="k">def</span> <span class="nf">delete</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">draft_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -1950,7 +1949,7 @@ Basically searches for all entries with same parent.id and sorts by version.
         <span class="n">raise_on_error_status</span><span class="p">(</span><span class="n">r</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">Record</span><span class="o">.</span><span class="n">parse_obj</span><span class="p">(</span><span class="n">r</span><span class="o">.</span><span class="n">json</span><span class="p">())</span>
 
-    <span class="k">def</span> <span class="nf">from_record</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">record_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Draft</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">from_record</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">record_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Record</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Create a draft from a published record version (to update attached metadata).</span>
 
@@ -1958,9 +1957,9 @@ Basically searches for all entries with same parent.id and sorts by version.
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">r</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_p</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_p</span><span class="o">.</span><span class="n">endpoint</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;/records/</span><span class="si">{</span><span class="n">record_id</span><span class="si">}</span><span class="s2">/draft&quot;</span><span class="p">))</span>
         <span class="n">raise_on_error_status</span><span class="p">(</span><span class="n">r</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">Draft</span><span class="o">.</span><span class="n">parse_obj</span><span class="p">(</span><span class="n">r</span><span class="o">.</span><span class="n">json</span><span class="p">())</span>
+        <span class="k">return</span> <span class="n">Record</span><span class="o">.</span><span class="n">parse_obj</span><span class="p">(</span><span class="n">r</span><span class="o">.</span><span class="n">json</span><span class="p">())</span>
 
-    <span class="k">def</span> <span class="nf">new_version</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">record_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Draft</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">new_version</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">record_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Record</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Create a draft from a published record as a new version (that gets a new id).</span>
 
@@ -1971,7 +1970,7 @@ Basically searches for all entries with same parent.id and sorts by version.
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">r</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_p</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_p</span><span class="o">.</span><span class="n">endpoint</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;/records/</span><span class="si">{</span><span class="n">record_id</span><span class="si">}</span><span class="s2">/versions&quot;</span><span class="p">))</span>
         <span class="n">raise_on_error_status</span><span class="p">(</span><span class="n">r</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">Draft</span><span class="o">.</span><span class="n">parse_obj</span><span class="p">(</span><span class="n">r</span><span class="o">.</span><span class="n">json</span><span class="p">())</span>
+        <span class="k">return</span> <span class="n">Record</span><span class="o">.</span><span class="n">parse_obj</span><span class="p">(</span><span class="n">r</span><span class="o">.</span><span class="n">json</span><span class="p">())</span>
 
     <span class="k">def</span> <span class="nf">create</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
@@ -1980,7 +1979,7 @@ Basically searches for all entries with same parent.id and sorts by version.
         <span class="n">files</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Files</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">draft_id</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">pids</span><span class="p">:</span> <span class="n">PIDs</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Draft</span><span class="p">:</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Record</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Create a record draft (or update an existing draft, if draft_id provided).</span>
 
@@ -2018,9 +2017,9 @@ Basically searches for all entries with same parent.id and sorts by version.
             <span class="n">r</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_p</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">json</span><span class="o">=</span><span class="n">req</span><span class="p">)</span>
         <span class="n">raise_on_error_status</span><span class="p">(</span><span class="n">r</span><span class="p">)</span>
 
-        <span class="k">return</span> <span class="n">Draft</span><span class="o">.</span><span class="n">parse_obj</span><span class="p">(</span><span class="n">r</span><span class="o">.</span><span class="n">json</span><span class="p">())</span>
+        <span class="k">return</span> <span class="n">Record</span><span class="o">.</span><span class="n">parse_obj</span><span class="p">(</span><span class="n">r</span><span class="o">.</span><span class="n">json</span><span class="p">())</span>
 
-    <span class="k">def</span> <span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">draft</span><span class="p">:</span> <span class="n">Draft</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Draft</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">draft</span><span class="p">:</span> <span class="n">Record</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Record</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Update a record draft (from a modified draft object).</span>
 
@@ -2097,7 +2096,7 @@ Basically searches for all entries with same parent.id and sorts by version.
         <span class="k">return</span> <span class="n">FileMetadata</span><span class="o">.</span><span class="n">parse_obj</span><span class="p">(</span><span class="n">r</span><span class="o">.</span><span class="n">json</span><span class="p">())</span>
 
     <span class="k">def</span> <span class="nf">file_upload_content</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span> <span class="n">draft_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">file</span><span class="p">:</span> <span class="n">Path</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">draft_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="n">BinaryIO</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">FileMetadata</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Upload file content to a registered filename.</span>
@@ -2106,7 +2105,7 @@ Basically searches for all entries with same parent.id and sorts by version.
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">url</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_p</span><span class="o">.</span><span class="n">endpoint</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;/records/</span><span class="si">{</span><span class="n">draft_id</span><span class="si">}</span><span class="s2">/draft/files/</span><span class="si">{</span><span class="n">filename</span><span class="si">}</span><span class="s2">/content&quot;</span><span class="p">)</span>
         <span class="n">hdr</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;content-type&quot;</span><span class="p">:</span> <span class="s2">&quot;application/octet-stream&quot;</span><span class="p">}</span>
-        <span class="n">r</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_p</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">content</span><span class="o">=</span><span class="nb">open</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="s2">&quot;rb&quot;</span><span class="p">),</span> <span class="n">headers</span><span class="o">=</span><span class="n">hdr</span><span class="p">)</span>
+        <span class="n">r</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_p</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">content</span><span class="o">=</span><span class="n">data</span><span class="p">,</span> <span class="n">headers</span><span class="o">=</span><span class="n">hdr</span><span class="p">)</span>
         <span class="n">raise_on_error_status</span><span class="p">(</span><span class="n">r</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">FileMetadata</span><span class="o">.</span><span class="n">parse_obj</span><span class="p">(</span><span class="n">r</span><span class="o">.</span><span class="n">json</span><span class="p">())</span>
 
@@ -2126,7 +2125,7 @@ Basically searches for all entries with same parent.id and sorts by version.
         <span class="k">assert</span> <span class="n">file</span><span class="o">.</span><span class="n">is_file</span><span class="p">()</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">file_upload_start</span><span class="p">(</span><span class="n">draft_id</span><span class="p">,</span> <span class="n">file</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">file_upload_content</span><span class="p">(</span><span class="n">draft_id</span><span class="p">,</span> <span class="n">file</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">file</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">file_upload_content</span><span class="p">(</span><span class="n">draft_id</span><span class="p">,</span> <span class="n">file</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="nb">open</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="s2">&quot;rb&quot;</span><span class="p">))</span>
 
         <span class="n">fmeta</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">file_upload_complete</span><span class="p">(</span><span class="n">draft_id</span><span class="p">,</span> <span class="n">file</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
         <span class="k">assert</span> <span class="n">fmeta</span><span class="o">.</span><span class="n">checksum</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
@@ -2148,12 +2147,12 @@ Basically searches for all entries with same parent.id and sorts by version.
 
         
             <span class="def">def</span>
-            <span class="name">get</span><span class="signature">(self, draft_id: str) -&gt; <a href="models/technical.html#Draft">iridium.inveniordm.models.technical.Draft</a></span>:
+            <span class="name">get</span><span class="signature">(self, draft_id: str) -&gt; <a href="models/technical.html#Record">iridium.inveniordm.models.technical.Record</a></span>:
     </div>
 
                 <details>
             <summary>View Source</summary>
-            <div class="codehilite"><pre><span></span>    <span class="k">def</span> <span class="nf">get</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">draft_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Draft</span><span class="p">:</span>
+            <div class="codehilite"><pre><span></span>    <span class="k">def</span> <span class="nf">get</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">draft_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Record</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get metadata of a record draft (does not contain information about files).</span>
 
@@ -2161,7 +2160,7 @@ Basically searches for all entries with same parent.id and sorts by version.
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">r</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_p</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_p</span><span class="o">.</span><span class="n">endpoint</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;/records/</span><span class="si">{</span><span class="n">draft_id</span><span class="si">}</span><span class="s2">/draft&quot;</span><span class="p">))</span>
         <span class="n">raise_on_error_status</span><span class="p">(</span><span class="n">r</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">Draft</span><span class="o">.</span><span class="n">parse_obj</span><span class="p">(</span><span class="n">r</span><span class="o">.</span><span class="n">json</span><span class="p">())</span>
+        <span class="k">return</span> <span class="n">Record</span><span class="o">.</span><span class="n">parse_obj</span><span class="p">(</span><span class="n">r</span><span class="o">.</span><span class="n">json</span><span class="p">())</span>
 </pre></div>
 
         </details>
@@ -2238,12 +2237,12 @@ Basically searches for all entries with same parent.id and sorts by version.
 
         
             <span class="def">def</span>
-            <span class="name">from_record</span><span class="signature">(self, record_id: str) -&gt; <a href="models/technical.html#Draft">iridium.inveniordm.models.technical.Draft</a></span>:
+            <span class="name">from_record</span><span class="signature">(self, record_id: str) -&gt; <a href="models/technical.html#Record">iridium.inveniordm.models.technical.Record</a></span>:
     </div>
 
                 <details>
             <summary>View Source</summary>
-            <div class="codehilite"><pre><span></span>    <span class="k">def</span> <span class="nf">from_record</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">record_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Draft</span><span class="p">:</span>
+            <div class="codehilite"><pre><span></span>    <span class="k">def</span> <span class="nf">from_record</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">record_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Record</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Create a draft from a published record version (to update attached metadata).</span>
 
@@ -2251,7 +2250,7 @@ Basically searches for all entries with same parent.id and sorts by version.
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">r</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_p</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_p</span><span class="o">.</span><span class="n">endpoint</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;/records/</span><span class="si">{</span><span class="n">record_id</span><span class="si">}</span><span class="s2">/draft&quot;</span><span class="p">))</span>
         <span class="n">raise_on_error_status</span><span class="p">(</span><span class="n">r</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">Draft</span><span class="o">.</span><span class="n">parse_obj</span><span class="p">(</span><span class="n">r</span><span class="o">.</span><span class="n">json</span><span class="p">())</span>
+        <span class="k">return</span> <span class="n">Record</span><span class="o">.</span><span class="n">parse_obj</span><span class="p">(</span><span class="n">r</span><span class="o">.</span><span class="n">json</span><span class="p">())</span>
 </pre></div>
 
         </details>
@@ -2268,12 +2267,12 @@ Basically searches for all entries with same parent.id and sorts by version.
 
         
             <span class="def">def</span>
-            <span class="name">new_version</span><span class="signature">(self, record_id: str) -&gt; <a href="models/technical.html#Draft">iridium.inveniordm.models.technical.Draft</a></span>:
+            <span class="name">new_version</span><span class="signature">(self, record_id: str) -&gt; <a href="models/technical.html#Record">iridium.inveniordm.models.technical.Record</a></span>:
     </div>
 
                 <details>
             <summary>View Source</summary>
-            <div class="codehilite"><pre><span></span>    <span class="k">def</span> <span class="nf">new_version</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">record_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Draft</span><span class="p">:</span>
+            <div class="codehilite"><pre><span></span>    <span class="k">def</span> <span class="nf">new_version</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">record_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Record</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Create a draft from a published record as a new version (that gets a new id).</span>
 
@@ -2284,7 +2283,7 @@ Basically searches for all entries with same parent.id and sorts by version.
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">r</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_p</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_p</span><span class="o">.</span><span class="n">endpoint</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;/records/</span><span class="si">{</span><span class="n">record_id</span><span class="si">}</span><span class="s2">/versions&quot;</span><span class="p">))</span>
         <span class="n">raise_on_error_status</span><span class="p">(</span><span class="n">r</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">Draft</span><span class="o">.</span><span class="n">parse_obj</span><span class="p">(</span><span class="n">r</span><span class="o">.</span><span class="n">json</span><span class="p">())</span>
+        <span class="k">return</span> <span class="n">Record</span><span class="o">.</span><span class="n">parse_obj</span><span class="p">(</span><span class="n">r</span><span class="o">.</span><span class="n">json</span><span class="p">())</span>
 </pre></div>
 
         </details>
@@ -2311,7 +2310,7 @@ and a new id is provided for the new version.</p>
     files: Optional[<a href="models/technical.html#Files">iridium.inveniordm.models.technical.Files</a>] = None,
     draft_id: Optional[str] = None,
     pids: <a href="models/technical.html#PIDs">iridium.inveniordm.models.technical.PIDs</a> = None
-) -&gt; <a href="models/technical.html#Draft">iridium.inveniordm.models.technical.Draft</a></span>:
+) -&gt; <a href="models/technical.html#Record">iridium.inveniordm.models.technical.Record</a></span>:
     </div>
 
                 <details>
@@ -2323,7 +2322,7 @@ and a new id is provided for the new version.</p>
         <span class="n">files</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Files</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">draft_id</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">pids</span><span class="p">:</span> <span class="n">PIDs</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Draft</span><span class="p">:</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Record</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Create a record draft (or update an existing draft, if draft_id provided).</span>
 
@@ -2361,7 +2360,7 @@ and a new id is provided for the new version.</p>
             <span class="n">r</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_p</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">json</span><span class="o">=</span><span class="n">req</span><span class="p">)</span>
         <span class="n">raise_on_error_status</span><span class="p">(</span><span class="n">r</span><span class="p">)</span>
 
-        <span class="k">return</span> <span class="n">Draft</span><span class="o">.</span><span class="n">parse_obj</span><span class="p">(</span><span class="n">r</span><span class="o">.</span><span class="n">json</span><span class="p">())</span>
+        <span class="k">return</span> <span class="n">Record</span><span class="o">.</span><span class="n">parse_obj</span><span class="p">(</span><span class="n">r</span><span class="o">.</span><span class="n">json</span><span class="p">())</span>
 </pre></div>
 
         </details>
@@ -2380,13 +2379,13 @@ and a new id is provided for the new version.</p>
             <span class="def">def</span>
             <span class="name">update</span><span class="signature">(
     self,
-    draft: <a href="models/technical.html#Draft">iridium.inveniordm.models.technical.Draft</a>
-) -&gt; <a href="models/technical.html#Draft">iridium.inveniordm.models.technical.Draft</a></span>:
+    draft: <a href="models/technical.html#Record">iridium.inveniordm.models.technical.Record</a>
+) -&gt; <a href="models/technical.html#Record">iridium.inveniordm.models.technical.Record</a></span>:
     </div>
 
                 <details>
             <summary>View Source</summary>
-            <div class="codehilite"><pre><span></span>    <span class="k">def</span> <span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">draft</span><span class="p">:</span> <span class="n">Draft</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Draft</span><span class="p">:</span>
+            <div class="codehilite"><pre><span></span>    <span class="k">def</span> <span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">draft</span><span class="p">:</span> <span class="n">Record</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Record</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Update a record draft (from a modified draft object).</span>
 
@@ -2615,14 +2614,14 @@ and a new id is provided for the new version.</p>
     self,
     draft_id: str,
     filename: str,
-    file: pathlib.Path
+    data: &lt;class &#39;BinaryIO&#39;&gt;
 ) -&gt; <a href="models/technical.html#FileMetadata">iridium.inveniordm.models.technical.FileMetadata</a></span>:
     </div>
 
                 <details>
             <summary>View Source</summary>
             <div class="codehilite"><pre><span></span>    <span class="k">def</span> <span class="nf">file_upload_content</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span> <span class="n">draft_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">file</span><span class="p">:</span> <span class="n">Path</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">draft_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="n">BinaryIO</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">FileMetadata</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Upload file content to a registered filename.</span>
@@ -2631,7 +2630,7 @@ and a new id is provided for the new version.</p>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">url</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_p</span><span class="o">.</span><span class="n">endpoint</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;/records/</span><span class="si">{</span><span class="n">draft_id</span><span class="si">}</span><span class="s2">/draft/files/</span><span class="si">{</span><span class="n">filename</span><span class="si">}</span><span class="s2">/content&quot;</span><span class="p">)</span>
         <span class="n">hdr</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;content-type&quot;</span><span class="p">:</span> <span class="s2">&quot;application/octet-stream&quot;</span><span class="p">}</span>
-        <span class="n">r</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_p</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">content</span><span class="o">=</span><span class="nb">open</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="s2">&quot;rb&quot;</span><span class="p">),</span> <span class="n">headers</span><span class="o">=</span><span class="n">hdr</span><span class="p">)</span>
+        <span class="n">r</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_p</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">content</span><span class="o">=</span><span class="n">data</span><span class="p">,</span> <span class="n">headers</span><span class="o">=</span><span class="n">hdr</span><span class="p">)</span>
         <span class="n">raise_on_error_status</span><span class="p">(</span><span class="n">r</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">FileMetadata</span><span class="o">.</span><span class="n">parse_obj</span><span class="p">(</span><span class="n">r</span><span class="o">.</span><span class="n">json</span><span class="p">())</span>
 </pre></div>
@@ -2695,7 +2694,7 @@ and a new id is provided for the new version.</p>
         <span class="k">assert</span> <span class="n">file</span><span class="o">.</span><span class="n">is_file</span><span class="p">()</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">file_upload_start</span><span class="p">(</span><span class="n">draft_id</span><span class="p">,</span> <span class="n">file</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">file_upload_content</span><span class="p">(</span><span class="n">draft_id</span><span class="p">,</span> <span class="n">file</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">file</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">file_upload_content</span><span class="p">(</span><span class="n">draft_id</span><span class="p">,</span> <span class="n">file</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="nb">open</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="s2">&quot;rb&quot;</span><span class="p">))</span>
 
         <span class="n">fmeta</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">file_upload_complete</span><span class="p">(</span><span class="n">draft_id</span><span class="p">,</span> <span class="n">file</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
         <span class="k">assert</span> <span class="n">fmeta</span><span class="o">.</span><span class="n">checksum</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>

@@ -192,12 +192,6 @@
                 </ul>
 
             </li>
-            <li>
-                    <a class="class" href="#Draft">Draft</a>
-                            <ul class="memberlist">
-                </ul>
-
-            </li>
     </ul>
 
 
@@ -485,12 +479,6 @@
 
     <span class="c1"># this does not seem to be useful, should rather rely on own validation</span>
     <span class="n">errors</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]</span>  <span class="c1"># seems to be only used in drafts</span>
-
-
-<span class="k">class</span> <span class="nc">Draft</span><span class="p">(</span><span class="n">Record</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;A draft is just an unpublished record.&quot;&quot;&quot;</span>
-
-    <span class="k">pass</span>
 </pre></div>
 
         </details>
@@ -1890,60 +1878,6 @@ https://github.com/inveniosoftware/invenio-drafts-resources/blob/master/invenio_
 
     
 
-                            </div>
-                </section>
-                <section id="Draft">
-                                <div class="attr class">
-        <a class="headerlink" href="#Draft">#&nbsp;&nbsp</a>
-
-        
-        <span class="def">class</span>
-        <span class="name">Draft</span><wbr>(<span class="base"><a href="#Record">Record</a></span>):
-    </div>
-
-                <details>
-            <summary>View Source</summary>
-            <div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">Draft</span><span class="p">(</span><span class="n">Record</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;A draft is just an unpublished record.&quot;&quot;&quot;</span>
-
-    <span class="k">pass</span>
-</pre></div>
-
-        </details>
-
-            <div class="docstring"><p>A draft is just an unpublished record.</p>
-</div>
-
-
-                            <div class="inherited">
-                                <h5>Inherited Members</h5>
-                                <dl>
-                                    <div><dt>pydantic.main.BaseModel</dt>
-                                <dd id="Draft.__init__" class="function">BaseModel</dd>
-                <dd id="Draft.dict" class="function">dict</dd>
-                <dd id="Draft.json" class="function">json</dd>
-                <dd id="Draft.parse_raw" class="function">parse_raw</dd>
-                <dd id="Draft.parse_file" class="function">parse_file</dd>
-                <dd id="Draft.from_orm" class="function">from_orm</dd>
-                <dd id="Draft.construct" class="function">construct</dd>
-                <dd id="Draft.copy" class="function">copy</dd>
-                <dd id="Draft.schema" class="function">schema</dd>
-                <dd id="Draft.schema_json" class="function">schema_json</dd>
-                <dd id="Draft.validate" class="function">validate</dd>
-                <dd id="Draft.update_forward_refs" class="function">update_forward_refs</dd>
-
-            </div>
-            <div><dt><a href="#Record">Record</a></dt>
-                                <dd id="Draft.Config" class="class"><a href="#Record.Config">Config</a></dd>
-
-            </div>
-            <div><dt><a href="base.html#JSONModel">iridium.inveniordm.models.base.JSONModel</a></dt>
-                                <dd id="Draft.raw_json" class="function"><a href="base.html#JSONModel.raw_json">raw_json</a></dd>
-                <dd id="Draft.pprint_set" class="function"><a href="base.html#JSONModel.pprint_set">pprint_set</a></dd>
-                <dd id="Draft.parse_obj" class="function"><a href="base.html#JSONModel.parse_obj">parse_obj</a></dd>
-
-            </div>
-                                </dl>
                             </div>
                 </section>
     </main>
