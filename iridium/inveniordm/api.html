@@ -517,9 +517,9 @@
 
 <span class="sd">        https://inveniordm.docs.cern.ch/reference/rest_api_drafts_records/#get-all-versions</span>
 <span class="sd">        Basically searches for all entries with same parent.id and sorts by version.</span>
-<span class="sd">        (NOTE: with bugfix - allversions=true must be set in the query)</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># url = self._p.endpoint(f&quot;/records/{record_id}/versions&quot;)</span>
+        <span class="c1"># buggy; see https://github.com/inveniosoftware/invenio-app-rdm/issues/1167</span>
         <span class="n">url</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_p</span><span class="o">.</span><span class="n">endpoint</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;/records/</span><span class="si">{</span><span class="n">record_id</span><span class="si">}</span><span class="s2">/versions?allversions=true&quot;</span><span class="p">)</span>
         <span class="n">r</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_p</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
         <span class="n">raise_on_error_status</span><span class="p">(</span><span class="n">r</span><span class="p">)</span>
@@ -1652,9 +1652,9 @@ https://inveniordm.docs.cern.ch/reference/rest_api_drafts_records/#user-records<
 
 <span class="sd">        https://inveniordm.docs.cern.ch/reference/rest_api_drafts_records/#get-all-versions</span>
 <span class="sd">        Basically searches for all entries with same parent.id and sorts by version.</span>
-<span class="sd">        (NOTE: with bugfix - allversions=true must be set in the query)</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># url = self._p.endpoint(f&quot;/records/{record_id}/versions&quot;)</span>
+        <span class="c1"># buggy; see https://github.com/inveniosoftware/invenio-app-rdm/issues/1167</span>
         <span class="n">url</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_p</span><span class="o">.</span><span class="n">endpoint</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;/records/</span><span class="si">{</span><span class="n">record_id</span><span class="si">}</span><span class="s2">/versions?allversions=true&quot;</span><span class="p">)</span>
         <span class="n">r</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_p</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
         <span class="n">raise_on_error_status</span><span class="p">(</span><span class="n">r</span><span class="p">)</span>
@@ -1849,9 +1849,9 @@ https://inveniordm.docs.cern.ch/reference/rest_api_drafts_records/#user-records<
 
 <span class="sd">        https://inveniordm.docs.cern.ch/reference/rest_api_drafts_records/#get-all-versions</span>
 <span class="sd">        Basically searches for all entries with same parent.id and sorts by version.</span>
-<span class="sd">        (NOTE: with bugfix - allversions=true must be set in the query)</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># url = self._p.endpoint(f&quot;/records/{record_id}/versions&quot;)</span>
+        <span class="c1"># buggy; see https://github.com/inveniosoftware/invenio-app-rdm/issues/1167</span>
         <span class="n">url</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_p</span><span class="o">.</span><span class="n">endpoint</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;/records/</span><span class="si">{</span><span class="n">record_id</span><span class="si">}</span><span class="s2">/versions?allversions=true&quot;</span><span class="p">)</span>
         <span class="n">r</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_p</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
         <span class="n">raise_on_error_status</span><span class="p">(</span><span class="n">r</span><span class="p">)</span>
@@ -1867,8 +1867,7 @@ https://inveniordm.docs.cern.ch/reference/rest_api_drafts_records/#user-records<
             <div class="docstring"><p>Get all versions of a record.</p>
 
 <p>https://inveniordm.docs.cern.ch/reference/rest_api_drafts_records/#get-all-versions
-Basically searches for all entries with same parent.id and sorts by version.
-(NOTE: with bugfix - allversions=true must be set in the query)</p>
+Basically searches for all entries with same parent.id and sorts by version.</p>
 </div>
 
 

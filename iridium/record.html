@@ -43,10 +43,10 @@
                                 <a class="variable" href="#WrappedRecord.is_published">is_published</a>
                         </li>
                         <li>
-                                <a class="variable" href="#WrappedRecord.access_links">access_links</a>
+                                <a class="variable" href="#WrappedRecord.is_saved">is_saved</a>
                         </li>
                         <li>
-                                <a class="variable" href="#WrappedRecord.files">files</a>
+                                <a class="variable" href="#WrappedRecord.access_links">access_links</a>
                         </li>
                         <li>
                                 <a class="function" href="#WrappedRecord.edit">edit</a>
@@ -90,9 +90,6 @@
                         <li>
                                 <a class="function" href="#WrappedAccessLink.delete">delete</a>
                         </li>
-                        <li>
-                                <a class="function" href="#WrappedAccessLink.check_deleted">check_deleted</a>
-                        </li>
                 </ul>
 
             </li>
@@ -123,6 +120,30 @@
                         <li>
                                 <a class="function" href="#WrappedFiles.__init__">WrappedFiles</a>
                         </li>
+                        <li>
+                                <a class="variable" href="#WrappedFiles.enabled">enabled</a>
+                        </li>
+                        <li>
+                                <a class="function" href="#WrappedFiles.download">download</a>
+                        </li>
+                        <li>
+                                <a class="function" href="#WrappedFiles.delete">delete</a>
+                        </li>
+                        <li>
+                                <a class="function" href="#WrappedFiles.import_old">import_old</a>
+                        </li>
+                        <li>
+                                <a class="function" href="#WrappedFiles.upload">upload</a>
+                        </li>
+                        <li>
+                                <a class="function" href="#WrappedFiles.keys">keys</a>
+                        </li>
+                        <li>
+                                <a class="function" href="#WrappedFiles.values">values</a>
+                        </li>
+                        <li>
+                                <a class="function" href="#WrappedFiles.items">items</a>
+                        </li>
                 </ul>
 
             </li>
@@ -150,13 +171,22 @@
             <div class="codehilite"><pre><span></span><span class="sd">&quot;&quot;&quot;Convenience wrapper for draft and record API.&quot;&quot;&quot;</span>
 
 <span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Optional</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">BinaryIO</span><span class="p">,</span> <span class="n">Iterable</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Tuple</span>
 
 <span class="kn">from</span> <span class="nn">.generic</span> <span class="kn">import</span> <span class="n">AccessProxy</span><span class="p">,</span> <span class="n">Query</span>
 <span class="kn">from</span> <span class="nn">.inveniordm.api</span> <span class="kn">import</span> <span class="n">InvenioRDMClient</span>
-<span class="kn">from</span> <span class="nn">.inveniordm.models</span> <span class="kn">import</span> <span class="n">AccessLink</span><span class="p">,</span> <span class="n">LinkPermission</span><span class="p">,</span> <span class="n">Record</span><span class="p">,</span> <span class="n">Results</span>
+<span class="kn">from</span> <span class="nn">.inveniordm.models</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">AccessLink</span><span class="p">,</span>
+    <span class="n">FileMetadata</span><span class="p">,</span>
+    <span class="n">Files</span><span class="p">,</span>
+    <span class="n">LinkPermission</span><span class="p">,</span>
+    <span class="n">Record</span><span class="p">,</span>
+    <span class="n">Results</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span> <span class="nn">.pprint</span> <span class="kn">import</span> <span class="n">NoPrint</span>
 
 <span class="c1"># TODO: how to access a private record through an access link shared by someone else?</span>
+<span class="c1"># probably need to access the URL for the token to be added to the user identity</span>
 
 
 <span class="k">class</span> <span class="nc">WrappedRecord</span><span class="p">:</span>
@@ -172,11 +202,19 @@
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cl</span><span class="p">:</span> <span class="n">InvenioRDMClient</span><span class="p">,</span> <span class="n">rec</span><span class="p">:</span> <span class="n">Record</span><span class="p">,</span> <span class="n">is_draft</span><span class="p">:</span> <span class="nb">bool</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_client</span> <span class="o">=</span> <span class="n">cl</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_record</span> <span class="o">=</span> <span class="n">rec</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_access_links</span> <span class="o">=</span> <span class="n">AccessLinks</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_is_draft</span> <span class="o">=</span> <span class="n">is_draft</span>  <span class="c1"># there is no such &quot;field&quot;, these are really 2 APIs!</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">files</span>  <span class="c1"># force to load the file metadata</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="p">:</span> <span class="n">InvenioRDMClient</span> <span class="o">=</span> <span class="n">cl</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_record</span><span class="p">:</span> <span class="n">Record</span> <span class="o">=</span> <span class="n">rec</span>
+
+        <span class="c1"># there is no such &quot;field&quot; in Invenio RDM, these are really 2 APIs!</span>
+        <span class="c1"># so we track the difference on our own.</span>
+        <span class="c1">#</span>
+        <span class="c1"># Also, this must come BEFORE initializing files,</span>
+        <span class="c1"># as `WrappedFiles` accesses the property is_draft,</span>
+        <span class="c1"># which only works correctly once `_is_draft` is set.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_is_draft</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="n">is_draft</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">files</span><span class="p">:</span> <span class="n">WrappedFiles</span> <span class="o">=</span> <span class="n">WrappedFiles</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_access_links</span><span class="p">:</span> <span class="n">AccessLinks</span> <span class="o">=</span> <span class="n">AccessLinks</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">is_draft</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -187,6 +225,10 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_draft</span>
 
+    <span class="k">def</span> <span class="nf">_expect_draft</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_draft</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;Operation supported only for drafts!&quot;</span><span class="p">)</span>
+
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">is_published</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -196,26 +238,37 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_record</span><span class="o">.</span><span class="n">is_published</span>
 
+    <span class="k">def</span> <span class="nf">_expect_published</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_draft</span> <span class="ow">or</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_published</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;Operation supported only for published records!&quot;</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">is_saved</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Check whether the current draft is in sync with the draft on in Invenio RDM.</span>
+
+<span class="sd">        This means that they must agree on access, metadata and files attributes,</span>
+<span class="sd">        as these are the ones modifiable by the user.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_expect_draft</span><span class="p">()</span>
+
+        <span class="c1"># need to &quot;wrap&quot; to initialize e.g. the &#39;files&#39; part correctly</span>
+        <span class="n">drft</span> <span class="o">=</span> <span class="n">WrappedRecord</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="o">.</span><span class="n">draft</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_record</span><span class="o">.</span><span class="n">id</span><span class="p">),</span> <span class="kc">True</span>
+        <span class="p">)</span>
+        <span class="c1"># compare relevant contents</span>
+        <span class="n">same_access</span> <span class="o">=</span> <span class="n">drft</span><span class="o">.</span><span class="n">access</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">_record</span><span class="o">.</span><span class="n">access</span>
+        <span class="n">same_metadata</span> <span class="o">=</span> <span class="n">drft</span><span class="o">.</span><span class="n">metadata</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">_record</span><span class="o">.</span><span class="n">metadata</span>
+        <span class="n">same_files</span> <span class="o">=</span> <span class="n">drft</span><span class="o">.</span><span class="n">files</span><span class="o">.</span><span class="n">_files</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">files</span><span class="o">.</span><span class="n">_files</span>  <span class="c1"># compare unwrapped</span>
+        <span class="k">return</span> <span class="n">same_access</span> <span class="ow">and</span> <span class="n">same_metadata</span> <span class="ow">and</span> <span class="n">same_files</span>
+        <span class="c1"># TODO: track https://github.com/inveniosoftware/invenio-app-rdm/issues/1233</span>
+
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">access_links</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Return interface for managing access links for this record.&quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_draft</span> <span class="ow">or</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_published</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;Operation supported only for published records!&quot;</span><span class="p">)</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_access_links</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_expect_published</span><span class="p">()</span>
 
-    <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">files</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Return metadata associated with files in the record.&quot;&quot;&quot;</span>
-        <span class="c1"># if there is an &quot;entries&quot; key, we already have more than the stub</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_record</span><span class="o">.</span><span class="n">files</span><span class="o">.</span><span class="n">entries</span><span class="p">:</span>
-            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_record</span><span class="o">.</span><span class="n">files</span>
-        <span class="c1"># otherwise no cached data is available -&gt; load</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_draft</span><span class="p">:</span>
-            <span class="n">ret</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="o">.</span><span class="n">draft</span><span class="o">.</span><span class="n">files</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_record</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">ret</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="o">.</span><span class="n">record</span><span class="o">.</span><span class="n">files</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_record</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_record</span><span class="o">.</span><span class="n">files</span> <span class="o">=</span> <span class="n">ret</span>
-        <span class="k">return</span> <span class="n">ret</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_access_links</span>
 
     <span class="k">def</span> <span class="nf">edit</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -223,11 +276,17 @@
 
 <span class="sd">        This draft can be used to update the metadata of the published record version.</span>
 <span class="sd">        For this, change metadata accordingly and call `save()` and `publish()`.</span>
+
+<span class="sd">        This object will stay a draft until `publish()` is called.</span>
+<span class="sd">        To get back from the draft to the original record, without publishing,</span>
+<span class="sd">        just request it again from the repository.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_draft</span> <span class="ow">or</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_published</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;Operation supported only for published records!&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_expect_published</span><span class="p">()</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_record</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="o">.</span><span class="n">draft</span><span class="o">.</span><span class="n">from_record</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_record</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
+        <span class="c1"># https://github.com/inveniosoftware/invenio-app-rdm/issues/1223 workaround</span>
+        <span class="c1"># just pull the draft from the other endpoint</span>
+        <span class="c1"># self._record = self._client.draft.get(self._record.id)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_is_draft</span> <span class="o">=</span> <span class="kc">True</span>
 
     <span class="k">def</span> <span class="nf">new_version</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -237,11 +296,11 @@
 <span class="sd">        This works like `edit()`, with the difference that in a new version</span>
 <span class="sd">        it is possible to change the files as well, not only metadata.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_draft</span> <span class="ow">or</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_published</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;Operation supported only for published records!&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_expect_published</span><span class="p">()</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_record</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="o">.</span><span class="n">draft</span><span class="o">.</span><span class="n">new_version</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_record</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_is_draft</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_is_draft</span> <span class="o">=</span> <span class="kc">True</span>  <span class="c1"># must be set before loading files for correct behavior</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">files</span> <span class="o">=</span> <span class="n">WrappedFiles</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>  <span class="c1"># update files information</span>
 
     <span class="k">def</span> <span class="nf">save</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -253,10 +312,13 @@
 <span class="sd">        this will only affect the draft (i.e. the version accessed via `edit()`).</span>
 <span class="sd">        The changes will only be visible to others after calling `publish()`.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_draft</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;Operation supported only for drafts!&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_expect_draft</span><span class="p">()</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_record</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="o">.</span><span class="n">draft</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_record</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_check_files_exist_if_enabled</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">files</span><span class="o">.</span><span class="n">enabled</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">files</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Files are enabled, but none are attached!&quot;</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">publish</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -267,8 +329,8 @@
 <span class="sd">        * you can only change metadata of the record for that version (with `edit()`)</span>
 <span class="sd">        * to also change files, you must create a new version (with `new_version()`)</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_draft</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;Operation supported only for drafts!&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_expect_draft</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_check_files_exist_if_enabled</span><span class="p">()</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_record</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="o">.</span><span class="n">draft</span><span class="o">.</span><span class="n">publish</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_record</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_is_draft</span> <span class="o">=</span> <span class="kc">False</span>
@@ -278,13 +340,14 @@
 <span class="sd">        Delete this draft record.</span>
 
 <span class="sd">        After deletion, this object is not backed by a draft in Invenio RDM.</span>
-<span class="sd">        Therefore, all method calls will result in errors.</span>
+<span class="sd">        Therefore, all method calls and attribute accesses will be invalid.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_draft</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;Operation supported only for drafts!&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_expect_draft</span><span class="p">()</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="o">.</span><span class="n">draft</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_record</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_is_draft</span> <span class="o">=</span> <span class="kc">False</span>  <span class="c1"># to prevent attempts to save() or publish()</span>
+        <span class="c1"># to prevent the user from doing anything stupid, make it fail</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_record</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># type: ignore</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_access_links</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># type: ignore</span>
 
     <span class="c1"># NOTE: the following is really, really bad idea!</span>
     <span class="c1"># While it would be cool to write `del record_object`, this</span>
@@ -298,8 +361,13 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_record</span><span class="o">.</span><span class="fm">__getattribute__</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
 
     <span class="c1"># magic methods must be proxied by hand</span>
-    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_record</span><span class="p">)</span>
+    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c1"># little hack to show files properly</span>
+        <span class="n">f</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_record</span><span class="o">.</span><span class="n">files</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_record</span><span class="o">.</span><span class="n">files</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">files</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>  <span class="c1"># type: ignore</span>
+        <span class="n">ret</span> <span class="o">=</span> <span class="nb">repr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_record</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_record</span><span class="o">.</span><span class="n">files</span> <span class="o">=</span> <span class="n">f</span>
+        <span class="k">return</span> <span class="n">ret</span>
 
 
 <span class="c1"># ---- access link API wrappers ----</span>
@@ -319,44 +387,44 @@
     <span class="c1"># (based on the links generated in the Invenio RDM Web UI)</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rec</span><span class="p">:</span> <span class="n">WrappedRecord</span><span class="p">,</span> <span class="n">lnk</span><span class="p">:</span> <span class="n">AccessLink</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_record</span> <span class="o">=</span> <span class="n">rec</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_record</span><span class="p">:</span> <span class="n">WrappedRecord</span> <span class="o">=</span> <span class="n">rec</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_link</span><span class="p">:</span> <span class="n">AccessLink</span> <span class="o">=</span> <span class="n">lnk</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">expires_at</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">datetime</span><span class="p">]:</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">check_deleted</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_check_deleted</span><span class="p">()</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_link</span><span class="o">.</span><span class="n">expires_at</span>
 
     <span class="nd">@expires_at</span><span class="o">.</span><span class="n">setter</span>
     <span class="k">def</span> <span class="nf">expires_at</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">datetime</span><span class="p">]):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">check_deleted</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_check_deleted</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_link</span><span class="o">.</span><span class="n">expires_at</span> <span class="o">=</span> <span class="n">value</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_record</span><span class="o">.</span><span class="n">_client</span><span class="o">.</span><span class="n">record</span><span class="o">.</span><span class="n">access_links</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_record</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_link</span><span class="p">)</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">permission</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">LinkPermission</span><span class="p">]:</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">check_deleted</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_check_deleted</span><span class="p">()</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_link</span><span class="o">.</span><span class="n">permission</span>
 
     <span class="nd">@permission</span><span class="o">.</span><span class="n">setter</span>
     <span class="k">def</span> <span class="nf">permission</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">LinkPermission</span><span class="p">]):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">check_deleted</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_check_deleted</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_link</span><span class="o">.</span><span class="n">permission</span> <span class="o">=</span> <span class="n">value</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_record</span><span class="o">.</span><span class="n">_client</span><span class="o">.</span><span class="n">record</span><span class="o">.</span><span class="n">access_links</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_record</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_link</span><span class="p">)</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">id</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">check_deleted</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_check_deleted</span><span class="p">()</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_link</span><span class="o">.</span><span class="n">id</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">token</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">check_deleted</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_check_deleted</span><span class="p">()</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_link</span><span class="o">.</span><span class="n">token</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">created_at</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">datetime</span><span class="p">]:</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">check_deleted</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_check_deleted</span><span class="p">()</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_link</span><span class="o">.</span><span class="n">created_at</span>
 
     <span class="k">def</span> <span class="nf">delete</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -364,7 +432,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_record</span><span class="o">.</span><span class="n">_client</span><span class="o">.</span><span class="n">record</span><span class="o">.</span><span class="n">access_links</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_record</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_link</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_link</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># type: ignore</span>
 
-    <span class="k">def</span> <span class="nf">check_deleted</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_check_deleted</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_link</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Invalid access link! Maybe you deleted it?&quot;</span><span class="p">)</span>
 
@@ -376,8 +444,8 @@
 <span class="k">class</span> <span class="nc">AccessLinkQuery</span><span class="p">(</span><span class="n">Query</span><span class="p">):</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rec</span><span class="p">:</span> <span class="n">WrappedRecord</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_client</span> <span class="o">=</span> <span class="n">rec</span><span class="o">.</span><span class="n">_client</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_record</span> <span class="o">=</span> <span class="n">rec</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="p">:</span> <span class="n">InvenioRDMClient</span> <span class="o">=</span> <span class="n">rec</span><span class="o">.</span><span class="n">_client</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_record</span><span class="p">:</span> <span class="n">WrappedRecord</span> <span class="o">=</span> <span class="n">rec</span>
 
     <span class="k">def</span> <span class="nf">_query_items</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Results</span><span class="p">:</span>
         <span class="c1"># access links are special, so here we ignore the passed kwargs, because</span>
@@ -393,8 +461,8 @@
     <span class="sd">&quot;&quot;&quot;Sub-interface for interaction with access links.&quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rec</span><span class="p">:</span> <span class="n">WrappedRecord</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_client</span> <span class="o">=</span> <span class="n">rec</span><span class="o">.</span><span class="n">_client</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_record</span> <span class="o">=</span> <span class="n">rec</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="p">:</span> <span class="n">InvenioRDMClient</span> <span class="o">=</span> <span class="n">rec</span><span class="o">.</span><span class="n">_client</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_record</span><span class="p">:</span> <span class="n">WrappedRecord</span> <span class="o">=</span> <span class="n">rec</span>
 
     <span class="k">def</span> <span class="nf">_get_query</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Query</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">AccessLinkQuery</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_record</span><span class="p">)</span>
@@ -419,9 +487,139 @@
 
 
 <span class="k">class</span> <span class="nc">WrappedFiles</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;Sub-interface for interaction with files.&quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;Dict-like interface for interaction with files.&quot;&quot;&quot;</span>
 
-    <span class="k">pass</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">record</span><span class="p">:</span> <span class="n">WrappedRecord</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_record</span><span class="p">:</span> <span class="n">WrappedRecord</span> <span class="o">=</span> <span class="n">record</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="p">:</span> <span class="n">InvenioRDMClient</span> <span class="o">=</span> <span class="n">record</span><span class="o">.</span><span class="n">_client</span>
+
+        <span class="c1"># _files should contain the raw structure as returned by the API,</span>
+        <span class="c1"># But this is only accessible if file support is enabled for the record.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_files</span><span class="p">:</span> <span class="n">Files</span> <span class="o">=</span> <span class="n">record</span><span class="o">.</span><span class="n">_record</span><span class="o">.</span><span class="n">files</span>  <span class="c1"># stub with just &quot;enabled&quot; state</span>
+        <span class="k">if</span> <span class="n">record</span><span class="o">.</span><span class="n">_record</span><span class="o">.</span><span class="n">files</span><span class="o">.</span><span class="n">enabled</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_files</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_fileinfos</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">_get_fileinfos</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Files</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_record</span><span class="o">.</span><span class="n">is_draft</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="o">.</span><span class="n">draft</span><span class="o">.</span><span class="n">files</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_record</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="o">.</span><span class="n">record</span><span class="o">.</span><span class="n">files</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_record</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">enabled</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_files</span><span class="o">.</span><span class="n">enabled</span>
+
+    <span class="nd">@enabled</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">enabled</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">bool</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_files</span><span class="o">.</span><span class="n">entries</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_files</span><span class="o">.</span><span class="n">entries</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;This value can only be modified if there are no files!&quot;</span><span class="p">)</span>
+
+        <span class="c1"># set files.enabled state on server without committing other record changes</span>
+        <span class="n">rec</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="o">.</span><span class="n">draft</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_record</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
+        <span class="n">rec</span><span class="o">.</span><span class="n">files</span><span class="o">.</span><span class="n">enabled</span> <span class="o">=</span> <span class="n">value</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="o">.</span><span class="n">draft</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">rec</span><span class="p">)</span>
+        <span class="c1"># if no exception happened, update the values locally</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_record</span><span class="o">.</span><span class="n">_record</span><span class="o">.</span><span class="n">files</span><span class="o">.</span><span class="n">enabled</span> <span class="o">=</span> <span class="n">value</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_files</span><span class="o">.</span><span class="n">enabled</span> <span class="o">=</span> <span class="n">value</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_files</span><span class="o">.</span><span class="n">enabled</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_files</span><span class="o">.</span><span class="n">entries</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_files</span><span class="o">.</span><span class="n">entries</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">def</span> <span class="nf">_check_mutable</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_record</span><span class="o">.</span><span class="n">is_draft</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">_record</span><span class="o">.</span><span class="n">is_published</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Operation only supported on new record (version) drafts!&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_check_enabled</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_files</span><span class="o">.</span><span class="n">enabled</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Operation only supported if files are enabled!&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_check_filename</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="n">should_exist</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Complain if file does (not) exist.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">should_exist</span> <span class="ow">and</span> <span class="n">filename</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_entries_dict</span><span class="p">():</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;No such file in record: </span><span class="si">{</span><span class="n">filename</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">should_exist</span> <span class="ow">and</span> <span class="n">filename</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_entries_dict</span><span class="p">():</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;File with this name already in record: </span><span class="si">{</span><span class="n">filename</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">download</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">BinaryIO</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Download file from record or draft.&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_check_enabled</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_check_filename</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_record</span><span class="o">.</span><span class="n">is_draft</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="o">.</span><span class="n">draft</span><span class="o">.</span><span class="n">file_download</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_record</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="n">filename</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="o">.</span><span class="n">record</span><span class="o">.</span><span class="n">file_download</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_record</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="n">filename</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">delete</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Delete file from record draft.&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_check_mutable</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_check_filename</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_record</span><span class="o">.</span><span class="n">_client</span><span class="o">.</span><span class="n">draft</span><span class="o">.</span><span class="n">file_delete</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_record</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="n">filename</span><span class="p">)</span>
+        <span class="c1"># if no exception happened, it worked -&gt;</span>
+        <span class="c1"># remove the entry locally (thereby avoid reloading data)</span>
+        <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">_files</span><span class="o">.</span><span class="n">entries</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_files</span><span class="o">.</span><span class="n">entries</span> <span class="o">=</span> <span class="p">[</span><span class="n">fm</span> <span class="k">for</span> <span class="n">fm</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_files</span><span class="o">.</span><span class="n">entries</span> <span class="k">if</span> <span class="n">fm</span><span class="o">.</span><span class="n">key</span> <span class="o">!=</span> <span class="n">filename</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="nf">import_old</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Import files from the previous version.&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_check_mutable</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_check_enabled</span><span class="p">()</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_record</span><span class="o">.</span><span class="n">versions</span><span class="o">.</span><span class="n">index</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Cannot import files, this is the first record version!&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_files</span><span class="o">.</span><span class="n">entries</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_files</span><span class="o">.</span><span class="n">entries</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Can only import if no new files were uploaded yet!&quot;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_files</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="o">.</span><span class="n">draft</span><span class="o">.</span><span class="n">files_import</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_record</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">upload</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="n">BinaryIO</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Upload a file.</span>
+
+<span class="sd">        Takes a binary stream as input, you have to `open` your file yourself with `&quot;rb&quot;`.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_check_mutable</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_check_enabled</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_check_filename</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="o">.</span><span class="n">draft</span><span class="o">.</span><span class="n">file_upload_start</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_record</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="n">filename</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="o">.</span><span class="n">draft</span><span class="o">.</span><span class="n">file_upload_content</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_record</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="o">.</span><span class="n">draft</span><span class="o">.</span><span class="n">file_upload_complete</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_record</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="n">filename</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_files</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_fileinfos</span><span class="p">()</span>
+
+    <span class="c1"># ---- dict-like behaviour to access file metadata ----</span>
+
+    <span class="k">def</span> <span class="nf">_entries_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Exposes file entries as delivered by backend into a dict.&quot;&quot;&quot;</span>
+        <span class="c1"># There should not be a bazillion files per record,</span>
+        <span class="c1"># so recreating the dict on access should be no problem at all.</span>
+        <span class="c1"># When need arises, we can switch to something more efficient.</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">enabled</span> <span class="ow">or</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_files</span><span class="o">.</span><span class="n">entries</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">{}</span>  <span class="c1"># there is no &#39;entries&#39; key if files are disabled</span>
+        <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">_files</span><span class="o">.</span><span class="n">entries</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>  <span class="c1"># if enabled, must be present</span>
+        <span class="k">return</span> <span class="p">{</span><span class="n">fileinfo</span><span class="o">.</span><span class="n">key</span><span class="p">:</span> <span class="n">fileinfo</span> <span class="k">for</span> <span class="n">fileinfo</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_files</span><span class="o">.</span><span class="n">entries</span><span class="p">}</span>
+
+    <span class="k">def</span> <span class="nf">keys</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterable</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_entries_dict</span><span class="p">()</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">values</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">FileMetadata</span><span class="p">]:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_entries_dict</span><span class="p">()</span><span class="o">.</span><span class="n">values</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">items</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">FileMetadata</span><span class="p">]]:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_entries_dict</span><span class="p">()</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="fm">__iter__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterable</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+        <span class="k">return</span> <span class="nb">iter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_entries_dict</span><span class="p">())</span>
+
+    <span class="k">def</span> <span class="fm">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_entries_dict</span><span class="p">())</span>
+
+    <span class="k">def</span> <span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">FileMetadata</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_entries_dict</span><span class="p">()[</span><span class="n">filename</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="c1"># there is too much information in the metadata anyway, just show names</span>
+        <span class="c1"># and indicate dict-like accessibility</span>
+        <span class="k">return</span> <span class="nb">repr</span><span class="p">({</span><span class="n">k</span><span class="p">:</span> <span class="n">NoPrint</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_entries_dict</span><span class="p">()</span><span class="o">.</span><span class="n">items</span><span class="p">()})</span>
 </pre></div>
 
         </details>
@@ -451,11 +649,19 @@
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cl</span><span class="p">:</span> <span class="n">InvenioRDMClient</span><span class="p">,</span> <span class="n">rec</span><span class="p">:</span> <span class="n">Record</span><span class="p">,</span> <span class="n">is_draft</span><span class="p">:</span> <span class="nb">bool</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_client</span> <span class="o">=</span> <span class="n">cl</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_record</span> <span class="o">=</span> <span class="n">rec</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_access_links</span> <span class="o">=</span> <span class="n">AccessLinks</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_is_draft</span> <span class="o">=</span> <span class="n">is_draft</span>  <span class="c1"># there is no such &quot;field&quot;, these are really 2 APIs!</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">files</span>  <span class="c1"># force to load the file metadata</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="p">:</span> <span class="n">InvenioRDMClient</span> <span class="o">=</span> <span class="n">cl</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_record</span><span class="p">:</span> <span class="n">Record</span> <span class="o">=</span> <span class="n">rec</span>
+
+        <span class="c1"># there is no such &quot;field&quot; in Invenio RDM, these are really 2 APIs!</span>
+        <span class="c1"># so we track the difference on our own.</span>
+        <span class="c1">#</span>
+        <span class="c1"># Also, this must come BEFORE initializing files,</span>
+        <span class="c1"># as `WrappedFiles` accesses the property is_draft,</span>
+        <span class="c1"># which only works correctly once `_is_draft` is set.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_is_draft</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="n">is_draft</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">files</span><span class="p">:</span> <span class="n">WrappedFiles</span> <span class="o">=</span> <span class="n">WrappedFiles</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_access_links</span><span class="p">:</span> <span class="n">AccessLinks</span> <span class="o">=</span> <span class="n">AccessLinks</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">is_draft</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -466,6 +672,10 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_draft</span>
 
+    <span class="k">def</span> <span class="nf">_expect_draft</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_draft</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;Operation supported only for drafts!&quot;</span><span class="p">)</span>
+
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">is_published</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -475,26 +685,37 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_record</span><span class="o">.</span><span class="n">is_published</span>
 
+    <span class="k">def</span> <span class="nf">_expect_published</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_draft</span> <span class="ow">or</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_published</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;Operation supported only for published records!&quot;</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">is_saved</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Check whether the current draft is in sync with the draft on in Invenio RDM.</span>
+
+<span class="sd">        This means that they must agree on access, metadata and files attributes,</span>
+<span class="sd">        as these are the ones modifiable by the user.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_expect_draft</span><span class="p">()</span>
+
+        <span class="c1"># need to &quot;wrap&quot; to initialize e.g. the &#39;files&#39; part correctly</span>
+        <span class="n">drft</span> <span class="o">=</span> <span class="n">WrappedRecord</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="o">.</span><span class="n">draft</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_record</span><span class="o">.</span><span class="n">id</span><span class="p">),</span> <span class="kc">True</span>
+        <span class="p">)</span>
+        <span class="c1"># compare relevant contents</span>
+        <span class="n">same_access</span> <span class="o">=</span> <span class="n">drft</span><span class="o">.</span><span class="n">access</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">_record</span><span class="o">.</span><span class="n">access</span>
+        <span class="n">same_metadata</span> <span class="o">=</span> <span class="n">drft</span><span class="o">.</span><span class="n">metadata</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">_record</span><span class="o">.</span><span class="n">metadata</span>
+        <span class="n">same_files</span> <span class="o">=</span> <span class="n">drft</span><span class="o">.</span><span class="n">files</span><span class="o">.</span><span class="n">_files</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">files</span><span class="o">.</span><span class="n">_files</span>  <span class="c1"># compare unwrapped</span>
+        <span class="k">return</span> <span class="n">same_access</span> <span class="ow">and</span> <span class="n">same_metadata</span> <span class="ow">and</span> <span class="n">same_files</span>
+        <span class="c1"># TODO: track https://github.com/inveniosoftware/invenio-app-rdm/issues/1233</span>
+
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">access_links</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Return interface for managing access links for this record.&quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_draft</span> <span class="ow">or</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_published</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;Operation supported only for published records!&quot;</span><span class="p">)</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_access_links</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_expect_published</span><span class="p">()</span>
 
-    <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">files</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Return metadata associated with files in the record.&quot;&quot;&quot;</span>
-        <span class="c1"># if there is an &quot;entries&quot; key, we already have more than the stub</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_record</span><span class="o">.</span><span class="n">files</span><span class="o">.</span><span class="n">entries</span><span class="p">:</span>
-            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_record</span><span class="o">.</span><span class="n">files</span>
-        <span class="c1"># otherwise no cached data is available -&gt; load</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_draft</span><span class="p">:</span>
-            <span class="n">ret</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="o">.</span><span class="n">draft</span><span class="o">.</span><span class="n">files</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_record</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">ret</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="o">.</span><span class="n">record</span><span class="o">.</span><span class="n">files</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_record</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_record</span><span class="o">.</span><span class="n">files</span> <span class="o">=</span> <span class="n">ret</span>
-        <span class="k">return</span> <span class="n">ret</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_access_links</span>
 
     <span class="k">def</span> <span class="nf">edit</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -502,11 +723,17 @@
 
 <span class="sd">        This draft can be used to update the metadata of the published record version.</span>
 <span class="sd">        For this, change metadata accordingly and call `save()` and `publish()`.</span>
+
+<span class="sd">        This object will stay a draft until `publish()` is called.</span>
+<span class="sd">        To get back from the draft to the original record, without publishing,</span>
+<span class="sd">        just request it again from the repository.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_draft</span> <span class="ow">or</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_published</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;Operation supported only for published records!&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_expect_published</span><span class="p">()</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_record</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="o">.</span><span class="n">draft</span><span class="o">.</span><span class="n">from_record</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_record</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
+        <span class="c1"># https://github.com/inveniosoftware/invenio-app-rdm/issues/1223 workaround</span>
+        <span class="c1"># just pull the draft from the other endpoint</span>
+        <span class="c1"># self._record = self._client.draft.get(self._record.id)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_is_draft</span> <span class="o">=</span> <span class="kc">True</span>
 
     <span class="k">def</span> <span class="nf">new_version</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -516,11 +743,11 @@
 <span class="sd">        This works like `edit()`, with the difference that in a new version</span>
 <span class="sd">        it is possible to change the files as well, not only metadata.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_draft</span> <span class="ow">or</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_published</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;Operation supported only for published records!&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_expect_published</span><span class="p">()</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_record</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="o">.</span><span class="n">draft</span><span class="o">.</span><span class="n">new_version</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_record</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_is_draft</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_is_draft</span> <span class="o">=</span> <span class="kc">True</span>  <span class="c1"># must be set before loading files for correct behavior</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">files</span> <span class="o">=</span> <span class="n">WrappedFiles</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>  <span class="c1"># update files information</span>
 
     <span class="k">def</span> <span class="nf">save</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -532,10 +759,13 @@
 <span class="sd">        this will only affect the draft (i.e. the version accessed via `edit()`).</span>
 <span class="sd">        The changes will only be visible to others after calling `publish()`.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_draft</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;Operation supported only for drafts!&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_expect_draft</span><span class="p">()</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_record</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="o">.</span><span class="n">draft</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_record</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_check_files_exist_if_enabled</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">files</span><span class="o">.</span><span class="n">enabled</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">files</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Files are enabled, but none are attached!&quot;</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">publish</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -546,8 +776,8 @@
 <span class="sd">        * you can only change metadata of the record for that version (with `edit()`)</span>
 <span class="sd">        * to also change files, you must create a new version (with `new_version()`)</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_draft</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;Operation supported only for drafts!&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_expect_draft</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_check_files_exist_if_enabled</span><span class="p">()</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_record</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="o">.</span><span class="n">draft</span><span class="o">.</span><span class="n">publish</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_record</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_is_draft</span> <span class="o">=</span> <span class="kc">False</span>
@@ -557,13 +787,14 @@
 <span class="sd">        Delete this draft record.</span>
 
 <span class="sd">        After deletion, this object is not backed by a draft in Invenio RDM.</span>
-<span class="sd">        Therefore, all method calls will result in errors.</span>
+<span class="sd">        Therefore, all method calls and attribute accesses will be invalid.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_draft</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;Operation supported only for drafts!&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_expect_draft</span><span class="p">()</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="o">.</span><span class="n">draft</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_record</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_is_draft</span> <span class="o">=</span> <span class="kc">False</span>  <span class="c1"># to prevent attempts to save() or publish()</span>
+        <span class="c1"># to prevent the user from doing anything stupid, make it fail</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_record</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># type: ignore</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_access_links</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># type: ignore</span>
 
     <span class="c1"># NOTE: the following is really, really bad idea!</span>
     <span class="c1"># While it would be cool to write `del record_object`, this</span>
@@ -577,8 +808,13 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_record</span><span class="o">.</span><span class="fm">__getattribute__</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
 
     <span class="c1"># magic methods must be proxied by hand</span>
-    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_record</span><span class="p">)</span>
+    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c1"># little hack to show files properly</span>
+        <span class="n">f</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_record</span><span class="o">.</span><span class="n">files</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_record</span><span class="o">.</span><span class="n">files</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">files</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>  <span class="c1"># type: ignore</span>
+        <span class="n">ret</span> <span class="o">=</span> <span class="nb">repr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_record</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_record</span><span class="o">.</span><span class="n">files</span> <span class="o">=</span> <span class="n">f</span>
+        <span class="k">return</span> <span class="n">ret</span>
 </pre></div>
 
         </details>
@@ -608,11 +844,19 @@ the allowed methods through runtime inspection.</p>
                 <details>
             <summary>View Source</summary>
             <div class="codehilite"><pre><span></span>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cl</span><span class="p">:</span> <span class="n">InvenioRDMClient</span><span class="p">,</span> <span class="n">rec</span><span class="p">:</span> <span class="n">Record</span><span class="p">,</span> <span class="n">is_draft</span><span class="p">:</span> <span class="nb">bool</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_client</span> <span class="o">=</span> <span class="n">cl</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_record</span> <span class="o">=</span> <span class="n">rec</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_access_links</span> <span class="o">=</span> <span class="n">AccessLinks</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_is_draft</span> <span class="o">=</span> <span class="n">is_draft</span>  <span class="c1"># there is no such &quot;field&quot;, these are really 2 APIs!</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">files</span>  <span class="c1"># force to load the file metadata</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="p">:</span> <span class="n">InvenioRDMClient</span> <span class="o">=</span> <span class="n">cl</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_record</span><span class="p">:</span> <span class="n">Record</span> <span class="o">=</span> <span class="n">rec</span>
+
+        <span class="c1"># there is no such &quot;field&quot; in Invenio RDM, these are really 2 APIs!</span>
+        <span class="c1"># so we track the difference on our own.</span>
+        <span class="c1">#</span>
+        <span class="c1"># Also, this must come BEFORE initializing files,</span>
+        <span class="c1"># as `WrappedFiles` accesses the property is_draft,</span>
+        <span class="c1"># which only works correctly once `_is_draft` is set.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_is_draft</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="n">is_draft</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">files</span><span class="p">:</span> <span class="n">WrappedFiles</span> <span class="o">=</span> <span class="n">WrappedFiles</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_access_links</span><span class="p">:</span> <span class="n">AccessLinks</span> <span class="o">=</span> <span class="n">AccessLinks</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
 </pre></div>
 
         </details>
@@ -646,6 +890,20 @@ the allowed methods through runtime inspection.</p>
 
 
                             </div>
+                            <div id="WrappedRecord.is_saved" class="classattr">
+                                            <div class="attr variable"><a class="headerlink" href="#WrappedRecord.is_saved">#&nbsp;&nbsp</a>
+
+        <span class="name">is_saved</span>
+    </div>
+
+            <div class="docstring"><p>Check whether the current draft is in sync with the draft on in Invenio RDM.</p>
+
+<p>This means that they must agree on access, metadata and files attributes,
+as these are the ones modifiable by the user.</p>
+</div>
+
+
+                            </div>
                             <div id="WrappedRecord.access_links" class="classattr">
                                             <div class="attr variable"><a class="headerlink" href="#WrappedRecord.access_links">#&nbsp;&nbsp</a>
 
@@ -653,17 +911,6 @@ the allowed methods through runtime inspection.</p>
     </div>
 
             <div class="docstring"><p>Return interface for managing access links for this record.</p>
-</div>
-
-
-                            </div>
-                            <div id="WrappedRecord.files" class="classattr">
-                                            <div class="attr variable"><a class="headerlink" href="#WrappedRecord.files">#&nbsp;&nbsp</a>
-
-        <span class="name">files</span>
-    </div>
-
-            <div class="docstring"><p>Return metadata associated with files in the record.</p>
 </div>
 
 
@@ -684,11 +931,17 @@ the allowed methods through runtime inspection.</p>
 
 <span class="sd">        This draft can be used to update the metadata of the published record version.</span>
 <span class="sd">        For this, change metadata accordingly and call `save()` and `publish()`.</span>
+
+<span class="sd">        This object will stay a draft until `publish()` is called.</span>
+<span class="sd">        To get back from the draft to the original record, without publishing,</span>
+<span class="sd">        just request it again from the repository.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_draft</span> <span class="ow">or</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_published</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;Operation supported only for published records!&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_expect_published</span><span class="p">()</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_record</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="o">.</span><span class="n">draft</span><span class="o">.</span><span class="n">from_record</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_record</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
+        <span class="c1"># https://github.com/inveniosoftware/invenio-app-rdm/issues/1223 workaround</span>
+        <span class="c1"># just pull the draft from the other endpoint</span>
+        <span class="c1"># self._record = self._client.draft.get(self._record.id)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_is_draft</span> <span class="o">=</span> <span class="kc">True</span>
 </pre></div>
 
@@ -698,6 +951,10 @@ the allowed methods through runtime inspection.</p>
 
 <p>This draft can be used to update the metadata of the published record version.
 For this, change metadata accordingly and call <code><a href="#WrappedRecord.save">save()</a></code> and <code><a href="#WrappedRecord.publish">publish()</a></code>.</p>
+
+<p>This object will stay a draft until <code><a href="#WrappedRecord.publish">publish()</a></code> is called.
+To get back from the draft to the original record, without publishing,
+just request it again from the repository.</p>
 </div>
 
 
@@ -719,11 +976,11 @@ For this, change metadata accordingly and call <code><a href="#WrappedRecord.sav
 <span class="sd">        This works like `edit()`, with the difference that in a new version</span>
 <span class="sd">        it is possible to change the files as well, not only metadata.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_draft</span> <span class="ow">or</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_published</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;Operation supported only for published records!&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_expect_published</span><span class="p">()</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_record</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="o">.</span><span class="n">draft</span><span class="o">.</span><span class="n">new_version</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_record</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_is_draft</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_is_draft</span> <span class="o">=</span> <span class="kc">True</span>  <span class="c1"># must be set before loading files for correct behavior</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">files</span> <span class="o">=</span> <span class="n">WrappedFiles</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>  <span class="c1"># update files information</span>
 </pre></div>
 
         </details>
@@ -756,8 +1013,7 @@ it is possible to change the files as well, not only metadata.</p>
 <span class="sd">        this will only affect the draft (i.e. the version accessed via `edit()`).</span>
 <span class="sd">        The changes will only be visible to others after calling `publish()`.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_draft</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;Operation supported only for drafts!&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_expect_draft</span><span class="p">()</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_record</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="o">.</span><span class="n">draft</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_record</span><span class="p">)</span>
 </pre></div>
@@ -794,8 +1050,8 @@ The changes will only be visible to others after calling <code><a href="#Wrapped
 <span class="sd">        * you can only change metadata of the record for that version (with `edit()`)</span>
 <span class="sd">        * to also change files, you must create a new version (with `new_version()`)</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_draft</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;Operation supported only for drafts!&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_expect_draft</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_check_files_exist_if_enabled</span><span class="p">()</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_record</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="o">.</span><span class="n">draft</span><span class="o">.</span><span class="n">publish</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_record</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_is_draft</span> <span class="o">=</span> <span class="kc">False</span>
@@ -831,13 +1087,14 @@ The changes will only be visible to others after calling <code><a href="#Wrapped
 <span class="sd">        Delete this draft record.</span>
 
 <span class="sd">        After deletion, this object is not backed by a draft in Invenio RDM.</span>
-<span class="sd">        Therefore, all method calls will result in errors.</span>
+<span class="sd">        Therefore, all method calls and attribute accesses will be invalid.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_draft</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;Operation supported only for drafts!&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_expect_draft</span><span class="p">()</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="o">.</span><span class="n">draft</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_record</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_is_draft</span> <span class="o">=</span> <span class="kc">False</span>  <span class="c1"># to prevent attempts to save() or publish()</span>
+        <span class="c1"># to prevent the user from doing anything stupid, make it fail</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_record</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># type: ignore</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_access_links</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># type: ignore</span>
 </pre></div>
 
         </details>
@@ -845,7 +1102,7 @@ The changes will only be visible to others after calling <code><a href="#Wrapped
             <div class="docstring"><p>Delete this draft record.</p>
 
 <p>After deletion, this object is not backed by a draft in Invenio RDM.
-Therefore, all method calls will result in errors.</p>
+Therefore, all method calls and attribute accesses will be invalid.</p>
 </div>
 
 
@@ -876,44 +1133,44 @@ Therefore, all method calls will result in errors.</p>
     <span class="c1"># (based on the links generated in the Invenio RDM Web UI)</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rec</span><span class="p">:</span> <span class="n">WrappedRecord</span><span class="p">,</span> <span class="n">lnk</span><span class="p">:</span> <span class="n">AccessLink</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_record</span> <span class="o">=</span> <span class="n">rec</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_record</span><span class="p">:</span> <span class="n">WrappedRecord</span> <span class="o">=</span> <span class="n">rec</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_link</span><span class="p">:</span> <span class="n">AccessLink</span> <span class="o">=</span> <span class="n">lnk</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">expires_at</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">datetime</span><span class="p">]:</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">check_deleted</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_check_deleted</span><span class="p">()</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_link</span><span class="o">.</span><span class="n">expires_at</span>
 
     <span class="nd">@expires_at</span><span class="o">.</span><span class="n">setter</span>
     <span class="k">def</span> <span class="nf">expires_at</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">datetime</span><span class="p">]):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">check_deleted</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_check_deleted</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_link</span><span class="o">.</span><span class="n">expires_at</span> <span class="o">=</span> <span class="n">value</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_record</span><span class="o">.</span><span class="n">_client</span><span class="o">.</span><span class="n">record</span><span class="o">.</span><span class="n">access_links</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_record</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_link</span><span class="p">)</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">permission</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">LinkPermission</span><span class="p">]:</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">check_deleted</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_check_deleted</span><span class="p">()</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_link</span><span class="o">.</span><span class="n">permission</span>
 
     <span class="nd">@permission</span><span class="o">.</span><span class="n">setter</span>
     <span class="k">def</span> <span class="nf">permission</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">LinkPermission</span><span class="p">]):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">check_deleted</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_check_deleted</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_link</span><span class="o">.</span><span class="n">permission</span> <span class="o">=</span> <span class="n">value</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_record</span><span class="o">.</span><span class="n">_client</span><span class="o">.</span><span class="n">record</span><span class="o">.</span><span class="n">access_links</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_record</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_link</span><span class="p">)</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">id</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">check_deleted</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_check_deleted</span><span class="p">()</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_link</span><span class="o">.</span><span class="n">id</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">token</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">check_deleted</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_check_deleted</span><span class="p">()</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_link</span><span class="o">.</span><span class="n">token</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">created_at</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">datetime</span><span class="p">]:</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">check_deleted</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_check_deleted</span><span class="p">()</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_link</span><span class="o">.</span><span class="n">created_at</span>
 
     <span class="k">def</span> <span class="nf">delete</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -921,7 +1178,7 @@ Therefore, all method calls will result in errors.</p>
         <span class="bp">self</span><span class="o">.</span><span class="n">_record</span><span class="o">.</span><span class="n">_client</span><span class="o">.</span><span class="n">record</span><span class="o">.</span><span class="n">access_links</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_record</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_link</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_link</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># type: ignore</span>
 
-    <span class="k">def</span> <span class="nf">check_deleted</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_check_deleted</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_link</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Invalid access link! Maybe you deleted it?&quot;</span><span class="p">)</span>
 
@@ -952,7 +1209,7 @@ the fields <code><a href="#WrappedAccessLink.expires_at">expires_at</a></code> a
                 <details>
             <summary>View Source</summary>
             <div class="codehilite"><pre><span></span>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rec</span><span class="p">:</span> <span class="n">WrappedRecord</span><span class="p">,</span> <span class="n">lnk</span><span class="p">:</span> <span class="n">AccessLink</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_record</span> <span class="o">=</span> <span class="n">rec</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_record</span><span class="p">:</span> <span class="n">WrappedRecord</span> <span class="o">=</span> <span class="n">rec</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_link</span><span class="p">:</span> <span class="n">AccessLink</span> <span class="o">=</span> <span class="n">lnk</span>
 </pre></div>
 
@@ -1029,26 +1286,6 @@ the fields <code><a href="#WrappedAccessLink.expires_at">expires_at</a></code> a
 
 
                             </div>
-                            <div id="WrappedAccessLink.check_deleted" class="classattr">
-                                        <div class="attr function"><a class="headerlink" href="#WrappedAccessLink.check_deleted">#&nbsp;&nbsp</a>
-
-        
-            <span class="def">def</span>
-            <span class="name">check_deleted</span><span class="signature">(self)</span>:
-    </div>
-
-                <details>
-            <summary>View Source</summary>
-            <div class="codehilite"><pre><span></span>    <span class="k">def</span> <span class="nf">check_deleted</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_link</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Invalid access link! Maybe you deleted it?&quot;</span><span class="p">)</span>
-</pre></div>
-
-        </details>
-
-    
-
-                            </div>
                 </section>
                 <section id="AccessLinkQuery">
                                 <div class="attr class">
@@ -1064,8 +1301,8 @@ the fields <code><a href="#WrappedAccessLink.expires_at">expires_at</a></code> a
             <div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">AccessLinkQuery</span><span class="p">(</span><span class="n">Query</span><span class="p">):</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rec</span><span class="p">:</span> <span class="n">WrappedRecord</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_client</span> <span class="o">=</span> <span class="n">rec</span><span class="o">.</span><span class="n">_client</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_record</span> <span class="o">=</span> <span class="n">rec</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="p">:</span> <span class="n">InvenioRDMClient</span> <span class="o">=</span> <span class="n">rec</span><span class="o">.</span><span class="n">_client</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_record</span><span class="p">:</span> <span class="n">WrappedRecord</span> <span class="o">=</span> <span class="n">rec</span>
 
     <span class="k">def</span> <span class="nf">_query_items</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Results</span><span class="p">:</span>
         <span class="c1"># access links are special, so here we ignore the passed kwargs, because</span>
@@ -1102,8 +1339,8 @@ because this would be extremely inefficient (for this, use <code><a href="#Acces
             <summary>View Source</summary>
             <div class="codehilite"><pre><span></span>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rec</span><span class="p">:</span> <span class="n">WrappedRecord</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_client</span> <span class="o">=</span> <span class="n">rec</span><span class="o">.</span><span class="n">_client</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_record</span> <span class="o">=</span> <span class="n">rec</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="p">:</span> <span class="n">InvenioRDMClient</span> <span class="o">=</span> <span class="n">rec</span><span class="o">.</span><span class="n">_client</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_record</span><span class="p">:</span> <span class="n">WrappedRecord</span> <span class="o">=</span> <span class="n">rec</span>
 </pre></div>
 
         </details>
@@ -1151,8 +1388,8 @@ because this would be extremely inefficient (for this, use <code><a href="#Acces
     <span class="sd">&quot;&quot;&quot;Sub-interface for interaction with access links.&quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rec</span><span class="p">:</span> <span class="n">WrappedRecord</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_client</span> <span class="o">=</span> <span class="n">rec</span><span class="o">.</span><span class="n">_client</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_record</span> <span class="o">=</span> <span class="n">rec</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="p">:</span> <span class="n">InvenioRDMClient</span> <span class="o">=</span> <span class="n">rec</span><span class="o">.</span><span class="n">_client</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_record</span><span class="p">:</span> <span class="n">WrappedRecord</span> <span class="o">=</span> <span class="n">rec</span>
 
     <span class="k">def</span> <span class="nf">_get_query</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Query</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">AccessLinkQuery</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_record</span><span class="p">)</span>
@@ -1189,8 +1426,8 @@ because this would be extremely inefficient (for this, use <code><a href="#Acces
                 <details>
             <summary>View Source</summary>
             <div class="codehilite"><pre><span></span>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rec</span><span class="p">:</span> <span class="n">WrappedRecord</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_client</span> <span class="o">=</span> <span class="n">rec</span><span class="o">.</span><span class="n">_client</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_record</span> <span class="o">=</span> <span class="n">rec</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="p">:</span> <span class="n">InvenioRDMClient</span> <span class="o">=</span> <span class="n">rec</span><span class="o">.</span><span class="n">_client</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_record</span><span class="p">:</span> <span class="n">WrappedRecord</span> <span class="o">=</span> <span class="n">rec</span>
 </pre></div>
 
         </details>
@@ -1244,14 +1481,144 @@ because this would be extremely inefficient (for this, use <code><a href="#Acces
                 <details>
             <summary>View Source</summary>
             <div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">WrappedFiles</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;Sub-interface for interaction with files.&quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;Dict-like interface for interaction with files.&quot;&quot;&quot;</span>
 
-    <span class="k">pass</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">record</span><span class="p">:</span> <span class="n">WrappedRecord</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_record</span><span class="p">:</span> <span class="n">WrappedRecord</span> <span class="o">=</span> <span class="n">record</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="p">:</span> <span class="n">InvenioRDMClient</span> <span class="o">=</span> <span class="n">record</span><span class="o">.</span><span class="n">_client</span>
+
+        <span class="c1"># _files should contain the raw structure as returned by the API,</span>
+        <span class="c1"># But this is only accessible if file support is enabled for the record.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_files</span><span class="p">:</span> <span class="n">Files</span> <span class="o">=</span> <span class="n">record</span><span class="o">.</span><span class="n">_record</span><span class="o">.</span><span class="n">files</span>  <span class="c1"># stub with just &quot;enabled&quot; state</span>
+        <span class="k">if</span> <span class="n">record</span><span class="o">.</span><span class="n">_record</span><span class="o">.</span><span class="n">files</span><span class="o">.</span><span class="n">enabled</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_files</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_fileinfos</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">_get_fileinfos</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Files</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_record</span><span class="o">.</span><span class="n">is_draft</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="o">.</span><span class="n">draft</span><span class="o">.</span><span class="n">files</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_record</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="o">.</span><span class="n">record</span><span class="o">.</span><span class="n">files</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_record</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">enabled</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_files</span><span class="o">.</span><span class="n">enabled</span>
+
+    <span class="nd">@enabled</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">enabled</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">bool</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_files</span><span class="o">.</span><span class="n">entries</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_files</span><span class="o">.</span><span class="n">entries</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;This value can only be modified if there are no files!&quot;</span><span class="p">)</span>
+
+        <span class="c1"># set files.enabled state on server without committing other record changes</span>
+        <span class="n">rec</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="o">.</span><span class="n">draft</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_record</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
+        <span class="n">rec</span><span class="o">.</span><span class="n">files</span><span class="o">.</span><span class="n">enabled</span> <span class="o">=</span> <span class="n">value</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="o">.</span><span class="n">draft</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">rec</span><span class="p">)</span>
+        <span class="c1"># if no exception happened, update the values locally</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_record</span><span class="o">.</span><span class="n">_record</span><span class="o">.</span><span class="n">files</span><span class="o">.</span><span class="n">enabled</span> <span class="o">=</span> <span class="n">value</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_files</span><span class="o">.</span><span class="n">enabled</span> <span class="o">=</span> <span class="n">value</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_files</span><span class="o">.</span><span class="n">enabled</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_files</span><span class="o">.</span><span class="n">entries</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_files</span><span class="o">.</span><span class="n">entries</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">def</span> <span class="nf">_check_mutable</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_record</span><span class="o">.</span><span class="n">is_draft</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">_record</span><span class="o">.</span><span class="n">is_published</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Operation only supported on new record (version) drafts!&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_check_enabled</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_files</span><span class="o">.</span><span class="n">enabled</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Operation only supported if files are enabled!&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_check_filename</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="n">should_exist</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Complain if file does (not) exist.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">should_exist</span> <span class="ow">and</span> <span class="n">filename</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_entries_dict</span><span class="p">():</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;No such file in record: </span><span class="si">{</span><span class="n">filename</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">should_exist</span> <span class="ow">and</span> <span class="n">filename</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_entries_dict</span><span class="p">():</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;File with this name already in record: </span><span class="si">{</span><span class="n">filename</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">download</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">BinaryIO</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Download file from record or draft.&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_check_enabled</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_check_filename</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_record</span><span class="o">.</span><span class="n">is_draft</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="o">.</span><span class="n">draft</span><span class="o">.</span><span class="n">file_download</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_record</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="n">filename</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="o">.</span><span class="n">record</span><span class="o">.</span><span class="n">file_download</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_record</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="n">filename</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">delete</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Delete file from record draft.&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_check_mutable</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_check_filename</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_record</span><span class="o">.</span><span class="n">_client</span><span class="o">.</span><span class="n">draft</span><span class="o">.</span><span class="n">file_delete</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_record</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="n">filename</span><span class="p">)</span>
+        <span class="c1"># if no exception happened, it worked -&gt;</span>
+        <span class="c1"># remove the entry locally (thereby avoid reloading data)</span>
+        <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">_files</span><span class="o">.</span><span class="n">entries</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_files</span><span class="o">.</span><span class="n">entries</span> <span class="o">=</span> <span class="p">[</span><span class="n">fm</span> <span class="k">for</span> <span class="n">fm</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_files</span><span class="o">.</span><span class="n">entries</span> <span class="k">if</span> <span class="n">fm</span><span class="o">.</span><span class="n">key</span> <span class="o">!=</span> <span class="n">filename</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="nf">import_old</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Import files from the previous version.&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_check_mutable</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_check_enabled</span><span class="p">()</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_record</span><span class="o">.</span><span class="n">versions</span><span class="o">.</span><span class="n">index</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Cannot import files, this is the first record version!&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_files</span><span class="o">.</span><span class="n">entries</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_files</span><span class="o">.</span><span class="n">entries</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Can only import if no new files were uploaded yet!&quot;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_files</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="o">.</span><span class="n">draft</span><span class="o">.</span><span class="n">files_import</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_record</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">upload</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="n">BinaryIO</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Upload a file.</span>
+
+<span class="sd">        Takes a binary stream as input, you have to `open` your file yourself with `&quot;rb&quot;`.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_check_mutable</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_check_enabled</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_check_filename</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="o">.</span><span class="n">draft</span><span class="o">.</span><span class="n">file_upload_start</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_record</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="n">filename</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="o">.</span><span class="n">draft</span><span class="o">.</span><span class="n">file_upload_content</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_record</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="o">.</span><span class="n">draft</span><span class="o">.</span><span class="n">file_upload_complete</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_record</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="n">filename</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_files</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_fileinfos</span><span class="p">()</span>
+
+    <span class="c1"># ---- dict-like behaviour to access file metadata ----</span>
+
+    <span class="k">def</span> <span class="nf">_entries_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Exposes file entries as delivered by backend into a dict.&quot;&quot;&quot;</span>
+        <span class="c1"># There should not be a bazillion files per record,</span>
+        <span class="c1"># so recreating the dict on access should be no problem at all.</span>
+        <span class="c1"># When need arises, we can switch to something more efficient.</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">enabled</span> <span class="ow">or</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_files</span><span class="o">.</span><span class="n">entries</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">{}</span>  <span class="c1"># there is no &#39;entries&#39; key if files are disabled</span>
+        <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">_files</span><span class="o">.</span><span class="n">entries</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>  <span class="c1"># if enabled, must be present</span>
+        <span class="k">return</span> <span class="p">{</span><span class="n">fileinfo</span><span class="o">.</span><span class="n">key</span><span class="p">:</span> <span class="n">fileinfo</span> <span class="k">for</span> <span class="n">fileinfo</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_files</span><span class="o">.</span><span class="n">entries</span><span class="p">}</span>
+
+    <span class="k">def</span> <span class="nf">keys</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterable</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_entries_dict</span><span class="p">()</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">values</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">FileMetadata</span><span class="p">]:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_entries_dict</span><span class="p">()</span><span class="o">.</span><span class="n">values</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">items</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">FileMetadata</span><span class="p">]]:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_entries_dict</span><span class="p">()</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="fm">__iter__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterable</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+        <span class="k">return</span> <span class="nb">iter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_entries_dict</span><span class="p">())</span>
+
+    <span class="k">def</span> <span class="fm">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_entries_dict</span><span class="p">())</span>
+
+    <span class="k">def</span> <span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">FileMetadata</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_entries_dict</span><span class="p">()[</span><span class="n">filename</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="c1"># there is too much information in the metadata anyway, just show names</span>
+        <span class="c1"># and indicate dict-like accessibility</span>
+        <span class="k">return</span> <span class="nb">repr</span><span class="p">({</span><span class="n">k</span><span class="p">:</span> <span class="n">NoPrint</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_entries_dict</span><span class="p">()</span><span class="o">.</span><span class="n">items</span><span class="p">()})</span>
 </pre></div>
 
         </details>
 
-            <div class="docstring"><p>Sub-interface for interaction with files.</p>
+            <div class="docstring"><p>Dict-like interface for interaction with files.</p>
 </div>
 
 
@@ -1259,10 +1626,213 @@ because this would be extremely inefficient (for this, use <code><a href="#Acces
                                         <div class="attr function"><a class="headerlink" href="#WrappedFiles.__init__">#&nbsp;&nbsp</a>
 
         
-            <span class="name">WrappedFiles</span><span class="signature">()</span>
+            <span class="name">WrappedFiles</span><span class="signature">(record: <a href="#WrappedRecord">iridium.record.WrappedRecord</a>)</span>
     </div>
 
+                <details>
+            <summary>View Source</summary>
+            <div class="codehilite"><pre><span></span>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">record</span><span class="p">:</span> <span class="n">WrappedRecord</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_record</span><span class="p">:</span> <span class="n">WrappedRecord</span> <span class="o">=</span> <span class="n">record</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="p">:</span> <span class="n">InvenioRDMClient</span> <span class="o">=</span> <span class="n">record</span><span class="o">.</span><span class="n">_client</span>
+
+        <span class="c1"># _files should contain the raw structure as returned by the API,</span>
+        <span class="c1"># But this is only accessible if file support is enabled for the record.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_files</span><span class="p">:</span> <span class="n">Files</span> <span class="o">=</span> <span class="n">record</span><span class="o">.</span><span class="n">_record</span><span class="o">.</span><span class="n">files</span>  <span class="c1"># stub with just &quot;enabled&quot; state</span>
+        <span class="k">if</span> <span class="n">record</span><span class="o">.</span><span class="n">_record</span><span class="o">.</span><span class="n">files</span><span class="o">.</span><span class="n">enabled</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_files</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_fileinfos</span><span class="p">()</span>
+</pre></div>
+
+        </details>
+
+    
+
+                            </div>
+                            <div id="WrappedFiles.enabled" class="classattr">
+                                            <div class="attr variable"><a class="headerlink" href="#WrappedFiles.enabled">#&nbsp;&nbsp</a>
+
+        <span class="name">enabled</span><span class="annotation">: bool</span>
+    </div>
+
+    
+
+                            </div>
+                            <div id="WrappedFiles.download" class="classattr">
+                                        <div class="attr function"><a class="headerlink" href="#WrappedFiles.download">#&nbsp;&nbsp</a>
+
         
+            <span class="def">def</span>
+            <span class="name">download</span><span class="signature">(self, filename: str) -&gt; &lt;class &#39;BinaryIO&#39;&gt;</span>:
+    </div>
+
+                <details>
+            <summary>View Source</summary>
+            <div class="codehilite"><pre><span></span>    <span class="k">def</span> <span class="nf">download</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">BinaryIO</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Download file from record or draft.&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_check_enabled</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_check_filename</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_record</span><span class="o">.</span><span class="n">is_draft</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="o">.</span><span class="n">draft</span><span class="o">.</span><span class="n">file_download</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_record</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="n">filename</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="o">.</span><span class="n">record</span><span class="o">.</span><span class="n">file_download</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_record</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="n">filename</span><span class="p">)</span>
+</pre></div>
+
+        </details>
+
+            <div class="docstring"><p>Download file from record or draft.</p>
+</div>
+
+
+                            </div>
+                            <div id="WrappedFiles.delete" class="classattr">
+                                        <div class="attr function"><a class="headerlink" href="#WrappedFiles.delete">#&nbsp;&nbsp</a>
+
+        
+            <span class="def">def</span>
+            <span class="name">delete</span><span class="signature">(self, filename: str)</span>:
+    </div>
+
+                <details>
+            <summary>View Source</summary>
+            <div class="codehilite"><pre><span></span>    <span class="k">def</span> <span class="nf">delete</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Delete file from record draft.&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_check_mutable</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_check_filename</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_record</span><span class="o">.</span><span class="n">_client</span><span class="o">.</span><span class="n">draft</span><span class="o">.</span><span class="n">file_delete</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_record</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="n">filename</span><span class="p">)</span>
+        <span class="c1"># if no exception happened, it worked -&gt;</span>
+        <span class="c1"># remove the entry locally (thereby avoid reloading data)</span>
+        <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">_files</span><span class="o">.</span><span class="n">entries</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_files</span><span class="o">.</span><span class="n">entries</span> <span class="o">=</span> <span class="p">[</span><span class="n">fm</span> <span class="k">for</span> <span class="n">fm</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_files</span><span class="o">.</span><span class="n">entries</span> <span class="k">if</span> <span class="n">fm</span><span class="o">.</span><span class="n">key</span> <span class="o">!=</span> <span class="n">filename</span><span class="p">]</span>
+</pre></div>
+
+        </details>
+
+            <div class="docstring"><p>Delete file from record draft.</p>
+</div>
+
+
+                            </div>
+                            <div id="WrappedFiles.import_old" class="classattr">
+                                        <div class="attr function"><a class="headerlink" href="#WrappedFiles.import_old">#&nbsp;&nbsp</a>
+
+        
+            <span class="def">def</span>
+            <span class="name">import_old</span><span class="signature">(self)</span>:
+    </div>
+
+                <details>
+            <summary>View Source</summary>
+            <div class="codehilite"><pre><span></span>    <span class="k">def</span> <span class="nf">import_old</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Import files from the previous version.&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_check_mutable</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_check_enabled</span><span class="p">()</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_record</span><span class="o">.</span><span class="n">versions</span><span class="o">.</span><span class="n">index</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Cannot import files, this is the first record version!&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_files</span><span class="o">.</span><span class="n">entries</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_files</span><span class="o">.</span><span class="n">entries</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Can only import if no new files were uploaded yet!&quot;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_files</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="o">.</span><span class="n">draft</span><span class="o">.</span><span class="n">files_import</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_record</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
+</pre></div>
+
+        </details>
+
+            <div class="docstring"><p>Import files from the previous version.</p>
+</div>
+
+
+                            </div>
+                            <div id="WrappedFiles.upload" class="classattr">
+                                        <div class="attr function"><a class="headerlink" href="#WrappedFiles.upload">#&nbsp;&nbsp</a>
+
+        
+            <span class="def">def</span>
+            <span class="name">upload</span><span class="signature">(self, filename: str, data: &lt;class &#39;BinaryIO&#39;&gt;)</span>:
+    </div>
+
+                <details>
+            <summary>View Source</summary>
+            <div class="codehilite"><pre><span></span>    <span class="k">def</span> <span class="nf">upload</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="n">BinaryIO</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Upload a file.</span>
+
+<span class="sd">        Takes a binary stream as input, you have to `open` your file yourself with `&quot;rb&quot;`.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_check_mutable</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_check_enabled</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_check_filename</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="o">.</span><span class="n">draft</span><span class="o">.</span><span class="n">file_upload_start</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_record</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="n">filename</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="o">.</span><span class="n">draft</span><span class="o">.</span><span class="n">file_upload_content</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_record</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="o">.</span><span class="n">draft</span><span class="o">.</span><span class="n">file_upload_complete</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_record</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="n">filename</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_files</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_fileinfos</span><span class="p">()</span>
+</pre></div>
+
+        </details>
+
+            <div class="docstring"><p>Upload a file.</p>
+
+<p>Takes a binary stream as input, you have to <code>open</code> your file yourself with <code>"rb"</code>.</p>
+</div>
+
+
+                            </div>
+                            <div id="WrappedFiles.keys" class="classattr">
+                                        <div class="attr function"><a class="headerlink" href="#WrappedFiles.keys">#&nbsp;&nbsp</a>
+
+        
+            <span class="def">def</span>
+            <span class="name">keys</span><span class="signature">(self) -&gt; Iterable[str]</span>:
+    </div>
+
+                <details>
+            <summary>View Source</summary>
+            <div class="codehilite"><pre><span></span>    <span class="k">def</span> <span class="nf">keys</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterable</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_entries_dict</span><span class="p">()</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
+</pre></div>
+
+        </details>
+
+    
+
+                            </div>
+                            <div id="WrappedFiles.values" class="classattr">
+                                        <div class="attr function"><a class="headerlink" href="#WrappedFiles.values">#&nbsp;&nbsp</a>
+
+        
+            <span class="def">def</span>
+            <span class="name">values</span><span class="signature">(self) -&gt; Iterable[<a href="inveniordm/models/technical.html#FileMetadata">iridium.inveniordm.models.technical.FileMetadata</a>]</span>:
+    </div>
+
+                <details>
+            <summary>View Source</summary>
+            <div class="codehilite"><pre><span></span>    <span class="k">def</span> <span class="nf">values</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">FileMetadata</span><span class="p">]:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_entries_dict</span><span class="p">()</span><span class="o">.</span><span class="n">values</span><span class="p">()</span>
+</pre></div>
+
+        </details>
+
+    
+
+                            </div>
+                            <div id="WrappedFiles.items" class="classattr">
+                                        <div class="attr function"><a class="headerlink" href="#WrappedFiles.items">#&nbsp;&nbsp</a>
+
+        
+            <span class="def">def</span>
+            <span class="name">items</span><span class="signature">(
+    self
+) -&gt; Iterable[Tuple[str, <a href="inveniordm/models/technical.html#FileMetadata">iridium.inveniordm.models.technical.FileMetadata</a>]]</span>:
+    </div>
+
+                <details>
+            <summary>View Source</summary>
+            <div class="codehilite"><pre><span></span>    <span class="k">def</span> <span class="nf">items</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">FileMetadata</span><span class="p">]]:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_entries_dict</span><span class="p">()</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+</pre></div>
+
+        </details>
+
     
 
                             </div>

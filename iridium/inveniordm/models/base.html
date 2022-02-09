@@ -37,9 +37,6 @@
                                 <a class="function" href="#JSONModel.raw_json">raw_json</a>
                         </li>
                         <li>
-                                <a class="function" href="#JSONModel.pprint_set">pprint_set</a>
-                        </li>
-                        <li>
                                 <a class="function" href="#JSONModel.parse_obj">parse_obj</a>
                         </li>
                 </ul>
@@ -69,11 +66,11 @@
             <div class="codehilite"><pre><span></span><span class="sd">&quot;&quot;&quot;Modified base model with enhanced pretty-printing.&quot;&quot;&quot;</span>
 
 <span class="kn">import</span> <span class="nn">json</span>
-<span class="kn">import</span> <span class="nn">pprint</span>
-<span class="kn">import</span> <span class="nn">sys</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">cast</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">cast</span>
 
 <span class="kn">from</span> <span class="nn">pydantic</span> <span class="kn">import</span> <span class="n">BaseModel</span>
+
+<span class="kn">from</span> <span class="nn">...pprint</span> <span class="kn">import</span> <span class="n">pp</span>
 
 
 <span class="k">class</span> <span class="nc">JSONModel</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
@@ -88,53 +85,37 @@
 <span class="sd">    Otherwise these enhancements might lead to unintended consequences.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="n">_pprint_args</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
-        <span class="s2">&quot;indent&quot;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>
-        <span class="s2">&quot;depth&quot;</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span>
-    <span class="p">}</span>
-    <span class="c1"># TODO pydantic json args (exclude none etc)</span>
-
     <span class="n">_raw_json</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
 
     <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">raw_json</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">val</span><span class="p">:</span> <span class="nb">bool</span><span class="p">):</span>
         <span class="bp">cls</span><span class="o">.</span><span class="n">_raw_json</span> <span class="o">=</span> <span class="n">val</span>
 
-    <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">pprint_set</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Set or remove arguments for the pretty-printer.</span>
+<span class="sd">        Pretty-printed appropriate representation of JSON-based objects.</span>
 
-<span class="sd">        This will immediately modify the pretty-printing of all subclasses.</span>
+<span class="sd">        In normal circumstances, this should be __str__ instead, because __repr__</span>
+<span class="sd">        is supposed to REPRoduce the object, i.e. be a Python expression yielding the</span>
+<span class="sd">        object.</span>
+
+<span class="sd">        But in our case the distinction between &quot;user&quot; and &quot;developer&quot; is not that</span>
+<span class="sd">        clear-cut and as users will use this in a Python interpreter context,</span>
+<span class="sd">        making this __repr__ seems to be the lesser evil for enhanced usability.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-            <span class="k">if</span> <span class="n">v</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="bp">cls</span><span class="o">.</span><span class="n">_pprint_args</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">v</span>
-            <span class="k">elif</span> <span class="n">k</span> <span class="ow">in</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_pprint_args</span><span class="p">:</span>
-                <span class="k">del</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_pprint_args</span><span class="p">[</span><span class="n">k</span><span class="p">]</span>
-
-    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Override for a configurable pretty-printed representation of objects.&quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="n">pprint</span><span class="o">.</span><span class="n">pformat</span><span class="p">(</span>
-            <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">json</span><span class="p">(</span><span class="n">exclude_none</span><span class="o">=</span><span class="kc">True</span><span class="p">)),</span>
-            <span class="o">**</span><span class="n">JSONModel</span><span class="o">.</span><span class="n">_pprint_args</span><span class="p">,</span>
-        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">pp</span><span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">json</span><span class="p">(</span><span class="n">exclude_none</span><span class="o">=</span><span class="kc">True</span><span class="p">)))</span>
 
     <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">parse_obj</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">val</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        If _raw_json is set, return back the raw JSON dict instead of parsed object.</span>
 
-<span class="sd">        Note that this is a debugging hack and should only be used as such!</span>
+<span class="sd">        NOTE: This is a DEBUGGING HACK and should only be used as such!</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_raw_json</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">cast</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">val</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">cast</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">parse_obj</span><span class="p">(</span><span class="n">val</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">))</span>
-
-
-<span class="k">if</span> <span class="n">sys</span><span class="o">.</span><span class="n">version_info</span> <span class="o">&gt;=</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">8</span><span class="p">):</span>
-    <span class="n">JSONModel</span><span class="o">.</span><span class="n">pprint_set</span><span class="p">(</span><span class="n">sort_dicts</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 </pre></div>
 
         </details>
@@ -163,44 +144,32 @@
 <span class="sd">    Otherwise these enhancements might lead to unintended consequences.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="n">_pprint_args</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
-        <span class="s2">&quot;indent&quot;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>
-        <span class="s2">&quot;depth&quot;</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span>
-    <span class="p">}</span>
-    <span class="c1"># TODO pydantic json args (exclude none etc)</span>
-
     <span class="n">_raw_json</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
 
     <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">raw_json</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">val</span><span class="p">:</span> <span class="nb">bool</span><span class="p">):</span>
         <span class="bp">cls</span><span class="o">.</span><span class="n">_raw_json</span> <span class="o">=</span> <span class="n">val</span>
 
-    <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">pprint_set</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Set or remove arguments for the pretty-printer.</span>
+<span class="sd">        Pretty-printed appropriate representation of JSON-based objects.</span>
 
-<span class="sd">        This will immediately modify the pretty-printing of all subclasses.</span>
+<span class="sd">        In normal circumstances, this should be __str__ instead, because __repr__</span>
+<span class="sd">        is supposed to REPRoduce the object, i.e. be a Python expression yielding the</span>
+<span class="sd">        object.</span>
+
+<span class="sd">        But in our case the distinction between &quot;user&quot; and &quot;developer&quot; is not that</span>
+<span class="sd">        clear-cut and as users will use this in a Python interpreter context,</span>
+<span class="sd">        making this __repr__ seems to be the lesser evil for enhanced usability.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-            <span class="k">if</span> <span class="n">v</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="bp">cls</span><span class="o">.</span><span class="n">_pprint_args</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">v</span>
-            <span class="k">elif</span> <span class="n">k</span> <span class="ow">in</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_pprint_args</span><span class="p">:</span>
-                <span class="k">del</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_pprint_args</span><span class="p">[</span><span class="n">k</span><span class="p">]</span>
-
-    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Override for a configurable pretty-printed representation of objects.&quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="n">pprint</span><span class="o">.</span><span class="n">pformat</span><span class="p">(</span>
-            <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">json</span><span class="p">(</span><span class="n">exclude_none</span><span class="o">=</span><span class="kc">True</span><span class="p">)),</span>
-            <span class="o">**</span><span class="n">JSONModel</span><span class="o">.</span><span class="n">_pprint_args</span><span class="p">,</span>
-        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">pp</span><span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">json</span><span class="p">(</span><span class="n">exclude_none</span><span class="o">=</span><span class="kc">True</span><span class="p">)))</span>
 
     <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">parse_obj</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">val</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        If _raw_json is set, return back the raw JSON dict instead of parsed object.</span>
 
-<span class="sd">        Note that this is a debugging hack and should only be used as such!</span>
+<span class="sd">        NOTE: This is a DEBUGGING HACK and should only be used as such!</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_raw_json</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">cast</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">val</span><span class="p">)</span>
@@ -245,40 +214,6 @@ Otherwise these enhancements might lead to unintended consequences.</p>
     
 
                             </div>
-                            <div id="JSONModel.pprint_set" class="classattr">
-                                        <div class="attr function"><a class="headerlink" href="#JSONModel.pprint_set">#&nbsp;&nbsp</a>
-
-                <div class="decorator">@classmethod</div>
-
-            <span class="def">def</span>
-            <span class="name">pprint_set</span><span class="signature">(cls, **kwargs)</span>:
-    </div>
-
-                <details>
-            <summary>View Source</summary>
-            <div class="codehilite"><pre><span></span>    <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">pprint_set</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Set or remove arguments for the pretty-printer.</span>
-
-<span class="sd">        This will immediately modify the pretty-printing of all subclasses.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-            <span class="k">if</span> <span class="n">v</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="bp">cls</span><span class="o">.</span><span class="n">_pprint_args</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">v</span>
-            <span class="k">elif</span> <span class="n">k</span> <span class="ow">in</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_pprint_args</span><span class="p">:</span>
-                <span class="k">del</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_pprint_args</span><span class="p">[</span><span class="n">k</span><span class="p">]</span>
-</pre></div>
-
-        </details>
-
-            <div class="docstring"><p>Set or remove arguments for the pretty-printer.</p>
-
-<p>This will immediately modify the pretty-printing of all subclasses.</p>
-</div>
-
-
-                            </div>
                             <div id="JSONModel.parse_obj" class="classattr">
                                         <div class="attr function"><a class="headerlink" href="#JSONModel.parse_obj">#&nbsp;&nbsp</a>
 
@@ -295,7 +230,7 @@ Otherwise these enhancements might lead to unintended consequences.</p>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        If _raw_json is set, return back the raw JSON dict instead of parsed object.</span>
 
-<span class="sd">        Note that this is a debugging hack and should only be used as such!</span>
+<span class="sd">        NOTE: This is a DEBUGGING HACK and should only be used as such!</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_raw_json</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">cast</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">val</span><span class="p">)</span>
@@ -307,7 +242,7 @@ Otherwise these enhancements might lead to unintended consequences.</p>
 
             <div class="docstring"><p>If _raw_json is set, return back the raw JSON dict instead of parsed object.</p>
 
-<p>Note that this is a debugging hack and should only be used as such!</p>
+<p>NOTE: This is a DEBUGGING HACK and should only be used as such!</p>
 </div>
 
 
