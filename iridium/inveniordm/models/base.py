@@ -1,11 +1,11 @@
 """Modified base model with enhanced pretty-printing."""
 
 import json
-import pprint
-import sys
-from typing import Any, Dict, cast
+from typing import cast
 
 from pydantic import BaseModel
+
+from ...pprint import pp
 
 
 class JSONModel(BaseModel):
@@ -20,50 +20,34 @@ class JSONModel(BaseModel):
     Otherwise these enhancements might lead to unintended consequences.
     """
 
-    _pprint_args: Dict[str, Any] = {
-        "indent": 2,
-        "depth": 4,
-    }
-    # TODO pydantic json args (exclude none etc)
-
     _raw_json: bool = False
 
     @classmethod
     def raw_json(cls, val: bool):
         cls._raw_json = val
 
-    @classmethod
-    def pprint_set(cls, **kwargs):
+    def __repr__(self) -> str:
         """
-        Set or remove arguments for the pretty-printer.
+        Pretty-printed appropriate representation of JSON-based objects.
 
-        This will immediately modify the pretty-printing of all subclasses.
+        In normal circumstances, this should be __str__ instead, because __repr__
+        is supposed to REPRoduce the object, i.e. be a Python expression yielding the
+        object.
+
+        But in our case the distinction between "user" and "developer" is not that
+        clear-cut and as users will use this in a Python interpreter context,
+        making this __repr__ seems to be the lesser evil for enhanced usability.
         """
-        for k, v in kwargs.items():
-            if v is not None:
-                cls._pprint_args[k] = v
-            elif k in cls._pprint_args:
-                del cls._pprint_args[k]
-
-    def __str__(self) -> str:
-        """Override for a configurable pretty-printed representation of objects."""
-        return pprint.pformat(
-            json.loads(self.json(exclude_none=True)),
-            **JSONModel._pprint_args,
-        )
+        return pp(json.loads(self.json(exclude_none=True)))
 
     @classmethod
     def parse_obj(cls, val, *args, **kwargs):
         """
         If _raw_json is set, return back the raw JSON dict instead of parsed object.
 
-        Note that this is a debugging hack and should only be used as such!
+        NOTE: This is a DEBUGGING HACK and should only be used as such!
         """
         if cls._raw_json:
             return cast(cls, val)
         else:
             return cast(cls, super().parse_obj(val, *args, **kwargs))
-
-
-if sys.version_info >= (3, 8):
-    JSONModel.pprint_set(sort_dicts=False)

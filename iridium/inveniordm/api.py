@@ -311,9 +311,9 @@ class RecordAPI(SubAPI):
 
         https://inveniordm.docs.cern.ch/reference/rest_api_drafts_records/#get-all-versions
         Basically searches for all entries with same parent.id and sorts by version.
-        (NOTE: with bugfix - allversions=true must be set in the query)
         """
         # url = self._p.endpoint(f"/records/{record_id}/versions")
+        # buggy; see https://github.com/inveniosoftware/invenio-app-rdm/issues/1167
         url = self._p.endpoint(f"/records/{record_id}/versions?allversions=true")
         r = self._p.client.get(url)
         raise_on_error_status(r)

@@ -187,10 +187,9 @@ class Query(PaginatedList):
         return iter(self)
 
     # as a generic preview we can just list the ids
-
-    def __str__(self) -> str:
+    def __repr__(self) -> str:
         """Print ids of all accessible entities (this will load all of them)."""
-        return str(list(self.keys()))
+        return repr(list(self.keys()))
 
 
 class AccessProxy(ABC):
@@ -233,9 +232,9 @@ class AccessProxy(ABC):
         """Iterate through all accessible entities."""
         return iter(self())
 
-    def __str__(self) -> str:
+    def __repr__(self) -> str:
         """Print ids of all accessible entities."""
-        return str(self())
+        return repr(self())
 
     def __getitem__(self, key) -> Any:
         """
