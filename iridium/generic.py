@@ -2,16 +2,28 @@
 
 import math
 from abc import ABC, abstractmethod
-from collections.abc import Iterator, Sequence
-from typing import Any, Dict, Iterable, List, Optional, Tuple
+from typing import (
+    Dict,
+    Generic,
+    Iterable,
+    Iterator,
+    List,
+    Optional,
+    Sequence,
+    Tuple,
+    TypeVar,
+)
 
 import httpx
 
 from .inveniordm.api import InvenioRDMClient
 from .inveniordm.models import Results
 
+T = TypeVar("T")
+S = TypeVar("S")
 
-class PaginatedList(Sequence):
+
+class PaginatedList(Sequence[T]):
     """
     List-like class abstracting away automatic loading of successive batches of results.
 
@@ -23,15 +35,21 @@ class PaginatedList(Sequence):
     """
 
     DEF_BATCH_SIZE: int = 1000
+    """Default batch size for instances. Up to ~2000 works fine."""
 
     def __init__(self, batch_size: Optional[int] = None):
-        """Initialize with a batch fetcher and possibly custom batch size."""
-        self._BATCH_SIZE = batch_size or self.DEF_BATCH_SIZE
+        """
+        Initialize with a batch fetcher and possibly custom batch size.
+
+        A small batch size is useful to get a first preview without loading everything,
+        while a larger batch size is more efficient for traversing all results.
+        """
+        self._BATCH_SIZE: int = batch_size or self.DEF_BATCH_SIZE
         self._total: Optional[int] = None
-        self._results: Dict[int, Any] = {}
+        self._results: Dict[int, List[T]] = {}
 
     @abstractmethod
-    def _get_batch(self, bidx: int) -> Tuple[List[Any], int]:
+    def _get_batch(self, bidx: int) -> Tuple[List[T], int]:
         """
         Given batch number, return the batch and total number of available results.
 
@@ -87,7 +105,7 @@ class PaginatedList(Sequence):
 
         return self._results[bidx][boff]
 
-    class PaginatedListIterator(Iterator):
+    class PaginatedListIterator(Iterator[S]):
         def __init__(self, parent):
             self.idx = 0
             self.parent = parent
@@ -95,7 +113,7 @@ class PaginatedList(Sequence):
         def __iter__(self):
             return self
 
-        def __next__(self):
+        def __next__(self) -> S:
             try:
                 ret = self.parent[self.idx]
                 self.idx += 1
@@ -103,11 +121,11 @@ class PaginatedList(Sequence):
             except IndexError:
                 raise StopIteration
 
-    def __iter__(self):
+    def __iter__(self) -> Iterator[T]:
         """Return an iterator that handles batch loading behind the scenes."""
         return PaginatedList.PaginatedListIterator(self)
 
-    def __contains__(self, obj):
+    def __contains__(self, obj) -> bool:
         """
         Check if a value is in the list.
 
@@ -116,15 +134,14 @@ class PaginatedList(Sequence):
         return obj in iter(self)
 
 
-class Query(PaginatedList):
+class Query(PaginatedList[T]):
     """
     Class for convenient access to query results (that are assumed to have an id).
 
     Allowed keyword arguments: normal query args, but without 'page'.
 
     Access through numeric index corresponds to entries in search result order.
-    `__contains__` supports lookup by id string, but __getitem__ does not,
-    because this would be extremely inefficient (for this, use `dict()`).
+    Access through string id is possible, but inefficient (may traverse all results).
 
     Usage (for developers): Subclass and implement `_query_items`.
     """
@@ -140,20 +157,8 @@ class Query(PaginatedList):
         super().__init__(pgsz)
         self._query_args = kwargs
 
-    def __contains__(self, obj):
-        """
-        Check whether a term exists in the query results.
-
-        If given a string, will look for an entity with provided id.
-        Otherwise, will compare the whole entity.
-        """
-        if isinstance(obj, str):
-            return obj in iter(x.id for x in iter(self))
-        else:
-            super().__contains__(obj)
-
     @abstractmethod
-    def _query_items(self, **kwargs) -> Results:
+    def _query_items(self, **kwargs) -> Results[T]:
         """
         Override this with a function taking `QueryArgs` and returning `Results`.
 
@@ -172,28 +177,70 @@ class Query(PaginatedList):
 
     def dict(self):
         """Convert to a real `dict` (this downloads all query results!)."""
-        return {r.id: r for r in self}
+        return {r.id: r for r in iter(self)}  # type: ignore
 
-    def items(self) -> Iterable[Tuple[str, Any]]:
+    # these behave like a dict, but are lazy (not pulling everything, unless forced),
+    # could be useful to list "the first few results":
+
+    def items(self) -> Iterable[Tuple[str, T]]:
         """Return (id, result) key-value pais in query result order."""
-        return map(lambda x: (x.id, x), iter(self))
+        return ((x.id, x) for x in iter(self))  # type: ignore
 
     def keys(self) -> Iterable[str]:
         """Return ids of entities in query result order."""
-        return map(lambda x: x.id, iter(self))
+        return (x.id for x in iter(self))  # type: ignore
 
-    def values(self) -> Iterable[Any]:
+    def values(self) -> Iterable[T]:
         """Return entities in query result order."""
         return iter(self)
 
-    # as a generic preview we can just list the ids
+    # as a generic preview we can just list the ids (more would be verbose):
     def __repr__(self) -> str:
         """Print ids of all accessible entities (this will load all of them)."""
         return repr(list(self.keys()))
 
+    # Provided for consistency with AccessProxy.__contains__
+    # (even though its inefficient for a query):
 
-class AccessProxy(ABC):
-    """Access to individual entities as well as queries with applied filters."""
+    def __contains__(self, obj):
+        """
+        Check whether an entity exists in the query results.
+
+        If given a string, will look for an entity with provided id.
+        Otherwise, will compare the whole entity. O(n)
+        """
+        if isinstance(obj, str):
+            return obj in self.keys()
+        else:
+            super().__contains__(obj)
+
+    def __getitem__(self, key):  # -> T
+        """
+        Get an entity.
+
+        If passed a string, will look up by id (inefficiently, O(n)).
+        If passed an int, will perform filterless query and take n-th result.
+        """
+        if isinstance(key, str):
+            return self.dict()[key]
+        else:
+            return super().__getitem__(key)
+
+
+class AccessProxy(ABC, Generic[T]):
+    """
+    Access to individual entities as well as queries with applied filters.
+
+    Filtering, i.e. queries, are performed by calling an instance with query parameters.
+    Without query parameters the object behaves like an unfiltered query.
+    Direct access to entities is performed by accessing them by their id like a dict.
+
+    So given an instance `foos`:
+    * you can access a specific entry via `foos[FOO_ID]`
+    * you can check whether `FOO_ID in foos`
+    * you can filter using `foos(q="search terms")`
+    * `foos` and `foos(...)` can be treated like a list of results.
+    """
 
     def __init__(self, client: InvenioRDMClient):
         self._client = client
@@ -204,7 +251,7 @@ class AccessProxy(ABC):
         return self._get_query(**kwargs)
 
     @abstractmethod
-    def _get_query(self, **kwargs) -> Query:
+    def _get_query(self, **kwargs) -> Query[T]:
         """
         Return a query configured to return certain results.
 
@@ -213,7 +260,7 @@ class AccessProxy(ABC):
         """
 
     @abstractmethod
-    def _get_entity(self, entity_id: str) -> Any:
+    def _get_entity(self, entity_id: str) -> T:
         """
         Return an entity given its id.
 
@@ -228,7 +275,7 @@ class AccessProxy(ABC):
         """Return total number of accessible entities."""
         return len(self())
 
-    def __iter__(self) -> Iterator:
+    def __iter__(self) -> Iterator[T]:
         """Iterate through all accessible entities."""
         return iter(self())
 
@@ -236,7 +283,7 @@ class AccessProxy(ABC):
         """Print ids of all accessible entities."""
         return repr(self())
 
-    def __getitem__(self, key) -> Any:
+    def __getitem__(self, key):  # -> T
         """
         Get an entity.
 

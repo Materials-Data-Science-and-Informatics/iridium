@@ -1,6 +1,6 @@
 """ElasticSearch query related models for records and vocabularies."""
 from enum import Enum
-from typing import Any, Dict, List, Optional, Set
+from typing import Dict, Generic, List, Optional, Set, Type, TypeVar
 
 from pydantic import AnyHttpUrl, BaseModel, Extra, Field
 from typing_extensions import Annotated
@@ -96,26 +96,28 @@ def voc_special(voc: VocType) -> bool:
 
 # ---- ELASTICSEARCH QUERY RESULTS ----
 
+T = TypeVar("T")
 
-class ResultPage(JSONModel):
+
+class ResultPage(JSONModel, Generic[T]):
     """Sub-object containing the actual results."""
 
-    hits: Any
+    hits: List[T]
     total: int
 
 
-class Results(JSONModel):
+class Results(JSONModel, Generic[T]):
     """JSON returned by ElasticSearch."""
 
-    hits: ResultPage
+    hits: ResultPage[T]
 
     # not included for access_links queries, otherwise present
     links: Optional[Dict[str, AnyHttpUrl]]
     sortBy: Optional[str]
 
-    def parse_hits(self, obj_cls):
+    def parse_hits(self, obj_cls: Type[T]):
         """Try to parse the query hits into the provided model class."""
-        self.hits.hits = [obj_cls.parse_obj(x) for x in self.hits.hits]
+        self.hits.hits = [obj_cls.parse_obj(x) for x in self.hits.hits]  # type: ignore
 
 
 # ---- VOCABULARY SPECIFIC ----

@@ -10,6 +10,8 @@ from .query import Drafts, Records, Vocabulary
 class Repository:
     """Class representing an InvenioRDM repository."""
 
+    __slots__ = ["_client", "records", "drafts", "vocabulary"]
+
     def __init__(self, *args, **kwargs):
         if "client" in kwargs:
             self._client = kwargs["client"]

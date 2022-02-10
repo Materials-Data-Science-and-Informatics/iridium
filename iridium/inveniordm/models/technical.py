@@ -267,5 +267,4 @@ class Record(Entity):
 
     expires_at: Optional[datetime]  # seems to be only used in drafts
 
-    # this does not seem to be useful, should rather rely on own validation
     errors: Optional[List[ValidationError]]  # seems to be only used in drafts

@@ -1,7 +1,8 @@
 """Convenience wrapper for draft and record API."""
 
+import itertools
 from datetime import datetime
-from typing import BinaryIO, Iterable, Optional, Tuple
+from typing import BinaryIO, Dict, Iterable, Optional, Tuple
 
 from .generic import AccessProxy, Query
 from .inveniordm.api import InvenioRDMClient
@@ -15,12 +16,6 @@ from .inveniordm.models import (
 )
 from .pprint import NoPrint, PrettyRepr
 
-# TODO: how to access a private record through an access link shared by someone else?
-# probably need to access the URL for the token to be added to the user identity
-
-# TODO: help autocompletion for the pass-through operations using __dir__
-# or try to re-base the wrappers here on wrapt
-
 
 class WrappedRecord:
     """
@@ -33,6 +28,8 @@ class WrappedRecord:
     Therefore, this class covers both kinds of entities and determines
     the allowed methods through runtime inspection.
     """
+
+    __slots__ = ["_client", "_record", "_is_draft", "_access_links", "files"]
 
     def __init__(self, cl: InvenioRDMClient, rec: Record, is_draft: bool):
         self._client: InvenioRDMClient = cl
@@ -149,10 +146,18 @@ class WrappedRecord:
         self._expect_draft()
 
         self._record = self._client.draft.update(self._record)
+
         # present validation errors
-        errs = {e.field: " ".join(e.messages) for e in self._record.errors}
-        self._record.errors = None  # no need to keep them, not actual part of record
-        return PrettyRepr(errs)
+        errs: Optional[Dict[str, str]] = None
+        if self._record.errors is not None:
+            errs = {e.field: " ".join(e.messages) for e in self._record.errors}
+            self._record.errors = (
+                None  # no need to keep them, not actual part of record
+            )
+        if errs:
+            return PrettyRepr(errs)
+        else:
+            return None  # don't need to wrap None for printing... would print 'None'
 
     def publish(self):
         """
@@ -168,7 +173,7 @@ class WrappedRecord:
         # in case there were still unsaved changes, save. check for validation errors
         # (server validation also checks that files are attached when enabled)
         errors = self.save()
-        if len(errors) > 0:
+        if errors is not None and len(errors) > 0:
             raise ValueError(
                 "There were validation errors on save, cannot publish:\n"
                 f"{repr(errors)}"
@@ -202,6 +207,13 @@ class WrappedRecord:
     def __getattr__(self, name: str):
         return self._record.__getattribute__(name)
 
+    def __setattr__(self, name: str, value):
+        # need to be careful here...
+        if name[0] != "_" and name != "files":
+            return self._record.__setattr__(name, value)
+        else:  # private, local attribute
+            super().__setattr__(name, value)
+
     # magic methods must be proxied by hand
     def __repr__(self):
         # little hack to show files properly
@@ -210,6 +222,10 @@ class WrappedRecord:
         ret = repr(self._record)
         self._record.files = f
         return ret
+
+    # help the shell to list what's there
+    def __dir__(self):
+        return itertools.chain(super().__dir__(), dir(self._record))
 
 
 # ---- access link API wrappers ----
@@ -227,6 +243,9 @@ class WrappedAccessLink:
     # there should be a property that constructs the correct URL with the shape:
     # https://INVENIORDM_BASE/records/REC_ID?token=TOKEN[&preview=1 if preview mode]
     # (based on the links generated in the Invenio RDM Web UI)
+
+    # TODO: how to access a private record through an access link shared by someone else?
+    # probably need to access the URL for the token to be added to the user identity
 
     def __init__(self, rec: WrappedRecord, lnk: AccessLink):
         self._record: WrappedRecord = rec
@@ -279,8 +298,8 @@ class WrappedAccessLink:
             raise ValueError("Invalid access link! Maybe you deleted it?")
 
     # magic methods must be proxied by hand
-    def __str__(self):
-        return str(self._link)
+    def __repr__(self):
+        return repr(self._link)
 
 
 class AccessLinkQuery(Query):
@@ -396,7 +415,7 @@ class WrappedFiles:
         self._check_mutable()
         self._check_filename(filename)
 
-        self._record._client.draft.file_delete(self._record.id, filename)
+        self._client.draft.file_delete(self._record.id, filename)
         # if no exception happened, it worked ->
         # remove the entry locally (thereby avoid reloading data)
         assert self._files.entries is not None

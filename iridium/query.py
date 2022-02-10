@@ -12,6 +12,8 @@ from .record import WrappedRecord
 
 
 class VocabularyQuery(Query):
+    DEF_BATCH_SIZE = 500
+
     def __init__(self, cl: InvenioRDMClient, voc_type: VocType, **kwargs):
         super().__init__(**kwargs)
         self._client = cl
@@ -22,6 +24,8 @@ class VocabularyQuery(Query):
 
 
 class RecordQuery(Query):
+    DEF_BATCH_SIZE = 10
+
     def __init__(self, cl: InvenioRDMClient, user_only: bool, **kwargs):
         super().__init__(**kwargs)
         self._client = cl
@@ -36,6 +40,8 @@ class RecordQuery(Query):
 
 
 class DraftQuery(Query):
+    DEF_BATCH_SIZE = 10
+
     def __init__(self, cl: InvenioRDMClient, **kwargs):
         super().__init__(**kwargs)
         self._client = cl
