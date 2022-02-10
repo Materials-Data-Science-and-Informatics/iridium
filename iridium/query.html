@@ -36,6 +36,9 @@
                         <li>
                                 <a class="function" href="#VocabularyQuery.__init__">VocabularyQuery</a>
                         </li>
+                        <li>
+                                <a class="variable" href="#VocabularyQuery.DEF_BATCH_SIZE">DEF_BATCH_SIZE</a>
+                        </li>
                 </ul>
 
             </li>
@@ -45,6 +48,9 @@
                         <li>
                                 <a class="function" href="#RecordQuery.__init__">RecordQuery</a>
                         </li>
+                        <li>
+                                <a class="variable" href="#RecordQuery.DEF_BATCH_SIZE">DEF_BATCH_SIZE</a>
+                        </li>
                 </ul>
 
             </li>
@@ -53,6 +59,9 @@
                             <ul class="memberlist">
                         <li>
                                 <a class="function" href="#DraftQuery.__init__">DraftQuery</a>
+                        </li>
+                        <li>
+                                <a class="variable" href="#DraftQuery.DEF_BATCH_SIZE">DEF_BATCH_SIZE</a>
                         </li>
                 </ul>
 
@@ -119,6 +128,8 @@ and also to access specific entities via their id using dict-like access.</p>
 
 
 <span class="k">class</span> <span class="nc">VocabularyQuery</span><span class="p">(</span><span class="n">Query</span><span class="p">):</span>
+    <span class="n">DEF_BATCH_SIZE</span> <span class="o">=</span> <span class="mi">500</span>
+
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cl</span><span class="p">:</span> <span class="n">InvenioRDMClient</span><span class="p">,</span> <span class="n">voc_type</span><span class="p">:</span> <span class="n">VocType</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_client</span> <span class="o">=</span> <span class="n">cl</span>
@@ -129,6 +140,8 @@ and also to access specific entities via their id using dict-like access.</p>
 
 
 <span class="k">class</span> <span class="nc">RecordQuery</span><span class="p">(</span><span class="n">Query</span><span class="p">):</span>
+    <span class="n">DEF_BATCH_SIZE</span> <span class="o">=</span> <span class="mi">10</span>
+
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cl</span><span class="p">:</span> <span class="n">InvenioRDMClient</span><span class="p">,</span> <span class="n">user_only</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_client</span> <span class="o">=</span> <span class="n">cl</span>
@@ -143,6 +156,8 @@ and also to access specific entities via their id using dict-like access.</p>
 
 
 <span class="k">class</span> <span class="nc">DraftQuery</span><span class="p">(</span><span class="n">Query</span><span class="p">):</span>
+    <span class="n">DEF_BATCH_SIZE</span> <span class="o">=</span> <span class="mi">10</span>
+
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cl</span><span class="p">:</span> <span class="n">InvenioRDMClient</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_client</span> <span class="o">=</span> <span class="n">cl</span>
@@ -228,12 +243,14 @@ and also to access specific entities via their id using dict-like access.</p>
 
         
         <span class="def">class</span>
-        <span class="name">VocabularyQuery</span><wbr>(<span class="base"><a href="generic.html#Query">iridium.generic.Query</a></span>):
+        <span class="name">VocabularyQuery</span><wbr>(<span class="base"><a href="generic.html#PaginatedList">iridium.generic.PaginatedList[~T]</a></span>):
     </div>
 
                 <details>
             <summary>View Source</summary>
             <div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">VocabularyQuery</span><span class="p">(</span><span class="n">Query</span><span class="p">):</span>
+    <span class="n">DEF_BATCH_SIZE</span> <span class="o">=</span> <span class="mi">500</span>
+
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cl</span><span class="p">:</span> <span class="n">InvenioRDMClient</span><span class="p">,</span> <span class="n">voc_type</span><span class="p">:</span> <span class="n">VocType</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_client</span> <span class="o">=</span> <span class="n">cl</span>
@@ -250,8 +267,7 @@ and also to access specific entities via their id using dict-like access.</p>
 <p>Allowed keyword arguments: normal query args, but without 'page'.</p>
 
 <p>Access through numeric index corresponds to entries in search result order.
-<code>__contains__</code> supports lookup by id string, but __getitem__ does not,
-because this would be extremely inefficient (for this, use <code><a href="#VocabularyQuery.dict">dict()</a></code>).</p>
+Access through string id is possible, but inefficient (may traverse all results).</p>
 
 <p>Usage (for developers): Subclass and implement <code>_query_items</code>.</p>
 </div>
@@ -279,6 +295,20 @@ because this would be extremely inefficient (for this, use <code><a href="#Vocab
         </details>
 
             <div class="docstring"><p>Initialize with a batch fetcher and possibly custom batch size.</p>
+
+<p>A small batch size is useful to get a first preview without loading everything,
+while a larger batch size is more efficient for traversing all results.</p>
+</div>
+
+
+                            </div>
+                            <div id="VocabularyQuery.DEF_BATCH_SIZE" class="classattr">
+                                            <div class="attr variable"><a class="headerlink" href="#VocabularyQuery.DEF_BATCH_SIZE">#&nbsp;&nbsp</a>
+
+        <span class="name">DEF_BATCH_SIZE</span><span class="annotation">: int</span><span class="default_value"> = 500</span>
+    </div>
+
+            <div class="docstring"><p>Default batch size for instances. Up to ~2000 works fine.</p>
 </div>
 
 
@@ -294,8 +324,7 @@ because this would be extremely inefficient (for this, use <code><a href="#Vocab
 
             </div>
             <div><dt><a href="generic.html#PaginatedList">iridium.generic.PaginatedList</a></dt>
-                                <dd id="VocabularyQuery.DEF_BATCH_SIZE" class="variable"><a href="generic.html#PaginatedList.DEF_BATCH_SIZE">DEF_BATCH_SIZE</a></dd>
-                <dd id="VocabularyQuery.PaginatedListIterator" class="class"><a href="generic.html#PaginatedList.PaginatedListIterator">PaginatedListIterator</a></dd>
+                                <dd id="VocabularyQuery.PaginatedListIterator" class="class"><a href="generic.html#PaginatedList.PaginatedListIterator">PaginatedListIterator</a></dd>
 
             </div>
             <div><dt>collections.abc.Sequence</dt>
@@ -312,12 +341,14 @@ because this would be extremely inefficient (for this, use <code><a href="#Vocab
 
         
         <span class="def">class</span>
-        <span class="name">RecordQuery</span><wbr>(<span class="base"><a href="generic.html#Query">iridium.generic.Query</a></span>):
+        <span class="name">RecordQuery</span><wbr>(<span class="base"><a href="generic.html#PaginatedList">iridium.generic.PaginatedList[~T]</a></span>):
     </div>
 
                 <details>
             <summary>View Source</summary>
             <div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">RecordQuery</span><span class="p">(</span><span class="n">Query</span><span class="p">):</span>
+    <span class="n">DEF_BATCH_SIZE</span> <span class="o">=</span> <span class="mi">10</span>
+
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cl</span><span class="p">:</span> <span class="n">InvenioRDMClient</span><span class="p">,</span> <span class="n">user_only</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_client</span> <span class="o">=</span> <span class="n">cl</span>
@@ -338,8 +369,7 @@ because this would be extremely inefficient (for this, use <code><a href="#Vocab
 <p>Allowed keyword arguments: normal query args, but without 'page'.</p>
 
 <p>Access through numeric index corresponds to entries in search result order.
-<code>__contains__</code> supports lookup by id string, but __getitem__ does not,
-because this would be extremely inefficient (for this, use <code><a href="#RecordQuery.dict">dict()</a></code>).</p>
+Access through string id is possible, but inefficient (may traverse all results).</p>
 
 <p>Usage (for developers): Subclass and implement <code>_query_items</code>.</p>
 </div>
@@ -367,6 +397,20 @@ because this would be extremely inefficient (for this, use <code><a href="#Recor
         </details>
 
             <div class="docstring"><p>Initialize with a batch fetcher and possibly custom batch size.</p>
+
+<p>A small batch size is useful to get a first preview without loading everything,
+while a larger batch size is more efficient for traversing all results.</p>
+</div>
+
+
+                            </div>
+                            <div id="RecordQuery.DEF_BATCH_SIZE" class="classattr">
+                                            <div class="attr variable"><a class="headerlink" href="#RecordQuery.DEF_BATCH_SIZE">#&nbsp;&nbsp</a>
+
+        <span class="name">DEF_BATCH_SIZE</span><span class="annotation">: int</span><span class="default_value"> = 10</span>
+    </div>
+
+            <div class="docstring"><p>Default batch size for instances. Up to ~2000 works fine.</p>
 </div>
 
 
@@ -382,8 +426,7 @@ because this would be extremely inefficient (for this, use <code><a href="#Recor
 
             </div>
             <div><dt><a href="generic.html#PaginatedList">iridium.generic.PaginatedList</a></dt>
-                                <dd id="RecordQuery.DEF_BATCH_SIZE" class="variable"><a href="generic.html#PaginatedList.DEF_BATCH_SIZE">DEF_BATCH_SIZE</a></dd>
-                <dd id="RecordQuery.PaginatedListIterator" class="class"><a href="generic.html#PaginatedList.PaginatedListIterator">PaginatedListIterator</a></dd>
+                                <dd id="RecordQuery.PaginatedListIterator" class="class"><a href="generic.html#PaginatedList.PaginatedListIterator">PaginatedListIterator</a></dd>
 
             </div>
             <div><dt>collections.abc.Sequence</dt>
@@ -400,12 +443,14 @@ because this would be extremely inefficient (for this, use <code><a href="#Recor
 
         
         <span class="def">class</span>
-        <span class="name">DraftQuery</span><wbr>(<span class="base"><a href="generic.html#Query">iridium.generic.Query</a></span>):
+        <span class="name">DraftQuery</span><wbr>(<span class="base"><a href="generic.html#PaginatedList">iridium.generic.PaginatedList[~T]</a></span>):
     </div>
 
                 <details>
             <summary>View Source</summary>
             <div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">DraftQuery</span><span class="p">(</span><span class="n">Query</span><span class="p">):</span>
+    <span class="n">DEF_BATCH_SIZE</span> <span class="o">=</span> <span class="mi">10</span>
+
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cl</span><span class="p">:</span> <span class="n">InvenioRDMClient</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_client</span> <span class="o">=</span> <span class="n">cl</span>
@@ -430,8 +475,7 @@ because this would be extremely inefficient (for this, use <code><a href="#Recor
 <p>Allowed keyword arguments: normal query args, but without 'page'.</p>
 
 <p>Access through numeric index corresponds to entries in search result order.
-<code>__contains__</code> supports lookup by id string, but __getitem__ does not,
-because this would be extremely inefficient (for this, use <code><a href="#DraftQuery.dict">dict()</a></code>).</p>
+Access through string id is possible, but inefficient (may traverse all results).</p>
 
 <p>Usage (for developers): Subclass and implement <code>_query_items</code>.</p>
 </div>
@@ -454,6 +498,20 @@ because this would be extremely inefficient (for this, use <code><a href="#Draft
         </details>
 
             <div class="docstring"><p>Initialize with a batch fetcher and possibly custom batch size.</p>
+
+<p>A small batch size is useful to get a first preview without loading everything,
+while a larger batch size is more efficient for traversing all results.</p>
+</div>
+
+
+                            </div>
+                            <div id="DraftQuery.DEF_BATCH_SIZE" class="classattr">
+                                            <div class="attr variable"><a class="headerlink" href="#DraftQuery.DEF_BATCH_SIZE">#&nbsp;&nbsp</a>
+
+        <span class="name">DEF_BATCH_SIZE</span><span class="annotation">: int</span><span class="default_value"> = 10</span>
+    </div>
+
+            <div class="docstring"><p>Default batch size for instances. Up to ~2000 works fine.</p>
 </div>
 
 
@@ -469,8 +527,7 @@ because this would be extremely inefficient (for this, use <code><a href="#Draft
 
             </div>
             <div><dt><a href="generic.html#PaginatedList">iridium.generic.PaginatedList</a></dt>
-                                <dd id="DraftQuery.DEF_BATCH_SIZE" class="variable"><a href="generic.html#PaginatedList.DEF_BATCH_SIZE">DEF_BATCH_SIZE</a></dd>
-                <dd id="DraftQuery.PaginatedListIterator" class="class"><a href="generic.html#PaginatedList.PaginatedListIterator">PaginatedListIterator</a></dd>
+                                <dd id="DraftQuery.PaginatedListIterator" class="class"><a href="generic.html#PaginatedList.PaginatedListIterator">PaginatedListIterator</a></dd>
 
             </div>
             <div><dt>collections.abc.Sequence</dt>
@@ -487,7 +544,7 @@ because this would be extremely inefficient (for this, use <code><a href="#Draft
 
         
         <span class="def">class</span>
-        <span class="name">Vocabulary</span><wbr>(<span class="base"><a href="generic.html#AccessProxy">iridium.generic.AccessProxy</a></span>):
+        <span class="name">Vocabulary</span><wbr>(<span class="base">abc.ABC</span>, <span class="base">typing.Generic[~T]</span>):
     </div>
 
                 <details>
@@ -538,7 +595,7 @@ because this would be extremely inefficient (for this, use <code><a href="#Draft
 
         
         <span class="def">class</span>
-        <span class="name">Records</span><wbr>(<span class="base"><a href="generic.html#AccessProxy">iridium.generic.AccessProxy</a></span>):
+        <span class="name">Records</span><wbr>(<span class="base">abc.ABC</span>, <span class="base">typing.Generic[~T]</span>):
     </div>
 
                 <details>
@@ -584,7 +641,7 @@ because this would be extremely inefficient (for this, use <code><a href="#Draft
 
         
         <span class="def">class</span>
-        <span class="name">Drafts</span><wbr>(<span class="base"><a href="generic.html#AccessProxy">iridium.generic.AccessProxy</a></span>):
+        <span class="name">Drafts</span><wbr>(<span class="base">abc.ABC</span>, <span class="base">typing.Generic[~T]</span>):
     </div>
 
                 <details>

@@ -221,7 +221,7 @@
             <summary>View Source</summary>
             <div class="codehilite"><pre><span></span><span class="sd">&quot;&quot;&quot;ElasticSearch query related models for records and vocabularies.&quot;&quot;&quot;</span>
 <span class="kn">from</span> <span class="nn">enum</span> <span class="kn">import</span> <span class="n">Enum</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Set</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Generic</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Set</span><span class="p">,</span> <span class="n">Type</span><span class="p">,</span> <span class="n">TypeVar</span>
 
 <span class="kn">from</span> <span class="nn">pydantic</span> <span class="kn">import</span> <span class="n">AnyHttpUrl</span><span class="p">,</span> <span class="n">BaseModel</span><span class="p">,</span> <span class="n">Extra</span><span class="p">,</span> <span class="n">Field</span>
 <span class="kn">from</span> <span class="nn">typing_extensions</span> <span class="kn">import</span> <span class="n">Annotated</span>
@@ -317,26 +317,28 @@
 
 <span class="c1"># ---- ELASTICSEARCH QUERY RESULTS ----</span>
 
+<span class="n">T</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s2">&quot;T&quot;</span><span class="p">)</span>
 
-<span class="k">class</span> <span class="nc">ResultPage</span><span class="p">(</span><span class="n">JSONModel</span><span class="p">):</span>
+
+<span class="k">class</span> <span class="nc">ResultPage</span><span class="p">(</span><span class="n">JSONModel</span><span class="p">,</span> <span class="n">Generic</span><span class="p">[</span><span class="n">T</span><span class="p">]):</span>
     <span class="sd">&quot;&quot;&quot;Sub-object containing the actual results.&quot;&quot;&quot;</span>
 
-    <span class="n">hits</span><span class="p">:</span> <span class="n">Any</span>
+    <span class="n">hits</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">T</span><span class="p">]</span>
     <span class="n">total</span><span class="p">:</span> <span class="nb">int</span>
 
 
-<span class="k">class</span> <span class="nc">Results</span><span class="p">(</span><span class="n">JSONModel</span><span class="p">):</span>
+<span class="k">class</span> <span class="nc">Results</span><span class="p">(</span><span class="n">JSONModel</span><span class="p">,</span> <span class="n">Generic</span><span class="p">[</span><span class="n">T</span><span class="p">]):</span>
     <span class="sd">&quot;&quot;&quot;JSON returned by ElasticSearch.&quot;&quot;&quot;</span>
 
-    <span class="n">hits</span><span class="p">:</span> <span class="n">ResultPage</span>
+    <span class="n">hits</span><span class="p">:</span> <span class="n">ResultPage</span><span class="p">[</span><span class="n">T</span><span class="p">]</span>
 
     <span class="c1"># not included for access_links queries, otherwise present</span>
     <span class="n">links</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">AnyHttpUrl</span><span class="p">]]</span>
     <span class="n">sortBy</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span>
 
-    <span class="k">def</span> <span class="nf">parse_hits</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj_cls</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">parse_hits</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj_cls</span><span class="p">:</span> <span class="n">Type</span><span class="p">[</span><span class="n">T</span><span class="p">]):</span>
         <span class="sd">&quot;&quot;&quot;Try to parse the query hits into the provided model class.&quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">hits</span><span class="o">.</span><span class="n">hits</span> <span class="o">=</span> <span class="p">[</span><span class="n">obj_cls</span><span class="o">.</span><span class="n">parse_obj</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">hits</span><span class="o">.</span><span class="n">hits</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">hits</span><span class="o">.</span><span class="n">hits</span> <span class="o">=</span> <span class="p">[</span><span class="n">obj_cls</span><span class="o">.</span><span class="n">parse_obj</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">hits</span><span class="o">.</span><span class="n">hits</span><span class="p">]</span>  <span class="c1"># type: ignore</span>
 
 
 <span class="c1"># ---- VOCABULARY SPECIFIC ----</span>
@@ -924,15 +926,15 @@
 
         
         <span class="def">class</span>
-        <span class="name">ResultPage</span><wbr>(<span class="base"><a href="base.html#JSONModel">iridium.inveniordm.models.base.JSONModel</a></span>):
+        <span class="name">ResultPage</span><wbr>(<span class="base"><a href="base.html#JSONModel">iridium.inveniordm.models.base.JSONModel</a></span>, <span class="base">typing.Generic[~T]</span>):
     </div>
 
                 <details>
             <summary>View Source</summary>
-            <div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">ResultPage</span><span class="p">(</span><span class="n">JSONModel</span><span class="p">):</span>
+            <div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">ResultPage</span><span class="p">(</span><span class="n">JSONModel</span><span class="p">,</span> <span class="n">Generic</span><span class="p">[</span><span class="n">T</span><span class="p">]):</span>
     <span class="sd">&quot;&quot;&quot;Sub-object containing the actual results.&quot;&quot;&quot;</span>
 
-    <span class="n">hits</span><span class="p">:</span> <span class="n">Any</span>
+    <span class="n">hits</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">T</span><span class="p">]</span>
     <span class="n">total</span><span class="p">:</span> <span class="nb">int</span>
 </pre></div>
 
@@ -975,23 +977,23 @@
 
         
         <span class="def">class</span>
-        <span class="name">Results</span><wbr>(<span class="base"><a href="base.html#JSONModel">iridium.inveniordm.models.base.JSONModel</a></span>):
+        <span class="name">Results</span><wbr>(<span class="base"><a href="base.html#JSONModel">iridium.inveniordm.models.base.JSONModel</a></span>, <span class="base">typing.Generic[~T]</span>):
     </div>
 
                 <details>
             <summary>View Source</summary>
-            <div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">Results</span><span class="p">(</span><span class="n">JSONModel</span><span class="p">):</span>
+            <div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">Results</span><span class="p">(</span><span class="n">JSONModel</span><span class="p">,</span> <span class="n">Generic</span><span class="p">[</span><span class="n">T</span><span class="p">]):</span>
     <span class="sd">&quot;&quot;&quot;JSON returned by ElasticSearch.&quot;&quot;&quot;</span>
 
-    <span class="n">hits</span><span class="p">:</span> <span class="n">ResultPage</span>
+    <span class="n">hits</span><span class="p">:</span> <span class="n">ResultPage</span><span class="p">[</span><span class="n">T</span><span class="p">]</span>
 
     <span class="c1"># not included for access_links queries, otherwise present</span>
     <span class="n">links</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">AnyHttpUrl</span><span class="p">]]</span>
     <span class="n">sortBy</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span>
 
-    <span class="k">def</span> <span class="nf">parse_hits</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj_cls</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">parse_hits</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj_cls</span><span class="p">:</span> <span class="n">Type</span><span class="p">[</span><span class="n">T</span><span class="p">]):</span>
         <span class="sd">&quot;&quot;&quot;Try to parse the query hits into the provided model class.&quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">hits</span><span class="o">.</span><span class="n">hits</span> <span class="o">=</span> <span class="p">[</span><span class="n">obj_cls</span><span class="o">.</span><span class="n">parse_obj</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">hits</span><span class="o">.</span><span class="n">hits</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">hits</span><span class="o">.</span><span class="n">hits</span> <span class="o">=</span> <span class="p">[</span><span class="n">obj_cls</span><span class="o">.</span><span class="n">parse_obj</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">hits</span><span class="o">.</span><span class="n">hits</span><span class="p">]</span>  <span class="c1"># type: ignore</span>
 </pre></div>
 
         </details>
@@ -1005,14 +1007,14 @@
 
         
             <span class="def">def</span>
-            <span class="name">parse_hits</span><span class="signature">(self, obj_cls)</span>:
+            <span class="name">parse_hits</span><span class="signature">(self, obj_cls: Type[~T])</span>:
     </div>
 
                 <details>
             <summary>View Source</summary>
-            <div class="codehilite"><pre><span></span>    <span class="k">def</span> <span class="nf">parse_hits</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj_cls</span><span class="p">):</span>
+            <div class="codehilite"><pre><span></span>    <span class="k">def</span> <span class="nf">parse_hits</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj_cls</span><span class="p">:</span> <span class="n">Type</span><span class="p">[</span><span class="n">T</span><span class="p">]):</span>
         <span class="sd">&quot;&quot;&quot;Try to parse the query hits into the provided model class.&quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">hits</span><span class="o">.</span><span class="n">hits</span> <span class="o">=</span> <span class="p">[</span><span class="n">obj_cls</span><span class="o">.</span><span class="n">parse_obj</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">hits</span><span class="o">.</span><span class="n">hits</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">hits</span><span class="o">.</span><span class="n">hits</span> <span class="o">=</span> <span class="p">[</span><span class="n">obj_cls</span><span class="o">.</span><span class="n">parse_obj</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">hits</span><span class="o">.</span><span class="n">hits</span><span class="p">]</span>  <span class="c1"># type: ignore</span>
 </pre></div>
 
         </details>

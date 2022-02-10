@@ -37,6 +37,15 @@
                                 <a class="function" href="#Repository.__init__">Repository</a>
                         </li>
                         <li>
+                                <a class="variable" href="#Repository.records">records</a>
+                        </li>
+                        <li>
+                                <a class="variable" href="#Repository.drafts">drafts</a>
+                        </li>
+                        <li>
+                                <a class="variable" href="#Repository.vocabulary">vocabulary</a>
+                        </li>
+                        <li>
                                 <a class="function" href="#Repository.from_env">from_env</a>
                         </li>
                         <li>
@@ -78,6 +87,8 @@
 <span class="k">class</span> <span class="nc">Repository</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;Class representing an InvenioRDM repository.&quot;&quot;&quot;</span>
 
+    <span class="vm">__slots__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;_client&quot;</span><span class="p">,</span> <span class="s2">&quot;records&quot;</span><span class="p">,</span> <span class="s2">&quot;drafts&quot;</span><span class="p">,</span> <span class="s2">&quot;vocabulary&quot;</span><span class="p">]</span>
+
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="k">if</span> <span class="s2">&quot;client&quot;</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_client</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;client&quot;</span><span class="p">]</span>
@@ -112,6 +123,8 @@
             <summary>View Source</summary>
             <div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">Repository</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;Class representing an InvenioRDM repository.&quot;&quot;&quot;</span>
+
+    <span class="vm">__slots__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;_client&quot;</span><span class="p">,</span> <span class="s2">&quot;records&quot;</span><span class="p">,</span> <span class="s2">&quot;drafts&quot;</span><span class="p">,</span> <span class="s2">&quot;vocabulary&quot;</span><span class="p">]</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="k">if</span> <span class="s2">&quot;client&quot;</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
@@ -158,6 +171,33 @@
 </pre></div>
 
         </details>
+
+    
+
+                            </div>
+                            <div id="Repository.records" class="classattr">
+                                            <div class="attr variable"><a class="headerlink" href="#Repository.records">#&nbsp;&nbsp</a>
+
+        <span class="name">records</span>
+    </div>
+
+    
+
+                            </div>
+                            <div id="Repository.drafts" class="classattr">
+                                            <div class="attr variable"><a class="headerlink" href="#Repository.drafts">#&nbsp;&nbsp</a>
+
+        <span class="name">drafts</span>
+    </div>
+
+    
+
+                            </div>
+                            <div id="Repository.vocabulary" class="classattr">
+                                            <div class="attr variable"><a class="headerlink" href="#Repository.vocabulary">#&nbsp;&nbsp</a>
+
+        <span class="name">vocabulary</span>
+    </div>
 
     
 

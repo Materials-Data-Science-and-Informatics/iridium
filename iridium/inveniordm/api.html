@@ -180,9 +180,6 @@
                 </ul>
 
             </li>
-            <li>
-                    <a class="function" href="#default_bib_metadata">default_bib_metadata</a>
-            </li>
     </ul>
 
 
@@ -614,8 +611,8 @@
 
         <span class="c1"># add dummy values if none provided to create minimal accepted draft</span>
         <span class="k">if</span> <span class="n">create</span><span class="p">:</span>
-            <span class="k">if</span> <span class="ow">not</span> <span class="n">metadata</span><span class="p">:</span>
-                <span class="n">metadata</span> <span class="o">=</span> <span class="n">default_bib_metadata</span><span class="p">()</span>
+            <span class="c1"># if not metadata:</span>
+            <span class="c1">#     metadata = default_bib_metadata()</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="n">access</span><span class="p">:</span>
                 <span class="n">access</span> <span class="o">=</span> <span class="n">AccessControl</span><span class="p">(</span>
                     <span class="n">record</span><span class="o">=</span><span class="n">AccessPolicy</span><span class="o">.</span><span class="n">PUBLIC</span><span class="p">,</span> <span class="n">files</span><span class="o">=</span><span class="n">AccessPolicy</span><span class="o">.</span><span class="n">PUBLIC</span>
@@ -759,26 +756,6 @@
         <span class="k">assert</span> <span class="n">hsum</span> <span class="o">==</span> <span class="n">hsum_verify</span>
 
         <span class="k">return</span> <span class="n">fmeta</span>
-
-
-<span class="k">def</span> <span class="nf">default_bib_metadata</span><span class="p">():</span>
-    <span class="sd">&quot;&quot;&quot;Minimal sufficient metadata for a record yielding no errors.&quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="n">BibMetadata</span><span class="o">.</span><span class="n">parse_obj</span><span class="p">(</span>
-        <span class="p">{</span>
-            <span class="s2">&quot;title&quot;</span><span class="p">:</span> <span class="s2">&quot;Untitled Dataset&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;creators&quot;</span><span class="p">:</span> <span class="p">[</span>
-                <span class="p">{</span>
-                    <span class="s2">&quot;person_or_org&quot;</span><span class="p">:</span> <span class="p">{</span>
-                        <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;personal&quot;</span><span class="p">,</span>
-                        <span class="s2">&quot;given_name&quot;</span><span class="p">:</span> <span class="s2">&quot;Unknown&quot;</span><span class="p">,</span>
-                        <span class="s2">&quot;family_name&quot;</span><span class="p">:</span> <span class="s2">&quot;Author&quot;</span><span class="p">,</span>
-                    <span class="p">}</span>
-                <span class="p">}</span>
-            <span class="p">],</span>
-            <span class="s2">&quot;publication_date&quot;</span><span class="p">:</span> <span class="n">datetime</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">(),</span> <span class="s2">&quot;%Y-%m-</span><span class="si">%d</span><span class="s2">&quot;</span><span class="p">),</span>
-            <span class="s2">&quot;resource_type&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="s2">&quot;other&quot;</span><span class="p">},</span>
-        <span class="p">}</span>
-    <span class="p">)</span>
 </pre></div>
 
         </details>
@@ -1988,8 +1965,8 @@ Basically searches for all entries with same parent.id and sorts by version.</p>
 
         <span class="c1"># add dummy values if none provided to create minimal accepted draft</span>
         <span class="k">if</span> <span class="n">create</span><span class="p">:</span>
-            <span class="k">if</span> <span class="ow">not</span> <span class="n">metadata</span><span class="p">:</span>
-                <span class="n">metadata</span> <span class="o">=</span> <span class="n">default_bib_metadata</span><span class="p">()</span>
+            <span class="c1"># if not metadata:</span>
+            <span class="c1">#     metadata = default_bib_metadata()</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="n">access</span><span class="p">:</span>
                 <span class="n">access</span> <span class="o">=</span> <span class="n">AccessControl</span><span class="p">(</span>
                     <span class="n">record</span><span class="o">=</span><span class="n">AccessPolicy</span><span class="o">.</span><span class="n">PUBLIC</span><span class="p">,</span> <span class="n">files</span><span class="o">=</span><span class="n">AccessPolicy</span><span class="o">.</span><span class="n">PUBLIC</span>
@@ -2331,8 +2308,8 @@ and a new id is provided for the new version.</p>
 
         <span class="c1"># add dummy values if none provided to create minimal accepted draft</span>
         <span class="k">if</span> <span class="n">create</span><span class="p">:</span>
-            <span class="k">if</span> <span class="ow">not</span> <span class="n">metadata</span><span class="p">:</span>
-                <span class="n">metadata</span> <span class="o">=</span> <span class="n">default_bib_metadata</span><span class="p">()</span>
+            <span class="c1"># if not metadata:</span>
+            <span class="c1">#     metadata = default_bib_metadata()</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="n">access</span><span class="p">:</span>
                 <span class="n">access</span> <span class="o">=</span> <span class="n">AccessControl</span><span class="p">(</span>
                     <span class="n">record</span><span class="o">=</span><span class="n">AccessPolicy</span><span class="o">.</span><span class="n">PUBLIC</span><span class="p">,</span> <span class="n">files</span><span class="o">=</span><span class="n">AccessPolicy</span><span class="o">.</span><span class="n">PUBLIC</span>
@@ -2720,43 +2697,6 @@ and a new id is provided for the new version.</p>
             </div>
                                 </dl>
                             </div>
-                </section>
-                <section id="default_bib_metadata">
-                            <div class="attr function"><a class="headerlink" href="#default_bib_metadata">#&nbsp;&nbsp</a>
-
-        
-            <span class="def">def</span>
-            <span class="name">default_bib_metadata</span><span class="signature">()</span>:
-    </div>
-
-                <details>
-            <summary>View Source</summary>
-            <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">default_bib_metadata</span><span class="p">():</span>
-    <span class="sd">&quot;&quot;&quot;Minimal sufficient metadata for a record yielding no errors.&quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="n">BibMetadata</span><span class="o">.</span><span class="n">parse_obj</span><span class="p">(</span>
-        <span class="p">{</span>
-            <span class="s2">&quot;title&quot;</span><span class="p">:</span> <span class="s2">&quot;Untitled Dataset&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;creators&quot;</span><span class="p">:</span> <span class="p">[</span>
-                <span class="p">{</span>
-                    <span class="s2">&quot;person_or_org&quot;</span><span class="p">:</span> <span class="p">{</span>
-                        <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;personal&quot;</span><span class="p">,</span>
-                        <span class="s2">&quot;given_name&quot;</span><span class="p">:</span> <span class="s2">&quot;Unknown&quot;</span><span class="p">,</span>
-                        <span class="s2">&quot;family_name&quot;</span><span class="p">:</span> <span class="s2">&quot;Author&quot;</span><span class="p">,</span>
-                    <span class="p">}</span>
-                <span class="p">}</span>
-            <span class="p">],</span>
-            <span class="s2">&quot;publication_date&quot;</span><span class="p">:</span> <span class="n">datetime</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">(),</span> <span class="s2">&quot;%Y-%m-</span><span class="si">%d</span><span class="s2">&quot;</span><span class="p">),</span>
-            <span class="s2">&quot;resource_type&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="s2">&quot;other&quot;</span><span class="p">},</span>
-        <span class="p">}</span>
-    <span class="p">)</span>
-</pre></div>
-
-        </details>
-
-            <div class="docstring"><p>Minimal sufficient metadata for a record yielding no errors.</p>
-</div>
-
-
                 </section>
     </main>
 <script>

@@ -175,6 +175,12 @@
 
             </li>
             <li>
+                    <a class="class" href="#ValidationError">ValidationError</a>
+                            <ul class="memberlist">
+                </ul>
+
+            </li>
+            <li>
                     <a class="class" href="#Record">Record</a>
                             <ul class="memberlist">
                         <li>
@@ -216,7 +222,7 @@
             <div class="codehilite"><pre><span></span><span class="sd">&quot;&quot;&quot;Models for Invenio RDM specific, technical metadata.&quot;&quot;&quot;</span>
 <span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">date</span><span class="p">,</span> <span class="n">datetime</span>
 <span class="kn">from</span> <span class="nn">enum</span> <span class="kn">import</span> <span class="n">Enum</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span>
 
 <span class="kn">from</span> <span class="nn">pydantic</span> <span class="kn">import</span> <span class="n">AnyHttpUrl</span><span class="p">,</span> <span class="n">Extra</span><span class="p">,</span> <span class="n">root_validator</span>
 
@@ -448,6 +454,11 @@
     <span class="n">__root__</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="n">SupportedPIDs</span><span class="p">,</span> <span class="n">ExternalPID</span><span class="p">]</span>
 
 
+<span class="k">class</span> <span class="nc">ValidationError</span><span class="p">(</span><span class="n">JSONModel</span><span class="p">):</span>
+    <span class="n">field</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">messages</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span>
+
+
 <span class="k">class</span> <span class="nc">Record</span><span class="p">(</span><span class="n">Entity</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    This class represents both records and record drafts.</span>
@@ -477,8 +488,7 @@
 
     <span class="n">expires_at</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">datetime</span><span class="p">]</span>  <span class="c1"># seems to be only used in drafts</span>
 
-    <span class="c1"># this does not seem to be useful, should rather rely on own validation</span>
-    <span class="n">errors</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]</span>  <span class="c1"># seems to be only used in drafts</span>
+    <span class="n">errors</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">ValidationError</span><span class="p">]]</span>  <span class="c1"># seems to be only used in drafts</span>
 </pre></div>
 
         </details>
@@ -1742,6 +1752,65 @@ Otherwise these enhancements might lead to unintended consequences.</p>
                                 </dl>
                             </div>
                 </section>
+                <section id="ValidationError">
+                                <div class="attr class">
+        <a class="headerlink" href="#ValidationError">#&nbsp;&nbsp</a>
+
+        
+        <span class="def">class</span>
+        <span class="name">ValidationError</span><wbr>(<span class="base"><a href="base.html#JSONModel">iridium.inveniordm.models.base.JSONModel</a></span>):
+    </div>
+
+                <details>
+            <summary>View Source</summary>
+            <div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">ValidationError</span><span class="p">(</span><span class="n">JSONModel</span><span class="p">):</span>
+    <span class="n">field</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">messages</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span>
+</pre></div>
+
+        </details>
+
+            <div class="docstring"><p>Subclass adding additional features to pydantic BaseModel for API responses.</p>
+
+<p>Models deriving from this variant:</p>
+
+<ul>
+<li>automatically are pretty-printed as JSON (for user convenience)</li>
+<li>can be toggled to return original, raw JSON dict (for debugging)</li>
+</ul>
+
+<p>Only use this for parsing JSON responses from API requests!
+Otherwise these enhancements might lead to unintended consequences.</p>
+</div>
+
+
+                            <div class="inherited">
+                                <h5>Inherited Members</h5>
+                                <dl>
+                                    <div><dt>pydantic.main.BaseModel</dt>
+                                <dd id="ValidationError.__init__" class="function">BaseModel</dd>
+                <dd id="ValidationError.Config" class="class">Config</dd>
+                <dd id="ValidationError.dict" class="function">dict</dd>
+                <dd id="ValidationError.json" class="function">json</dd>
+                <dd id="ValidationError.parse_raw" class="function">parse_raw</dd>
+                <dd id="ValidationError.parse_file" class="function">parse_file</dd>
+                <dd id="ValidationError.from_orm" class="function">from_orm</dd>
+                <dd id="ValidationError.construct" class="function">construct</dd>
+                <dd id="ValidationError.copy" class="function">copy</dd>
+                <dd id="ValidationError.schema" class="function">schema</dd>
+                <dd id="ValidationError.schema_json" class="function">schema_json</dd>
+                <dd id="ValidationError.validate" class="function">validate</dd>
+                <dd id="ValidationError.update_forward_refs" class="function">update_forward_refs</dd>
+
+            </div>
+            <div><dt><a href="base.html#JSONModel">iridium.inveniordm.models.base.JSONModel</a></dt>
+                                <dd id="ValidationError.raw_json" class="function"><a href="base.html#JSONModel.raw_json">raw_json</a></dd>
+                <dd id="ValidationError.parse_obj" class="function"><a href="base.html#JSONModel.parse_obj">parse_obj</a></dd>
+
+            </div>
+                                </dl>
+                            </div>
+                </section>
                 <section id="Record">
                                 <div class="attr class">
         <a class="headerlink" href="#Record">#&nbsp;&nbsp</a>
@@ -1782,8 +1851,7 @@ Otherwise these enhancements might lead to unintended consequences.</p>
 
     <span class="n">expires_at</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">datetime</span><span class="p">]</span>  <span class="c1"># seems to be only used in drafts</span>
 
-    <span class="c1"># this does not seem to be useful, should rather rely on own validation</span>
-    <span class="n">errors</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]</span>  <span class="c1"># seems to be only used in drafts</span>
+    <span class="n">errors</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">ValidationError</span><span class="p">]]</span>  <span class="c1"># seems to be only used in drafts</span>
 </pre></div>
 
         </details>
