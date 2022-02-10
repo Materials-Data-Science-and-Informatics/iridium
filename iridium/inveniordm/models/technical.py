@@ -1,7 +1,7 @@
 """Models for Invenio RDM specific, technical metadata."""
 from datetime import date, datetime
 from enum import Enum
-from typing import Any, Dict, List, Optional
+from typing import Dict, List, Optional
 
 from pydantic import AnyHttpUrl, Extra, root_validator
 
@@ -233,6 +233,11 @@ class PIDs(JSONModel):
     __root__: Dict[SupportedPIDs, ExternalPID]
 
 
+class ValidationError(JSONModel):
+    field: str
+    messages: List[str]
+
+
 class Record(Entity):
     """
     This class represents both records and record drafts.
@@ -263,4 +268,4 @@ class Record(Entity):
     expires_at: Optional[datetime]  # seems to be only used in drafts
 
     # this does not seem to be useful, should rather rely on own validation
-    errors: Optional[Dict[str, Any]]  # seems to be only used in drafts
+    errors: Optional[List[ValidationError]]  # seems to be only used in drafts

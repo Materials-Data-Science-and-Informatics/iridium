@@ -4,6 +4,8 @@ import pprint
 import sys
 from typing import Any, Dict
 
+import wrapt
+
 pprint_args: Dict[str, Any] = {
     "indent": 2,
     "depth": 4,
@@ -19,11 +21,15 @@ def pp(obj) -> str:
     return pprint.pformat(obj, **pprint_args)
 
 
-class NoPrint:
+class NoPrint(wrapt.ObjectProxy):
     """Wrap any class to avoid printing it."""
 
-    def __init__(self, obj):
-        self.obj = obj
+    def __repr__(self) -> str:
+        return f"{type(self.__wrapped__).__name__}(...)"
+
+
+class PrettyRepr(wrapt.ObjectProxy):
+    """Wrap any class to apply pretty-printing to it."""
 
     def __repr__(self) -> str:
-        return f"{type(self.obj).__name__}(...)"
+        return pp(self.__wrapped__)

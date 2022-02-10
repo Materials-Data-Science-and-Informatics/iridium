@@ -13,10 +13,13 @@ from .inveniordm.models import (
     Record,
     Results,
 )
-from .pprint import NoPrint
+from .pprint import NoPrint, PrettyRepr
 
 # TODO: how to access a private record through an access link shared by someone else?
 # probably need to access the URL for the token to be added to the user identity
+
+# TODO: help autocompletion for the pass-through operations using __dir__
+# or try to re-base the wrappers here on wrapt
 
 
 class WrappedRecord:
@@ -105,7 +108,7 @@ class WrappedRecord:
         Create or switch to an existing draft based on the current record version.
 
         This draft can be used to update the metadata of the published record version.
-        For this, change metadata accordingly and call `save()` and `publish()`.
+        For this, change metadata accordingly and call `save()` and/or `publish()`.
 
         This object will stay a draft until `publish()` is called.
         To get back from the draft to the original record, without publishing,
@@ -137,6 +140,7 @@ class WrappedRecord:
         Save changes to draft record.
 
         This commits the changes to this draft object to the Invenio RDM instance.
+        Returns dict with validation errors from the server.
 
         Notice that if the draft belongs to a published record version,
         this will only affect the draft (i.e. the version accessed via `edit()`).
@@ -145,14 +149,14 @@ class WrappedRecord:
         self._expect_draft()
 
         self._record = self._client.draft.update(self._record)
-
-    def _check_files_exist_if_enabled(self):
-        if self.files.enabled and len(self.files) == 0:
-            raise ValueError("Files are enabled, but none are attached!")
+        # present validation errors
+        errs = {e.field: " ".join(e.messages) for e in self._record.errors}
+        self._record.errors = None  # no need to keep them, not actual part of record
+        return PrettyRepr(errs)
 
     def publish(self):
         """
-        Publish the draft as the actual record.
+        Save and publish the draft as the actual record.
 
         Notice that:
         * a published record cannot be deleted
@@ -160,7 +164,15 @@ class WrappedRecord:
         * to also change files, you must create a new version (with `new_version()`)
         """
         self._expect_draft()
-        self._check_files_exist_if_enabled()
+
+        # in case there were still unsaved changes, save. check for validation errors
+        # (server validation also checks that files are attached when enabled)
+        errors = self.save()
+        if len(errors) > 0:
+            raise ValueError(
+                "There were validation errors on save, cannot publish:\n"
+                f"{repr(errors)}"
+            )
 
         self._record = self._client.draft.publish(self._record.id)
         self._is_draft = False

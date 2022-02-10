@@ -60,14 +60,15 @@ def test_record_queries(rdm):
     assert rdm.query.records().hits.total > 0
 
 
-def test_new_draft(rdm, dummy_file, get_test_record):
+def test_new_draft(rdm, dummy_file, get_test_record, testutils):
     """Test creating, editing and finally destroying a draft."""
-    drft = rdm.draft.create()  # create fresh record draft
+    # create fresh record draft
+    drft = rdm.draft.create(metadata=testutils.default_bib_metadata())
 
     # try removing title and publish (should fail, as title is mandatory)
     drft.metadata.title = ""
     d2 = rdm.draft.update(drft)
-    assert d2.errors == {"field": "messages"}
+    assert len(d2.errors) > 0
     d3 = rdm.draft.get(drft.id)
     assert d3.errors is None
     with pytest.raises(httpx.HTTPStatusError):

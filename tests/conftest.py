@@ -6,7 +6,7 @@ from typing import Optional
 
 import pytest
 
-from iridium.inveniordm.api import InvenioRDMClient
+from iridium.inveniordm.api import BibMetadata, InvenioRDMClient
 
 DUMMYFILE_NAMELEN = 8
 DUMMYFILE_SIZE = 1024
@@ -19,6 +19,26 @@ class UtilFuncs:
     def random_hex(length: int) -> str:
         """Return hex string of given length."""
         return secrets.token_hex(int(length / 2))
+
+    @staticmethod
+    def default_bib_metadata():
+        """Minimal sufficient metadata for a record yielding no errors."""
+        return BibMetadata.parse_obj(
+            {
+                "title": "Untitled Dataset",
+                "creators": [
+                    {
+                        "person_or_org": {
+                            "type": "personal",
+                            "given_name": "Unknown",
+                            "family_name": "Author",
+                        }
+                    }
+                ],
+                "publication_date": datetime.strftime(datetime.now(), "%Y-%m-%d"),
+                "resource_type": {"id": "other"},
+            }
+        )
 
 
 @pytest.fixture(scope="session")
@@ -72,7 +92,7 @@ def rdm():
 
 
 @pytest.fixture(scope="session")
-def get_test_record(rdm):
+def get_test_record(rdm, testutils):
     """
     If no testing record exists yet, create fresh and return id.
 
@@ -88,7 +108,7 @@ def get_test_record(rdm):
     def _get_test_record(tsuf: Optional[str] = "", publish=False):
         nonlocal rec_id
         if rec_id is None:
-            drft = rdm.draft.create()
+            drft = rdm.draft.create(metadata=testutils.default_bib_metadata())
             drft.files.enabled = False
             drft.metadata.title = f"Test {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"
             drft.metadata.description = ""

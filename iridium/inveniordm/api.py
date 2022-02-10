@@ -408,8 +408,8 @@ class DraftAPI(SubAPI):
 
         # add dummy values if none provided to create minimal accepted draft
         if create:
-            if not metadata:
-                metadata = default_bib_metadata()
+            # if not metadata:
+            #     metadata = default_bib_metadata()
             if not access:
                 access = AccessControl(
                     record=AccessPolicy.PUBLIC, files=AccessPolicy.PUBLIC
@@ -553,23 +553,3 @@ class DraftAPI(SubAPI):
         assert hsum == hsum_verify
 
         return fmeta
-
-
-def default_bib_metadata():
-    """Minimal sufficient metadata for a record yielding no errors."""
-    return BibMetadata.parse_obj(
-        {
-            "title": "Untitled Dataset",
-            "creators": [
-                {
-                    "person_or_org": {
-                        "type": "personal",
-                        "given_name": "Unknown",
-                        "family_name": "Author",
-                    }
-                }
-            ],
-            "publication_date": datetime.strftime(datetime.now(), "%Y-%m-%d"),
-            "resource_type": {"id": "other"},
-        }
-    )
