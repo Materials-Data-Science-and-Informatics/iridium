@@ -80,7 +80,7 @@ def dummy_file(testutils, tmp_path_factory):
 @pytest.fixture(scope="session")
 def rdm():
     """Return an API instance configured from environment variables."""
-    cl = InvenioRDMClient.from_env({"verify": False})
+    cl = InvenioRDMClient.from_env(verify=False)
 
     # clean up all drafts from possible previous unclean runs
     if cl.connected():

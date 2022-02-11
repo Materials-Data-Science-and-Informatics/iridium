@@ -3,6 +3,11 @@ Access proxies for various entities.
 
 These can be used to get lazy-loaded list-like sequences of query results
 and also to access specific entities via their id using dict-like access.
+
+Notice that other query types are located in different places in order to
+prevent circular dependencies. For example, access link or version queries
+for published records are colocated with the `WrappedRecord` class that
+is used to access these queries.
 """
 from typing import Optional
 
@@ -110,7 +115,7 @@ class Drafts(AccessProxy):
     def _get_entity(self, draft_id: str):
         return WrappedRecord(self._client, self._client.draft.get(draft_id), True)
 
-    # this fits here nicely
+    # this fits here nicely as a general way to create new drafts
     def create(self, record_id: Optional[str] = None, new_version: bool = True):
         """
         Create an empty draft, create new version or edit an existing record.
@@ -122,8 +127,11 @@ class Drafts(AccessProxy):
         if record_id is None:
             rec = self._client.draft.create()
         else:
+            # this is also accessible from the WrappedRecord,
+            # but we can save one GET request doing it directly
             if new_version:
                 rec = self._client.draft.new_version(record_id)
             else:
                 rec = self._client.draft.from_record(record_id)
+
         return WrappedRecord(self._client, rec, True)

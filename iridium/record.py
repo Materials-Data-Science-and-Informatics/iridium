@@ -38,7 +38,14 @@ class WrappedRecord:
     overwriting them will have no effect on the actual data on the server.
     """
 
-    __slots__ = ["_client", "_record", "_is_draft", "_access_links", "_files"]
+    __slots__ = [
+        "_client",
+        "_record",
+        "_is_draft",
+        "_files",
+        "_access_links",
+        "_versions",
+    ]
 
     def __init__(self, cl: InvenioRDMClient, rec: Record, is_draft: bool):
         self._client: InvenioRDMClient = cl
@@ -52,8 +59,12 @@ class WrappedRecord:
         # which only works correctly once `_is_draft` is set.
         self._is_draft: bool = is_draft
 
+        # this is very interlinked with the wrapper, so we pass ourselves as parent
         self._files: WrappedFiles = WrappedFiles(self)
-        self._access_links: AccessLinks = AccessLinks(self)
+
+        # these special query interfaces only need the record id to work
+        self._access_links: AccessLinks = AccessLinks(cl, rec.id)
+        self._versions: RecordVersions = RecordVersions(cl, rec.id)
 
     @property
     def files(self):
@@ -65,6 +76,12 @@ class WrappedRecord:
         """Return interface for managing access links for this record."""
         self._expect_published()
         return self._access_links
+
+    @property
+    def versions(self):
+        """Return all versions of the current record."""
+        self._expect_published()
+        return self._versions
 
     @property
     def is_draft(self):
@@ -93,9 +110,8 @@ class WrappedRecord:
         self._expect_draft()
 
         # need to "wrap" to initialize e.g. the 'files' part correctly
-        drft = WrappedRecord(
-            self._client, self._client.draft.get(self._record.id), True
-        )
+        raw = self._client.draft.get(self._record.id)
+        drft = WrappedRecord(self._client, raw, True)
 
         # TODO: track https://github.com/inveniosoftware/invenio-app-rdm/issues/1233
         # for now, workaround: ignore access.status:
@@ -127,25 +143,6 @@ class WrappedRecord:
 
         self._record = self._client.draft.from_record(self._record.id)
         self._is_draft = True
-        return self
-
-    def new_version(self) -> WrappedRecord:
-        """
-        Create or switch to an existing draft for a new version of the current record.
-
-        This works like `edit()`, with the difference that in a new version
-        it is possible to change the files as well, not only metadata.
-
-        The method returns this object itself for convenience, e.g. to write:
-        `draft = rdm.records["REC_ID"].new_version()`
-        which is equivalent to:
-        `draft = rdm.drafts.create("REC_ID")`
-        """
-        self._expect_published()
-
-        self._record = self._client.draft.new_version(self._record.id)
-        self._is_draft = True  # must be set before loading files for correct behavior
-        self._files = WrappedFiles(self)  # update files information
         return self
 
     def save(self):
@@ -206,7 +203,6 @@ class WrappedRecord:
         self._client.draft.delete(self._record.id)
         # to prevent the user from doing anything stupid, make it fail
         self._record = None  # type: ignore
-        self._access_links = None  # type: ignore
 
     # NOTE: the following is a really, really bad idea!
     # While it would be cool to write `del record_object`, this
@@ -258,8 +254,9 @@ class WrappedAccessLink:
     # TODO: how to access a private record through an access link shared by someone else?
     # probably need to access the URL for the token to be added to the user identity
 
-    def __init__(self, parent: WrappedRecord, lnk: AccessLink):
-        self._parent: WrappedRecord = parent
+    def __init__(self, cl: InvenioRDMClient, rec_id: str, lnk: AccessLink):
+        self._client: InvenioRDMClient = cl
+        self._record_id: str = rec_id
         self._link: AccessLink = lnk
 
     @property
@@ -271,7 +268,7 @@ class WrappedAccessLink:
     def expires_at(self, value: Optional[datetime]):
         self._check_deleted()
         self._link.expires_at = value
-        self._parent._client.record.access_links.update(self._parent.id, self._link)
+        self._client.record.access_links.update(self._record_id, self._link)
 
     @property
     def permission(self) -> Optional[LinkPermission]:
@@ -282,7 +279,7 @@ class WrappedAccessLink:
     def permission(self, value: Optional[LinkPermission]):
         self._check_deleted()
         self._link.permission = value
-        self._parent._client.record.access_links.update(self._parent.id, self._link)
+        self._client.record.access_links.update(self._record_id, self._link)
 
     @property
     def id(self) -> Optional[str]:
@@ -301,7 +298,7 @@ class WrappedAccessLink:
 
     def delete(self):
         """Delete the underlying access link."""
-        self._parent._client.record.access_links.delete(self._parent.id, self._link.id)
+        self._client.record.access_links.delete(self._record_id, self._link.id)
         self._link = None  # type: ignore
 
     def _check_deleted(self):
@@ -314,32 +311,34 @@ class WrappedAccessLink:
 
 
 class AccessLinkQuery(Query):
-    def __init__(self, rec: WrappedRecord):
+    def __init__(self, cl: InvenioRDMClient, rec_id: str):
         super().__init__()
-        self._client: InvenioRDMClient = rec._client
-        self._parent: WrappedRecord = rec
+        self._client: InvenioRDMClient = cl
+        self._record_id: str = rec_id
 
     def _query_items(self, **kwargs) -> Results:
         # access links are special, so here we ignore the passed kwargs, because
         # they take no query parameters. yet, the interface requires accepting them
-        ret = self._client.record.access_links.list(self._parent.id)
-        ret.hits.hits = [WrappedAccessLink(self._parent, x) for x in ret.hits.hits]
+        ret = self._client.record.access_links.list(self._record_id)
+        ret.hits.hits = [
+            WrappedAccessLink(self._client, self._record_id, x) for x in ret.hits.hits
+        ]
         return ret
 
 
 class AccessLinks(AccessProxy):
     """Sub-interface for interaction with access links."""
 
-    def __init__(self, parent: WrappedRecord):
-        self._client: InvenioRDMClient = parent._client
-        self._parent: WrappedRecord = parent
+    def __init__(self, cl: InvenioRDMClient, rec_id: str):
+        self._client: InvenioRDMClient = cl
+        self._record_id: str = rec_id
 
     def _get_query(self, **kwargs) -> Query:
-        return AccessLinkQuery(self._parent)
+        return AccessLinkQuery(self._client, self._record_id)
 
     def _get_entity(self, link_id: str):
-        lnk = self._client.record.access_links.get(self._parent.id, link_id)
-        return WrappedAccessLink(self._parent, lnk)
+        lnk = self._client.record.access_links.get(self._record_id, link_id)
+        return WrappedAccessLink(self._client, self._record_id, lnk)
 
     def create(
         self,
@@ -350,7 +349,58 @@ class AccessLinks(AccessProxy):
         lnk = self._client.record.access_links.create(
             self._parent.id, expires_at, permission
         )
-        return WrappedAccessLink(self._parent, lnk)
+        return WrappedAccessLink(self._client, self._record_id, lnk)
+
+
+# ---- version management wrappers ----
+
+
+class RecordVersionsQuery(Query):
+    def __init__(self, cl: InvenioRDMClient, rec_id: str):
+        super().__init__()
+        self._client: InvenioRDMClient = cl
+        self._record_id: str = rec_id
+
+    def _query_items(self, **kwargs) -> Results:
+        # versions are special, so here we ignore the passed kwargs, because
+        # they take no query parameters. yet, the interface requires accepting them
+        ret = self._client.record.versions(self._record_id)
+        ret.hits.hits = [WrappedRecord(self._client, x, False) for x in ret.hits.hits]
+        return ret
+
+
+class RecordVersions(AccessProxy):
+    """Sub-interface for interaction with record versions."""
+
+    def __init__(self, cl: InvenioRDMClient, rec_id: str):
+        self._client: InvenioRDMClient = cl
+        self._record_id: str = rec_id
+
+    def _get_query(self, **kwargs) -> Query:
+        return RecordVersionsQuery(self._client, self._record_id)
+
+    def _get_entity(self, record_id: str):
+        rec = self._client.record.get(record_id)
+        return WrappedRecord(self._client, rec, False)
+
+    def create(self) -> WrappedRecord:
+        """
+        Create or switch to an existing draft for a new version of the current record.
+
+        This works like `WrappedRecord.edit()`, with the difference that in a new version
+        it is possible to change the files as well, not only metadata.
+
+        `rdm.records["REC_ID"].versions.create()`
+        is equivalent to:
+        `rdm.drafts.create("REC_ID")`
+        """
+        drft = self._client.draft.new_version(self._record_id)
+        return WrappedRecord(self._client, drft, True)
+
+    def latest(self) -> WrappedRecord:
+        """Return latest version of the current record."""
+        rec = self._client.record.latest_version(self._record_id)
+        return WrappedRecord(self._client, rec, False)
 
 
 # ---- file API wrappers ----

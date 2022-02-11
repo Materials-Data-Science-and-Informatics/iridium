@@ -59,12 +59,7 @@ class InvenioRDMClient:
         """Return complete URL based on configured base URL and relative API path."""
         return f"{self.irdm_url}/api{path}"
 
-    def __init__(
-        self,
-        irdm_url: str,
-        irdm_token: Optional[str] = None,
-        httpx_kwargs: Dict[str, Any] = {},
-    ):
+    def __init__(self, irdm_url: str, irdm_token: Optional[str] = None, **httpx_kwargs):
         """
         Create an instance of the Invenio RDM API.
 
@@ -101,12 +96,12 @@ class InvenioRDMClient:
             return False
 
     @staticmethod
-    def from_env(httpx_kwargs: Dict[str, Any] = {}):
+    def from_env(**httpx_kwargs):
         """Get client instance based on configuration given in environment."""
         load_dotenv()  # get environment variables from possible .env file
         url = get_env("INVENIORDM_URL").rstrip("/")
         token = get_env("INVENIORDM_TOKEN")
-        return InvenioRDMClient(url, token, httpx_kwargs)
+        return InvenioRDMClient(url, token, **httpx_kwargs)
 
 
 class SubAPI:
