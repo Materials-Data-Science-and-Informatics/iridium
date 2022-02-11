@@ -1,4 +1,11 @@
-"""Generic useful classes for the API."""
+"""
+Generic useful classes for the high-level API.
+
+`AccessProxy` serves as the wrapper class to accessing various entities
+that are returned by Invenio RDM from its ElasticSearch index.
+
+This includes: records, drafts, versions, access links, vocabularies and more.
+"""
 
 import math
 from abc import ABC, abstractmethod
@@ -16,7 +23,7 @@ from typing import (
 
 import httpx
 
-from .inveniordm.api import InvenioRDMClient
+from .inveniordm import InvenioRDMClient
 from .inveniordm.models import Results
 
 T = TypeVar("T")
@@ -29,9 +36,8 @@ class PaginatedList(Sequence[T]):
 
     Here, batches are 0-indexed and contain `self._BATCH_SIZE` elements per batch
     (specified during initialization of the instance).
-    Can only be used for read-only access. Already retrieved pages are cached.
 
-    Usage (for developers): Subclass and implement `_get_batch`.
+    Can only be used for read-only access. Already retrieved pages are cached.
     """
 
     DEF_BATCH_SIZE: int = 1000
@@ -136,17 +142,18 @@ class PaginatedList(Sequence[T]):
 
 class Query(PaginatedList[T]):
     """
-    Class for convenient access to query results (that are assumed to have an id).
+    Class for convenient access to query results.
 
-    Allowed keyword arguments: normal query args, but without 'page'.
+    Results are by default assumed to have an `id` attribute for dict-like access.
+
+    Allowed keyword arguments: normal `QueryArgs`, but without `page`.
 
     Access through numeric index corresponds to entries in search result order.
-    Access through string id is possible, but inefficient (may traverse all results).
 
-    Usage (for developers): Subclass and implement `_query_items`.
+    Access through string id is possible, but inefficient (may traverse all results).
     """
 
-    def __init__(self, **kwargs):
+    def __init__(self, dict_key: str = "id", **kwargs):
         pgsz = None
         if "size" in kwargs:
             pgsz = kwargs["size"]
@@ -155,6 +162,7 @@ class Query(PaginatedList[T]):
             raise ValueError("Forbidden keyword argument 'page'!")
 
         super().__init__(pgsz)
+        self._dict_key = id
         self._query_args = kwargs
 
     @abstractmethod
@@ -177,7 +185,7 @@ class Query(PaginatedList[T]):
 
     def dict(self):
         """Convert to a real `dict` (this downloads all query results!)."""
-        return {r.id: r for r in iter(self)}  # type: ignore
+        return {r.__dict__[self._dict_key]: r for r in iter(self)}  # type: ignore
 
     # these behave like a dict, but are lazy (not pulling everything, unless forced),
     # could be useful to list "the first few results":
@@ -188,7 +196,7 @@ class Query(PaginatedList[T]):
 
     def keys(self) -> Iterable[str]:
         """Return ids of entities in query result order."""
-        return (x.id for x in iter(self))  # type: ignore
+        return (x.__dict__[self._dict_key] for x in iter(self))  # type: ignore
 
     def values(self) -> Iterable[T]:
         """Return entities in query result order."""
@@ -232,7 +240,9 @@ class AccessProxy(ABC, Generic[T]):
     Access to individual entities as well as queries with applied filters.
 
     Filtering, i.e. queries, are performed by calling an instance with query parameters.
+
     Without query parameters the object behaves like an unfiltered query.
+
     Direct access to entities is performed by accessing them by their id like a dict.
 
     So given an instance `foos`:

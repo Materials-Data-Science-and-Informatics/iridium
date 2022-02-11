@@ -12,7 +12,7 @@ is used to access these queries.
 from typing import Optional
 
 from .generic import AccessProxy, Query
-from .inveniordm.api import InvenioRDMClient
+from .inveniordm import InvenioRDMClient
 from .inveniordm.models import Results, VocType
 from .record import WrappedRecord
 

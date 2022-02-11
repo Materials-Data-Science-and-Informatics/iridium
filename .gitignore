@@ -1,4 +1,4 @@
-# we don't keep the generated docs in the source repo
+# we don't keep the auto-generated docs in the source repo
 docs/
 
 # Created by https://www.toptal.com/developers/gitignore/api/python

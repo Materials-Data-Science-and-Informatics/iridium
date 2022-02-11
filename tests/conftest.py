@@ -6,7 +6,7 @@ from typing import Optional
 
 import pytest
 
-from iridium.inveniordm.api import BibMetadata, InvenioRDMClient
+from iridium.inveniordm import BibMetadata, InvenioRDMClient
 
 DUMMYFILE_NAMELEN = 8
 DUMMYFILE_SIZE = 1024

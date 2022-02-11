@@ -1,6 +1,6 @@
 """Higher-level API for Invenio RDM."""
 
-from .inveniordm.api import InvenioRDMClient
+from .inveniordm import InvenioRDMClient
 from .inveniordm.models import VocType
 from .query import Drafts, Records, Vocabulary
 

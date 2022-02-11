@@ -1,6 +1,6 @@
 # Iridium
 
-![Project status](https://img.shields.io/badge/status-pre--alpha-%23ff0000)
+![Project status](https://img.shields.io/badge/project%20status-alpha-%23ff8000)
 [
 ![Test](https://img.shields.io/github/workflow/status/Materials-Data-Science-and-Informatics/iridium/test?label=test)
 ](https://github.com/Materials-Data-Science-and-Informatics/iridium/actions?query=workflow:test)
@@ -24,7 +24,17 @@ It provides:
 * a higher-level object-oriented convenience API (in progress)
 
 Currently only the Vocabulary and Draft/Record APIs are supported.
-Other APIs might follow when there is interest and the REST APIs are stabilized.
+
+Other APIs (such as Communities and Requests APIs)
+might follow when there is interest and the REST APIs are stabilized.
+
+## Getting Started
+
+Probably you are interested in the high-level API. For this, read the [manual](MANUAL.md).
+
+It is not advised to use the low-level API directly, unless you are an Invenio RDM expert.
+The low-level API documentation is minimal and located
+[here](https://materials-data-science-and-informatics.github.io/iridium/iridium/inveniordm.html).
 
 ## Development
 

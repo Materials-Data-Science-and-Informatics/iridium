@@ -5,7 +5,7 @@ from datetime import datetime
 from typing import BinaryIO, Dict, Iterable, Optional, Tuple
 
 from .generic import AccessProxy, Query
-from .inveniordm.api import InvenioRDMClient
+from .inveniordm import InvenioRDMClient
 from .inveniordm.models import (
     AccessLink,
     FileMetadata,

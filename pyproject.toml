@@ -7,13 +7,10 @@ license = "MIT"
 
 [tool.poetry.dependencies]
 python = "^3.7"
-typer = "^0.4.0"
 pydantic = "~1.8.2"
 httpx = "^0.21.1"
 python-dotenv = "^0.19.2"
 typing-extensions = "^4.0.1"
-jsonschema = "^4.4.0"
-"ruamel.yaml" = "^0.17.20"
 wrapt = "^1.13.3"
 
 [tool.poetry.dev-dependencies]

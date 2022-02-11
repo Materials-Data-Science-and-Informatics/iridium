@@ -8,6 +8,9 @@ https://inveniordm.docs.cern.ch/reference/metadata/
 This recreation of the structures is not perfect.
 If failures happen, please open a bug report and describe
 what kind of API call failed in order to deduce a possible problem in the model.
+
+**Notice that `pdoc` fails to generate useful documentation out of just the
+type hints that define the model. Press `View Source` to inspect the models.**
 """
 
 # re-export all classes for convenience
