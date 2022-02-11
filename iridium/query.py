@@ -4,6 +4,7 @@ Access proxies for various entities.
 These can be used to get lazy-loaded list-like sequences of query results
 and also to access specific entities via their id using dict-like access.
 """
+from typing import Optional
 
 from .generic import AccessProxy, Query
 from .inveniordm.api import InvenioRDMClient
@@ -33,9 +34,7 @@ class RecordQuery(Query):
 
     def _query_items(self, **kwargs) -> Results:
         ret = self._client.query.records(self._user_only, **kwargs)
-        ret.hits.hits = list(
-            map(lambda x: WrappedRecord(self._client, x, False), ret.hits.hits)
-        )
+        ret.hits.hits = [WrappedRecord(self._client, x, False) for x in ret.hits.hits]
         return ret
 
 
@@ -53,9 +52,7 @@ class DraftQuery(Query):
         kwargs["q"] += " is_published:false"
 
         ret = self._client.query.records(user=True, **kwargs)
-        ret.hits.hits = list(
-            map(lambda x: WrappedRecord(self._client, x, True), ret.hits.hits)
-        )
+        ret.hits.hits = [WrappedRecord(self._client, x, True) for x in ret.hits.hits]
         return ret
 
 
@@ -85,7 +82,7 @@ class Records(AccessProxy):
                 raise ValueError("'user' must be a bool!")
             user = kwargs["user"]
             del kwargs["user"]
-
+        # the user flag determines whether general or user record API is used
         return RecordQuery(self._client, user, **kwargs)
 
     def _get_entity(self, record_id: str):
@@ -104,6 +101,7 @@ class Drafts(AccessProxy):
     as these drafts cannot be efficiently queried for (yet) due to the way
     the search indices in Invenio RDM are set up.
     (There exists `has_draft:true`, but this does not allow to filter for owned records).
+    See: https://github.com/inveniosoftware/invenio-app-rdm/issues/714
     """
 
     def _get_query(self, **kwargs) -> Query:
@@ -113,6 +111,19 @@ class Drafts(AccessProxy):
         return WrappedRecord(self._client, self._client.draft.get(draft_id), True)
 
     # this fits here nicely
-    def create(self):
-        """Create an empty record draft."""
-        return WrappedRecord(self._client, self._client.draft.create(), True)
+    def create(self, record_id: Optional[str] = None, new_version: bool = True):
+        """
+        Create an empty draft, create new version or edit an existing record.
+
+        If `record_id` is `None`, will create an empty draft.
+        Otherwise will return a draft for an existing or new version
+        (depending on whether `new_version` is set) for the passed `record_id`.
+        """
+        if record_id is None:
+            rec = self._client.draft.create()
+        else:
+            if new_version:
+                rec = self._client.draft.new_version(record_id)
+            else:
+                rec = self._client.draft.from_record(record_id)
+        return WrappedRecord(self._client, rec, True)
