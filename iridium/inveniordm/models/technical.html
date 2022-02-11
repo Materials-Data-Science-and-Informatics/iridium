@@ -688,8 +688,6 @@
                 <dd id="LinkPermission.upper" class="function">upper</dd>
                 <dd id="LinkPermission.startswith" class="function">startswith</dd>
                 <dd id="LinkPermission.endswith" class="function">endswith</dd>
-                <dd id="LinkPermission.removeprefix" class="function">removeprefix</dd>
-                <dd id="LinkPermission.removesuffix" class="function">removesuffix</dd>
                 <dd id="LinkPermission.isascii" class="function">isascii</dd>
                 <dd id="LinkPermission.islower" class="function">islower</dd>
                 <dd id="LinkPermission.isupper" class="function">isupper</dd>
@@ -1085,8 +1083,6 @@ https://github.com/inveniosoftware/invenio-drafts-resources/blob/master/invenio_
                 <dd id="SupportedPIDs.upper" class="function">upper</dd>
                 <dd id="SupportedPIDs.startswith" class="function">startswith</dd>
                 <dd id="SupportedPIDs.endswith" class="function">endswith</dd>
-                <dd id="SupportedPIDs.removeprefix" class="function">removeprefix</dd>
-                <dd id="SupportedPIDs.removesuffix" class="function">removesuffix</dd>
                 <dd id="SupportedPIDs.isascii" class="function">isascii</dd>
                 <dd id="SupportedPIDs.islower" class="function">islower</dd>
                 <dd id="SupportedPIDs.isupper" class="function">isupper</dd>
@@ -1240,8 +1236,6 @@ https://github.com/inveniosoftware/invenio-drafts-resources/blob/master/invenio_
                 <dd id="AccessPolicy.upper" class="function">upper</dd>
                 <dd id="AccessPolicy.startswith" class="function">startswith</dd>
                 <dd id="AccessPolicy.endswith" class="function">endswith</dd>
-                <dd id="AccessPolicy.removeprefix" class="function">removeprefix</dd>
-                <dd id="AccessPolicy.removesuffix" class="function">removesuffix</dd>
                 <dd id="AccessPolicy.isascii" class="function">isascii</dd>
                 <dd id="AccessPolicy.islower" class="function">islower</dd>
                 <dd id="AccessPolicy.isupper" class="function">isupper</dd>
@@ -1366,18 +1360,6 @@ https://github.com/inveniosoftware/invenio-drafts-resources/blob/master/invenio_
     <span class="n">files</span><span class="p">:</span> <span class="n">AccessPolicy</span>
     <span class="n">embargo</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Embargo</span><span class="p">]</span>
     <span class="n">status</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span>
-
-    <span class="c1"># TODO: only check on creating records.</span>
-    <span class="c1"># for existing records it can be public + old embargo</span>
-    <span class="c1"># @root_validator</span>
-    <span class="c1"># def embargo_needs_restricted(cls, values):</span>
-    <span class="c1">#     if &quot;record&quot; in values and values[&quot;record&quot;] == AccessPolicy.RESTRICTED:</span>
-    <span class="c1">#         return values</span>
-    <span class="c1">#     if &quot;files&quot; in values and values[&quot;files&quot;] == AccessPolicy.RESTRICTED:</span>
-    <span class="c1">#         return values</span>
-    <span class="c1">#     raise ValueError(</span>
-    <span class="c1">#         &quot;&#39;embargo&#39; assumes that the record or files are/were restricted&quot;</span>
-    <span class="c1">#     )</span>
 </pre></div>
 
         </details>

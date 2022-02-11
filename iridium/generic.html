@@ -91,12 +91,24 @@
                     <h1 class="modulename">
 <a href="./../iridium.html">iridium</a><wbr>.generic    </h1>
 
-                        <div class="docstring"><p>Generic useful classes for the API.</p>
+                        <div class="docstring"><p>Generic useful classes for the high-level API.</p>
+
+<p><code><a href="#AccessProxy">AccessProxy</a></code> serves as the wrapper class to accessing various entities
+that are returned by Invenio RDM from its ElasticSearch index.</p>
+
+<p>This includes: records, drafts, versions, access links, vocabularies and more.</p>
 </div>
 
                         <details>
             <summary>View Source</summary>
-            <div class="codehilite"><pre><span></span><span class="sd">&quot;&quot;&quot;Generic useful classes for the API.&quot;&quot;&quot;</span>
+            <div class="codehilite"><pre><span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Generic useful classes for the high-level API.</span>
+
+<span class="sd">`AccessProxy` serves as the wrapper class to accessing various entities</span>
+<span class="sd">that are returned by Invenio RDM from its ElasticSearch index.</span>
+
+<span class="sd">This includes: records, drafts, versions, access links, vocabularies and more.</span>
+<span class="sd">&quot;&quot;&quot;</span>
 
 <span class="kn">import</span> <span class="nn">math</span>
 <span class="kn">from</span> <span class="nn">abc</span> <span class="kn">import</span> <span class="n">ABC</span><span class="p">,</span> <span class="n">abstractmethod</span>
@@ -114,7 +126,7 @@
 
 <span class="kn">import</span> <span class="nn">httpx</span>
 
-<span class="kn">from</span> <span class="nn">.inveniordm.api</span> <span class="kn">import</span> <span class="n">InvenioRDMClient</span>
+<span class="kn">from</span> <span class="nn">.inveniordm</span> <span class="kn">import</span> <span class="n">InvenioRDMClient</span>
 <span class="kn">from</span> <span class="nn">.inveniordm.models</span> <span class="kn">import</span> <span class="n">Results</span>
 
 <span class="n">T</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s2">&quot;T&quot;</span><span class="p">)</span>
@@ -127,9 +139,8 @@
 
 <span class="sd">    Here, batches are 0-indexed and contain `self._BATCH_SIZE` elements per batch</span>
 <span class="sd">    (specified during initialization of the instance).</span>
-<span class="sd">    Can only be used for read-only access. Already retrieved pages are cached.</span>
 
-<span class="sd">    Usage (for developers): Subclass and implement `_get_batch`.</span>
+<span class="sd">    Can only be used for read-only access. Already retrieved pages are cached.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">DEF_BATCH_SIZE</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1000</span>
@@ -234,17 +245,18 @@
 
 <span class="k">class</span> <span class="nc">Query</span><span class="p">(</span><span class="n">PaginatedList</span><span class="p">[</span><span class="n">T</span><span class="p">]):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Class for convenient access to query results (that are assumed to have an id).</span>
+<span class="sd">    Class for convenient access to query results.</span>
 
-<span class="sd">    Allowed keyword arguments: normal query args, but without &#39;page&#39;.</span>
+<span class="sd">    Results are by default assumed to have an `id` attribute for dict-like access.</span>
+
+<span class="sd">    Allowed keyword arguments: normal `QueryArgs`, but without `page`.</span>
 
 <span class="sd">    Access through numeric index corresponds to entries in search result order.</span>
-<span class="sd">    Access through string id is possible, but inefficient (may traverse all results).</span>
 
-<span class="sd">    Usage (for developers): Subclass and implement `_query_items`.</span>
+<span class="sd">    Access through string id is possible, but inefficient (may traverse all results).</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dict_key</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;id&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="n">pgsz</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="k">if</span> <span class="s2">&quot;size&quot;</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
             <span class="n">pgsz</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;size&quot;</span><span class="p">]</span>
@@ -253,6 +265,7 @@
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Forbidden keyword argument &#39;page&#39;!&quot;</span><span class="p">)</span>
 
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">pgsz</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_dict_key</span> <span class="o">=</span> <span class="nb">id</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_query_args</span> <span class="o">=</span> <span class="n">kwargs</span>
 
     <span class="nd">@abstractmethod</span>
@@ -275,7 +288,7 @@
 
     <span class="k">def</span> <span class="nf">dict</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Convert to a real `dict` (this downloads all query results!).&quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="p">{</span><span class="n">r</span><span class="o">.</span><span class="n">id</span><span class="p">:</span> <span class="n">r</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="nb">iter</span><span class="p">(</span><span class="bp">self</span><span class="p">)}</span>  <span class="c1"># type: ignore</span>
+        <span class="k">return</span> <span class="p">{</span><span class="n">r</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_dict_key</span><span class="p">]:</span> <span class="n">r</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="nb">iter</span><span class="p">(</span><span class="bp">self</span><span class="p">)}</span>  <span class="c1"># type: ignore</span>
 
     <span class="c1"># these behave like a dict, but are lazy (not pulling everything, unless forced),</span>
     <span class="c1"># could be useful to list &quot;the first few results&quot;:</span>
@@ -286,7 +299,7 @@
 
     <span class="k">def</span> <span class="nf">keys</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterable</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
         <span class="sd">&quot;&quot;&quot;Return ids of entities in query result order.&quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">id</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">iter</span><span class="p">(</span><span class="bp">self</span><span class="p">))</span>  <span class="c1"># type: ignore</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_dict_key</span><span class="p">]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">iter</span><span class="p">(</span><span class="bp">self</span><span class="p">))</span>  <span class="c1"># type: ignore</span>
 
     <span class="k">def</span> <span class="nf">values</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">T</span><span class="p">]:</span>
         <span class="sd">&quot;&quot;&quot;Return entities in query result order.&quot;&quot;&quot;</span>
@@ -330,7 +343,9 @@
 <span class="sd">    Access to individual entities as well as queries with applied filters.</span>
 
 <span class="sd">    Filtering, i.e. queries, are performed by calling an instance with query parameters.</span>
+
 <span class="sd">    Without query parameters the object behaves like an unfiltered query.</span>
+
 <span class="sd">    Direct access to entities is performed by accessing them by their id like a dict.</span>
 
 <span class="sd">    So given an instance `foos`:</span>
@@ -427,9 +442,8 @@
 
 <span class="sd">    Here, batches are 0-indexed and contain `self._BATCH_SIZE` elements per batch</span>
 <span class="sd">    (specified during initialization of the instance).</span>
-<span class="sd">    Can only be used for read-only access. Already retrieved pages are cached.</span>
 
-<span class="sd">    Usage (for developers): Subclass and implement `_get_batch`.</span>
+<span class="sd">    Can only be used for read-only access. Already retrieved pages are cached.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">DEF_BATCH_SIZE</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1000</span>
@@ -537,10 +551,9 @@
             <div class="docstring"><p>List-like class abstracting away automatic loading of successive batches of results.</p>
 
 <p>Here, batches are 0-indexed and contain <code>self._BATCH_SIZE</code> elements per batch
-(specified during initialization of the instance).
-Can only be used for read-only access. Already retrieved pages are cached.</p>
+(specified during initialization of the instance).</p>
 
-<p>Usage (for developers): Subclass and implement <code>_get_batch</code>.</p>
+<p>Can only be used for read-only access. Already retrieved pages are cached.</p>
 </div>
 
 
@@ -548,7 +561,7 @@ Can only be used for read-only access. Already retrieved pages are cached.</p>
                                         <div class="attr function"><a class="headerlink" href="#PaginatedList.__init__">#&nbsp;&nbsp</a>
 
         
-            <span class="name">PaginatedList</span><span class="signature">(batch_size: Optional[int] = None)</span>
+            <span class="name">PaginatedList</span><span class="signature">(batch_size: Union[int, NoneType] = None)</span>
     </div>
 
                 <details>
@@ -681,17 +694,18 @@ For example, a generic mapping type might be defined as::</p>
             <summary>View Source</summary>
             <div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">Query</span><span class="p">(</span><span class="n">PaginatedList</span><span class="p">[</span><span class="n">T</span><span class="p">]):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Class for convenient access to query results (that are assumed to have an id).</span>
+<span class="sd">    Class for convenient access to query results.</span>
 
-<span class="sd">    Allowed keyword arguments: normal query args, but without &#39;page&#39;.</span>
+<span class="sd">    Results are by default assumed to have an `id` attribute for dict-like access.</span>
+
+<span class="sd">    Allowed keyword arguments: normal `QueryArgs`, but without `page`.</span>
 
 <span class="sd">    Access through numeric index corresponds to entries in search result order.</span>
-<span class="sd">    Access through string id is possible, but inefficient (may traverse all results).</span>
 
-<span class="sd">    Usage (for developers): Subclass and implement `_query_items`.</span>
+<span class="sd">    Access through string id is possible, but inefficient (may traverse all results).</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dict_key</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;id&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="n">pgsz</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="k">if</span> <span class="s2">&quot;size&quot;</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
             <span class="n">pgsz</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;size&quot;</span><span class="p">]</span>
@@ -700,6 +714,7 @@ For example, a generic mapping type might be defined as::</p>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Forbidden keyword argument &#39;page&#39;!&quot;</span><span class="p">)</span>
 
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">pgsz</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_dict_key</span> <span class="o">=</span> <span class="nb">id</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_query_args</span> <span class="o">=</span> <span class="n">kwargs</span>
 
     <span class="nd">@abstractmethod</span>
@@ -722,7 +737,7 @@ For example, a generic mapping type might be defined as::</p>
 
     <span class="k">def</span> <span class="nf">dict</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Convert to a real `dict` (this downloads all query results!).&quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="p">{</span><span class="n">r</span><span class="o">.</span><span class="n">id</span><span class="p">:</span> <span class="n">r</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="nb">iter</span><span class="p">(</span><span class="bp">self</span><span class="p">)}</span>  <span class="c1"># type: ignore</span>
+        <span class="k">return</span> <span class="p">{</span><span class="n">r</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_dict_key</span><span class="p">]:</span> <span class="n">r</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="nb">iter</span><span class="p">(</span><span class="bp">self</span><span class="p">)}</span>  <span class="c1"># type: ignore</span>
 
     <span class="c1"># these behave like a dict, but are lazy (not pulling everything, unless forced),</span>
     <span class="c1"># could be useful to list &quot;the first few results&quot;:</span>
@@ -733,7 +748,7 @@ For example, a generic mapping type might be defined as::</p>
 
     <span class="k">def</span> <span class="nf">keys</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterable</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
         <span class="sd">&quot;&quot;&quot;Return ids of entities in query result order.&quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">id</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">iter</span><span class="p">(</span><span class="bp">self</span><span class="p">))</span>  <span class="c1"># type: ignore</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_dict_key</span><span class="p">]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">iter</span><span class="p">(</span><span class="bp">self</span><span class="p">))</span>  <span class="c1"># type: ignore</span>
 
     <span class="k">def</span> <span class="nf">values</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">T</span><span class="p">]:</span>
         <span class="sd">&quot;&quot;&quot;Return entities in query result order.&quot;&quot;&quot;</span>
@@ -774,14 +789,15 @@ For example, a generic mapping type might be defined as::</p>
 
         </details>
 
-            <div class="docstring"><p>Class for convenient access to query results (that are assumed to have an id).</p>
+            <div class="docstring"><p>Class for convenient access to query results.</p>
 
-<p>Allowed keyword arguments: normal query args, but without 'page'.</p>
+<p>Results are by default assumed to have an <code>id</code> attribute for dict-like access.</p>
 
-<p>Access through numeric index corresponds to entries in search result order.
-Access through string id is possible, but inefficient (may traverse all results).</p>
+<p>Allowed keyword arguments: normal <code>QueryArgs</code>, but without <code>page</code>.</p>
 
-<p>Usage (for developers): Subclass and implement <code>_query_items</code>.</p>
+<p>Access through numeric index corresponds to entries in search result order.</p>
+
+<p>Access through string id is possible, but inefficient (may traverse all results).</p>
 </div>
 
 
@@ -797,7 +813,7 @@ Access through string id is possible, but inefficient (may traverse all results)
             <summary>View Source</summary>
             <div class="codehilite"><pre><span></span>    <span class="k">def</span> <span class="nf">dict</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Convert to a real `dict` (this downloads all query results!).&quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="p">{</span><span class="n">r</span><span class="o">.</span><span class="n">id</span><span class="p">:</span> <span class="n">r</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="nb">iter</span><span class="p">(</span><span class="bp">self</span><span class="p">)}</span>  <span class="c1"># type: ignore</span>
+        <span class="k">return</span> <span class="p">{</span><span class="n">r</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_dict_key</span><span class="p">]:</span> <span class="n">r</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="nb">iter</span><span class="p">(</span><span class="bp">self</span><span class="p">)}</span>  <span class="c1"># type: ignore</span>
 </pre></div>
 
         </details>
@@ -841,7 +857,7 @@ Access through string id is possible, but inefficient (may traverse all results)
             <summary>View Source</summary>
             <div class="codehilite"><pre><span></span>    <span class="k">def</span> <span class="nf">keys</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterable</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
         <span class="sd">&quot;&quot;&quot;Return ids of entities in query result order.&quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">id</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">iter</span><span class="p">(</span><span class="bp">self</span><span class="p">))</span>  <span class="c1"># type: ignore</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_dict_key</span><span class="p">]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">iter</span><span class="p">(</span><span class="bp">self</span><span class="p">))</span>  <span class="c1"># type: ignore</span>
 </pre></div>
 
         </details>
@@ -905,7 +921,9 @@ Access through string id is possible, but inefficient (may traverse all results)
 <span class="sd">    Access to individual entities as well as queries with applied filters.</span>
 
 <span class="sd">    Filtering, i.e. queries, are performed by calling an instance with query parameters.</span>
+
 <span class="sd">    Without query parameters the object behaves like an unfiltered query.</span>
+
 <span class="sd">    Direct access to entities is performed by accessing them by their id like a dict.</span>
 
 <span class="sd">    So given an instance `foos`:</span>
@@ -986,9 +1004,11 @@ Access through string id is possible, but inefficient (may traverse all results)
 
             <div class="docstring"><p>Access to individual entities as well as queries with applied filters.</p>
 
-<p>Filtering, i.e. queries, are performed by calling an instance with query parameters.
-Without query parameters the object behaves like an unfiltered query.
-Direct access to entities is performed by accessing them by their id like a dict.</p>
+<p>Filtering, i.e. queries, are performed by calling an instance with query parameters.</p>
+
+<p>Without query parameters the object behaves like an unfiltered query.</p>
+
+<p>Direct access to entities is performed by accessing them by their id like a dict.</p>
 
 <p>So given an instance <code>foos</code>:</p>
 

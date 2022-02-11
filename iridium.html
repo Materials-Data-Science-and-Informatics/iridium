@@ -28,11 +28,15 @@
                         <input type="search" placeholder="Search..." role="searchbox" aria-label="search"
                                pattern=".+" required>
 
+                    <h2>Contents</h2>
+                    <ul>
+  <li><a href="#iridium-manual">Iridium Manual</a></li>
+</ul>
+
 
                     <h2>Submodules</h2>
                     <ul>
                             <li><a href="iridium/api.html">iridium.api</a></li>
-                            <li><a href="iridium/cli.html">iridium.cli</a></li>
                             <li><a href="iridium/generic.html">iridium.generic</a></li>
                             <li><a href="iridium/inveniordm.html">iridium.inveniordm</a></li>
                             <li><a href="iridium/pprint.html">iridium.pprint</a></li>
@@ -43,9 +47,6 @@
 
                     <h2>API Documentation</h2>
                         <ul class="memberlist">
-            <li>
-                    <a class="function" href="#pkg_res">pkg_res</a>
-            </li>
     </ul>
 
 
@@ -62,18 +63,30 @@
                     <h1 class="modulename">
 iridium    </h1>
 
-                        <div class="docstring"><p>Some useful helpers to access files shipped with package.</p>
+                        <div class="docstring"><p>Welcome to Iridium.</p>
+
+<h1 id="iridium-manual">Iridium Manual</h1>
+
+<p>TODO</p>
 </div>
 
                         <details>
             <summary>View Source</summary>
-            <div class="codehilite"><pre><span></span><span class="sd">&quot;&quot;&quot;Some useful helpers to access files shipped with package.&quot;&quot;&quot;</span>
+            <div class="codehilite"><pre><span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Welcome to Iridium.</span>
 
+<span class="sd">.. include:: ../MANUAL.md</span>
+<span class="sd">&quot;&quot;&quot;</span>
 <span class="kn">import</span> <span class="nn">sys</span>
 <span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
 
 <span class="kn">import</span> <span class="nn">toml</span>
 <span class="kn">from</span> <span class="nn">typing_extensions</span> <span class="kn">import</span> <span class="n">Final</span>
+
+<span class="c1"># re-export</span>
+<span class="kn">from</span> <span class="nn">.api</span> <span class="kn">import</span> <span class="n">Repository</span>  <span class="c1"># noqa: F401</span>
+
+<span class="n">__docformat__</span> <span class="o">=</span> <span class="s2">&quot;restructuredtext&quot;</span>
 
 <span class="n">__pkg_path__</span><span class="p">:</span> <span class="n">Final</span><span class="p">[</span><span class="n">Path</span><span class="p">]</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">modules</span><span class="p">[</span><span class="vm">__name__</span><span class="p">]</span><span class="o">.</span><span class="vm">__file__</span><span class="p">)</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">resolve</span><span class="p">()</span>
 
@@ -85,38 +98,11 @@ iridium    </h1>
 <span class="n">pyproject</span> <span class="o">=</span> <span class="n">toml</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">__basepath__</span> <span class="o">/</span> <span class="s2">&quot;pyproject.toml&quot;</span><span class="p">)</span>
 
 <span class="n">__version__</span><span class="p">:</span> <span class="n">Final</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="n">pyproject</span><span class="p">[</span><span class="s2">&quot;tool&quot;</span><span class="p">][</span><span class="s2">&quot;poetry&quot;</span><span class="p">][</span><span class="s2">&quot;version&quot;</span><span class="p">]</span>
-
-
-<span class="k">def</span> <span class="nf">pkg_res</span><span class="p">(</span><span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Path</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;Return resource bundled with this package.&quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="n">__pkg_path__</span> <span class="o">/</span> <span class="n">path</span>
 </pre></div>
 
         </details>
 
             </section>
-                <section id="pkg_res">
-                            <div class="attr function"><a class="headerlink" href="#pkg_res">#&nbsp;&nbsp</a>
-
-        
-            <span class="def">def</span>
-            <span class="name">pkg_res</span><span class="signature">(path: str) -&gt; pathlib.Path</span>:
-    </div>
-
-                <details>
-            <summary>View Source</summary>
-            <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">pkg_res</span><span class="p">(</span><span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Path</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;Return resource bundled with this package.&quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="n">__pkg_path__</span> <span class="o">/</span> <span class="n">path</span>
-</pre></div>
-
-        </details>
-
-            <div class="docstring"><p>Return resource bundled with this package.</p>
-</div>
-
-
-                </section>
     </main>
 <script>
     function escapeHTML(html) {

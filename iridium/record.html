@@ -199,7 +199,7 @@
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">BinaryIO</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Iterable</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Tuple</span>
 
 <span class="kn">from</span> <span class="nn">.generic</span> <span class="kn">import</span> <span class="n">AccessProxy</span><span class="p">,</span> <span class="n">Query</span>
-<span class="kn">from</span> <span class="nn">.inveniordm.api</span> <span class="kn">import</span> <span class="n">InvenioRDMClient</span>
+<span class="kn">from</span> <span class="nn">.inveniordm</span> <span class="kn">import</span> <span class="n">InvenioRDMClient</span>
 <span class="kn">from</span> <span class="nn">.inveniordm.models</span> <span class="kn">import</span> <span class="p">(</span>
     <span class="n">AccessLink</span><span class="p">,</span>
     <span class="n">FileMetadata</span><span class="p">,</span>
@@ -997,7 +997,7 @@ overwriting them will have no effect on the actual data on the server.</p>
 
         
             <span class="name">WrappedRecord</span><span class="signature">(
-    cl: <a href="inveniordm/api.html#InvenioRDMClient">iridium.inveniordm.api.InvenioRDMClient</a>,
+    cl: <a href="inveniordm.html#InvenioRDMClient">iridium.inveniordm.InvenioRDMClient</a>,
     rec: <a href="inveniordm/models/technical.html#Record">iridium.inveniordm.models.technical.Record</a>,
     is_draft: bool
 )</span>
@@ -1405,7 +1405,7 @@ the fields <code><a href="#WrappedAccessLink.expires_at">expires_at</a></code> a
 
         
             <span class="name">WrappedAccessLink</span><span class="signature">(
-    cl: <a href="inveniordm/api.html#InvenioRDMClient">iridium.inveniordm.api.InvenioRDMClient</a>,
+    cl: <a href="inveniordm.html#InvenioRDMClient">iridium.inveniordm.InvenioRDMClient</a>,
     rec_id: str,
     lnk: <a href="inveniordm/models/technical.html#AccessLink">iridium.inveniordm.models.technical.AccessLink</a>
 )</span>
@@ -1427,7 +1427,7 @@ the fields <code><a href="#WrappedAccessLink.expires_at">expires_at</a></code> a
                             <div id="WrappedAccessLink.expires_at" class="classattr">
                                             <div class="attr variable"><a class="headerlink" href="#WrappedAccessLink.expires_at">#&nbsp;&nbsp</a>
 
-        <span class="name">expires_at</span><span class="annotation">: Optional[datetime.datetime]</span>
+        <span class="name">expires_at</span><span class="annotation">: Union[datetime.datetime, NoneType]</span>
     </div>
 
     
@@ -1436,7 +1436,7 @@ the fields <code><a href="#WrappedAccessLink.expires_at">expires_at</a></code> a
                             <div id="WrappedAccessLink.permission" class="classattr">
                                             <div class="attr variable"><a class="headerlink" href="#WrappedAccessLink.permission">#&nbsp;&nbsp</a>
 
-        <span class="name">permission</span><span class="annotation">: Optional[<a href="inveniordm/models/technical.html#LinkPermission">iridium.inveniordm.models.technical.LinkPermission</a>]</span>
+        <span class="name">permission</span><span class="annotation">: Union[<a href="inveniordm/models/technical.html#LinkPermission">iridium.inveniordm.models.technical.LinkPermission</a>, NoneType]</span>
     </div>
 
     
@@ -1445,7 +1445,7 @@ the fields <code><a href="#WrappedAccessLink.expires_at">expires_at</a></code> a
                             <div id="WrappedAccessLink.id" class="classattr">
                                             <div class="attr variable"><a class="headerlink" href="#WrappedAccessLink.id">#&nbsp;&nbsp</a>
 
-        <span class="name">id</span><span class="annotation">: Optional[str]</span>
+        <span class="name">id</span><span class="annotation">: Union[str, NoneType]</span>
     </div>
 
     
@@ -1454,7 +1454,7 @@ the fields <code><a href="#WrappedAccessLink.expires_at">expires_at</a></code> a
                             <div id="WrappedAccessLink.token" class="classattr">
                                             <div class="attr variable"><a class="headerlink" href="#WrappedAccessLink.token">#&nbsp;&nbsp</a>
 
-        <span class="name">token</span><span class="annotation">: Optional[str]</span>
+        <span class="name">token</span><span class="annotation">: Union[str, NoneType]</span>
     </div>
 
     
@@ -1463,7 +1463,7 @@ the fields <code><a href="#WrappedAccessLink.expires_at">expires_at</a></code> a
                             <div id="WrappedAccessLink.created_at" class="classattr">
                                             <div class="attr variable"><a class="headerlink" href="#WrappedAccessLink.created_at">#&nbsp;&nbsp</a>
 
-        <span class="name">created_at</span><span class="annotation">: Optional[datetime.datetime]</span>
+        <span class="name">created_at</span><span class="annotation">: Union[datetime.datetime, NoneType]</span>
     </div>
 
     
@@ -1522,14 +1522,15 @@ the fields <code><a href="#WrappedAccessLink.expires_at">expires_at</a></code> a
 
         </details>
 
-            <div class="docstring"><p>Class for convenient access to query results (that are assumed to have an id).</p>
+            <div class="docstring"><p>Class for convenient access to query results.</p>
 
-<p>Allowed keyword arguments: normal query args, but without 'page'.</p>
+<p>Results are by default assumed to have an <code>id</code> attribute for dict-like access.</p>
 
-<p>Access through numeric index corresponds to entries in search result order.
-Access through string id is possible, but inefficient (may traverse all results).</p>
+<p>Allowed keyword arguments: normal <code>QueryArgs</code>, but without <code>page</code>.</p>
 
-<p>Usage (for developers): Subclass and implement <code>_query_items</code>.</p>
+<p>Access through numeric index corresponds to entries in search result order.</p>
+
+<p>Access through string id is possible, but inefficient (may traverse all results).</p>
 </div>
 
 
@@ -1537,7 +1538,7 @@ Access through string id is possible, but inefficient (may traverse all results)
                                         <div class="attr function"><a class="headerlink" href="#AccessLinkQuery.__init__">#&nbsp;&nbsp</a>
 
         
-            <span class="name">AccessLinkQuery</span><span class="signature">(cl: <a href="inveniordm/api.html#InvenioRDMClient">iridium.inveniordm.api.InvenioRDMClient</a>, rec_id: str)</span>
+            <span class="name">AccessLinkQuery</span><span class="signature">(cl: <a href="inveniordm.html#InvenioRDMClient">iridium.inveniordm.InvenioRDMClient</a>, rec_id: str)</span>
     </div>
 
                 <details>
@@ -1628,7 +1629,7 @@ while a larger batch size is more efficient for traversing all results.</p>
                                         <div class="attr function"><a class="headerlink" href="#AccessLinks.__init__">#&nbsp;&nbsp</a>
 
         
-            <span class="name">AccessLinks</span><span class="signature">(cl: <a href="inveniordm/api.html#InvenioRDMClient">iridium.inveniordm.api.InvenioRDMClient</a>, rec_id: str)</span>
+            <span class="name">AccessLinks</span><span class="signature">(cl: <a href="inveniordm.html#InvenioRDMClient">iridium.inveniordm.InvenioRDMClient</a>, rec_id: str)</span>
     </div>
 
                 <details>
@@ -1650,8 +1651,8 @@ while a larger batch size is more efficient for traversing all results.</p>
             <span class="def">def</span>
             <span class="name">create</span><span class="signature">(
     self,
-    expires_at: Optional[datetime.datetime] = None,
-    permission: Optional[<a href="inveniordm/models/technical.html#LinkPermission">iridium.inveniordm.models.technical.LinkPermission</a>] = None
+    expires_at: Union[datetime.datetime, NoneType] = None,
+    permission: Union[<a href="inveniordm/models/technical.html#LinkPermission">iridium.inveniordm.models.technical.LinkPermission</a>, NoneType] = None
 )</span>:
     </div>
 
@@ -1704,14 +1705,15 @@ while a larger batch size is more efficient for traversing all results.</p>
 
         </details>
 
-            <div class="docstring"><p>Class for convenient access to query results (that are assumed to have an id).</p>
+            <div class="docstring"><p>Class for convenient access to query results.</p>
 
-<p>Allowed keyword arguments: normal query args, but without 'page'.</p>
+<p>Results are by default assumed to have an <code>id</code> attribute for dict-like access.</p>
 
-<p>Access through numeric index corresponds to entries in search result order.
-Access through string id is possible, but inefficient (may traverse all results).</p>
+<p>Allowed keyword arguments: normal <code>QueryArgs</code>, but without <code>page</code>.</p>
 
-<p>Usage (for developers): Subclass and implement <code>_query_items</code>.</p>
+<p>Access through numeric index corresponds to entries in search result order.</p>
+
+<p>Access through string id is possible, but inefficient (may traverse all results).</p>
 </div>
 
 
@@ -1719,7 +1721,7 @@ Access through string id is possible, but inefficient (may traverse all results)
                                         <div class="attr function"><a class="headerlink" href="#RecordVersionsQuery.__init__">#&nbsp;&nbsp</a>
 
         
-            <span class="name">RecordVersionsQuery</span><span class="signature">(cl: <a href="inveniordm/api.html#InvenioRDMClient">iridium.inveniordm.api.InvenioRDMClient</a>, rec_id: str)</span>
+            <span class="name">RecordVersionsQuery</span><span class="signature">(cl: <a href="inveniordm.html#InvenioRDMClient">iridium.inveniordm.InvenioRDMClient</a>, rec_id: str)</span>
     </div>
 
                 <details>
@@ -1818,7 +1820,7 @@ while a larger batch size is more efficient for traversing all results.</p>
                                         <div class="attr function"><a class="headerlink" href="#RecordVersions.__init__">#&nbsp;&nbsp</a>
 
         
-            <span class="name">RecordVersions</span><span class="signature">(cl: <a href="inveniordm/api.html#InvenioRDMClient">iridium.inveniordm.api.InvenioRDMClient</a>, rec_id: str)</span>
+            <span class="name">RecordVersions</span><span class="signature">(cl: <a href="inveniordm.html#InvenioRDMClient">iridium.inveniordm.InvenioRDMClient</a>, rec_id: str)</span>
     </div>
 
                 <details>
