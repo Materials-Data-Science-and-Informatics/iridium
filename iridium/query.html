@@ -120,6 +120,7 @@ and also to access specific entities via their id using dict-like access.</p>
 <span class="sd">These can be used to get lazy-loaded list-like sequences of query results</span>
 <span class="sd">and also to access specific entities via their id using dict-like access.</span>
 <span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Optional</span>
 
 <span class="kn">from</span> <span class="nn">.generic</span> <span class="kn">import</span> <span class="n">AccessProxy</span><span class="p">,</span> <span class="n">Query</span>
 <span class="kn">from</span> <span class="nn">.inveniordm.api</span> <span class="kn">import</span> <span class="n">InvenioRDMClient</span>
@@ -149,9 +150,7 @@ and also to access specific entities via their id using dict-like access.</p>
 
     <span class="k">def</span> <span class="nf">_query_items</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Results</span><span class="p">:</span>
         <span class="n">ret</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="o">.</span><span class="n">query</span><span class="o">.</span><span class="n">records</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_user_only</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-        <span class="n">ret</span><span class="o">.</span><span class="n">hits</span><span class="o">.</span><span class="n">hits</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span>
-            <span class="nb">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">WrappedRecord</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="kc">False</span><span class="p">),</span> <span class="n">ret</span><span class="o">.</span><span class="n">hits</span><span class="o">.</span><span class="n">hits</span><span class="p">)</span>
-        <span class="p">)</span>
+        <span class="n">ret</span><span class="o">.</span><span class="n">hits</span><span class="o">.</span><span class="n">hits</span> <span class="o">=</span> <span class="p">[</span><span class="n">WrappedRecord</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">ret</span><span class="o">.</span><span class="n">hits</span><span class="o">.</span><span class="n">hits</span><span class="p">]</span>
         <span class="k">return</span> <span class="n">ret</span>
 
 
@@ -169,9 +168,7 @@ and also to access specific entities via their id using dict-like access.</p>
         <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;q&quot;</span><span class="p">]</span> <span class="o">+=</span> <span class="s2">&quot; is_published:false&quot;</span>
 
         <span class="n">ret</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="o">.</span><span class="n">query</span><span class="o">.</span><span class="n">records</span><span class="p">(</span><span class="n">user</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-        <span class="n">ret</span><span class="o">.</span><span class="n">hits</span><span class="o">.</span><span class="n">hits</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span>
-            <span class="nb">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">WrappedRecord</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="kc">True</span><span class="p">),</span> <span class="n">ret</span><span class="o">.</span><span class="n">hits</span><span class="o">.</span><span class="n">hits</span><span class="p">)</span>
-        <span class="p">)</span>
+        <span class="n">ret</span><span class="o">.</span><span class="n">hits</span><span class="o">.</span><span class="n">hits</span> <span class="o">=</span> <span class="p">[</span><span class="n">WrappedRecord</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">ret</span><span class="o">.</span><span class="n">hits</span><span class="o">.</span><span class="n">hits</span><span class="p">]</span>
         <span class="k">return</span> <span class="n">ret</span>
 
 
@@ -201,7 +198,7 @@ and also to access specific entities via their id using dict-like access.</p>
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;&#39;user&#39; must be a bool!&quot;</span><span class="p">)</span>
             <span class="n">user</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;user&quot;</span><span class="p">]</span>
             <span class="k">del</span> <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;user&quot;</span><span class="p">]</span>
-
+        <span class="c1"># the user flag determines whether general or user record API is used</span>
         <span class="k">return</span> <span class="n">RecordQuery</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="p">,</span> <span class="n">user</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_get_entity</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">record_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
@@ -220,6 +217,7 @@ and also to access specific entities via their id using dict-like access.</p>
 <span class="sd">    as these drafts cannot be efficiently queried for (yet) due to the way</span>
 <span class="sd">    the search indices in Invenio RDM are set up.</span>
 <span class="sd">    (There exists `has_draft:true`, but this does not allow to filter for owned records).</span>
+<span class="sd">    See: https://github.com/inveniosoftware/invenio-app-rdm/issues/714</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="nf">_get_query</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Query</span><span class="p">:</span>
@@ -229,9 +227,22 @@ and also to access specific entities via their id using dict-like access.</p>
         <span class="k">return</span> <span class="n">WrappedRecord</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="o">.</span><span class="n">draft</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">draft_id</span><span class="p">),</span> <span class="kc">True</span><span class="p">)</span>
 
     <span class="c1"># this fits here nicely</span>
-    <span class="k">def</span> <span class="nf">create</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Create an empty record draft.&quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="n">WrappedRecord</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="o">.</span><span class="n">draft</span><span class="o">.</span><span class="n">create</span><span class="p">(),</span> <span class="kc">True</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">create</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">record_id</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">new_version</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Create an empty draft, create new version or edit an existing record.</span>
+
+<span class="sd">        If `record_id` is `None`, will create an empty draft.</span>
+<span class="sd">        Otherwise will return a draft for an existing or new version</span>
+<span class="sd">        (depending on whether `new_version` is set) for the passed `record_id`.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">record_id</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">rec</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="o">.</span><span class="n">draft</span><span class="o">.</span><span class="n">create</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">new_version</span><span class="p">:</span>
+                <span class="n">rec</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="o">.</span><span class="n">draft</span><span class="o">.</span><span class="n">new_version</span><span class="p">(</span><span class="n">record_id</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">rec</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="o">.</span><span class="n">draft</span><span class="o">.</span><span class="n">from_record</span><span class="p">(</span><span class="n">record_id</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">WrappedRecord</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="p">,</span> <span class="n">rec</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
 </pre></div>
 
         </details>
@@ -356,9 +367,7 @@ while a larger batch size is more efficient for traversing all results.</p>
 
     <span class="k">def</span> <span class="nf">_query_items</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Results</span><span class="p">:</span>
         <span class="n">ret</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="o">.</span><span class="n">query</span><span class="o">.</span><span class="n">records</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_user_only</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-        <span class="n">ret</span><span class="o">.</span><span class="n">hits</span><span class="o">.</span><span class="n">hits</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span>
-            <span class="nb">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">WrappedRecord</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="kc">False</span><span class="p">),</span> <span class="n">ret</span><span class="o">.</span><span class="n">hits</span><span class="o">.</span><span class="n">hits</span><span class="p">)</span>
-        <span class="p">)</span>
+        <span class="n">ret</span><span class="o">.</span><span class="n">hits</span><span class="o">.</span><span class="n">hits</span> <span class="o">=</span> <span class="p">[</span><span class="n">WrappedRecord</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">ret</span><span class="o">.</span><span class="n">hits</span><span class="o">.</span><span class="n">hits</span><span class="p">]</span>
         <span class="k">return</span> <span class="n">ret</span>
 </pre></div>
 
@@ -462,9 +471,7 @@ while a larger batch size is more efficient for traversing all results.</p>
         <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;q&quot;</span><span class="p">]</span> <span class="o">+=</span> <span class="s2">&quot; is_published:false&quot;</span>
 
         <span class="n">ret</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="o">.</span><span class="n">query</span><span class="o">.</span><span class="n">records</span><span class="p">(</span><span class="n">user</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-        <span class="n">ret</span><span class="o">.</span><span class="n">hits</span><span class="o">.</span><span class="n">hits</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span>
-            <span class="nb">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">WrappedRecord</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="kc">True</span><span class="p">),</span> <span class="n">ret</span><span class="o">.</span><span class="n">hits</span><span class="o">.</span><span class="n">hits</span><span class="p">)</span>
-        <span class="p">)</span>
+        <span class="n">ret</span><span class="o">.</span><span class="n">hits</span><span class="o">.</span><span class="n">hits</span> <span class="o">=</span> <span class="p">[</span><span class="n">WrappedRecord</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">ret</span><span class="o">.</span><span class="n">hits</span><span class="o">.</span><span class="n">hits</span><span class="p">]</span>
         <span class="k">return</span> <span class="n">ret</span>
 </pre></div>
 
@@ -612,7 +619,7 @@ while a larger batch size is more efficient for traversing all results.</p>
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;&#39;user&#39; must be a bool!&quot;</span><span class="p">)</span>
             <span class="n">user</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;user&quot;</span><span class="p">]</span>
             <span class="k">del</span> <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;user&quot;</span><span class="p">]</span>
-
+        <span class="c1"># the user flag determines whether general or user record API is used</span>
         <span class="k">return</span> <span class="n">RecordQuery</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="p">,</span> <span class="n">user</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_get_entity</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">record_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
@@ -658,6 +665,7 @@ while a larger batch size is more efficient for traversing all results.</p>
 <span class="sd">    as these drafts cannot be efficiently queried for (yet) due to the way</span>
 <span class="sd">    the search indices in Invenio RDM are set up.</span>
 <span class="sd">    (There exists `has_draft:true`, but this does not allow to filter for owned records).</span>
+<span class="sd">    See: https://github.com/inveniosoftware/invenio-app-rdm/issues/714</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="nf">_get_query</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Query</span><span class="p">:</span>
@@ -667,9 +675,22 @@ while a larger batch size is more efficient for traversing all results.</p>
         <span class="k">return</span> <span class="n">WrappedRecord</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="o">.</span><span class="n">draft</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">draft_id</span><span class="p">),</span> <span class="kc">True</span><span class="p">)</span>
 
     <span class="c1"># this fits here nicely</span>
-    <span class="k">def</span> <span class="nf">create</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Create an empty record draft.&quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="n">WrappedRecord</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="o">.</span><span class="n">draft</span><span class="o">.</span><span class="n">create</span><span class="p">(),</span> <span class="kc">True</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">create</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">record_id</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">new_version</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Create an empty draft, create new version or edit an existing record.</span>
+
+<span class="sd">        If `record_id` is `None`, will create an empty draft.</span>
+<span class="sd">        Otherwise will return a draft for an existing or new version</span>
+<span class="sd">        (depending on whether `new_version` is set) for the passed `record_id`.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">record_id</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">rec</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="o">.</span><span class="n">draft</span><span class="o">.</span><span class="n">create</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">new_version</span><span class="p">:</span>
+                <span class="n">rec</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="o">.</span><span class="n">draft</span><span class="o">.</span><span class="n">new_version</span><span class="p">(</span><span class="n">record_id</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">rec</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="o">.</span><span class="n">draft</span><span class="o">.</span><span class="n">from_record</span><span class="p">(</span><span class="n">record_id</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">WrappedRecord</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="p">,</span> <span class="n">rec</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
 </pre></div>
 
         </details>
@@ -686,7 +707,8 @@ while a larger batch size is more efficient for traversing all results.</p>
 <p>It will <strong>not</strong> find drafts of editing existing record versions by the user,
 as these drafts cannot be efficiently queried for (yet) due to the way
 the search indices in Invenio RDM are set up.
-(There exists <code>has_draft:true</code>, but this does not allow to filter for owned records).</p>
+(There exists <code>has_draft:true</code>, but this does not allow to filter for owned records).
+See: https://github.com/inveniosoftware/invenio-app-rdm/issues/714</p>
 </div>
 
 
@@ -695,19 +717,36 @@ the search indices in Invenio RDM are set up.
 
         
             <span class="def">def</span>
-            <span class="name">create</span><span class="signature">(self)</span>:
+            <span class="name">create</span><span class="signature">(self, record_id: Optional[str] = None, new_version: bool = True)</span>:
     </div>
 
                 <details>
             <summary>View Source</summary>
-            <div class="codehilite"><pre><span></span>    <span class="k">def</span> <span class="nf">create</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Create an empty record draft.&quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="n">WrappedRecord</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="o">.</span><span class="n">draft</span><span class="o">.</span><span class="n">create</span><span class="p">(),</span> <span class="kc">True</span><span class="p">)</span>
+            <div class="codehilite"><pre><span></span>    <span class="k">def</span> <span class="nf">create</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">record_id</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">new_version</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Create an empty draft, create new version or edit an existing record.</span>
+
+<span class="sd">        If `record_id` is `None`, will create an empty draft.</span>
+<span class="sd">        Otherwise will return a draft for an existing or new version</span>
+<span class="sd">        (depending on whether `new_version` is set) for the passed `record_id`.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">record_id</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">rec</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="o">.</span><span class="n">draft</span><span class="o">.</span><span class="n">create</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">new_version</span><span class="p">:</span>
+                <span class="n">rec</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="o">.</span><span class="n">draft</span><span class="o">.</span><span class="n">new_version</span><span class="p">(</span><span class="n">record_id</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">rec</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="o">.</span><span class="n">draft</span><span class="o">.</span><span class="n">from_record</span><span class="p">(</span><span class="n">record_id</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">WrappedRecord</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="p">,</span> <span class="n">rec</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
 </pre></div>
 
         </details>
 
-            <div class="docstring"><p>Create an empty record draft.</p>
+            <div class="docstring"><p>Create an empty draft, create new version or edit an existing record.</p>
+
+<p>If <code>record_id</code> is <code>None</code>, will create an empty draft.
+Otherwise will return a draft for an existing or new version
+(depending on whether <code>new_version</code> is set) for the passed <code>record_id</code>.</p>
 </div>
 
 
