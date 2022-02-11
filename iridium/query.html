@@ -110,6 +110,11 @@
 
 <p>These can be used to get lazy-loaded list-like sequences of query results
 and also to access specific entities via their id using dict-like access.</p>
+
+<p>Notice that other query types are located in different places in order to
+prevent circular dependencies. For example, access link or version queries
+for published records are colocated with the <code>WrappedRecord</code> class that
+is used to access these queries.</p>
 </div>
 
                         <details>
@@ -119,6 +124,11 @@ and also to access specific entities via their id using dict-like access.</p>
 
 <span class="sd">These can be used to get lazy-loaded list-like sequences of query results</span>
 <span class="sd">and also to access specific entities via their id using dict-like access.</span>
+
+<span class="sd">Notice that other query types are located in different places in order to</span>
+<span class="sd">prevent circular dependencies. For example, access link or version queries</span>
+<span class="sd">for published records are colocated with the `WrappedRecord` class that</span>
+<span class="sd">is used to access these queries.</span>
 <span class="sd">&quot;&quot;&quot;</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Optional</span>
 
@@ -226,7 +236,7 @@ and also to access specific entities via their id using dict-like access.</p>
     <span class="k">def</span> <span class="nf">_get_entity</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">draft_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">WrappedRecord</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="o">.</span><span class="n">draft</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">draft_id</span><span class="p">),</span> <span class="kc">True</span><span class="p">)</span>
 
-    <span class="c1"># this fits here nicely</span>
+    <span class="c1"># this fits here nicely as a general way to create new drafts</span>
     <span class="k">def</span> <span class="nf">create</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">record_id</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">new_version</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Create an empty draft, create new version or edit an existing record.</span>
@@ -238,10 +248,13 @@ and also to access specific entities via their id using dict-like access.</p>
         <span class="k">if</span> <span class="n">record_id</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">rec</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="o">.</span><span class="n">draft</span><span class="o">.</span><span class="n">create</span><span class="p">()</span>
         <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># this is also accessible from the WrappedRecord,</span>
+            <span class="c1"># but we can save one GET request doing it directly</span>
             <span class="k">if</span> <span class="n">new_version</span><span class="p">:</span>
                 <span class="n">rec</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="o">.</span><span class="n">draft</span><span class="o">.</span><span class="n">new_version</span><span class="p">(</span><span class="n">record_id</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">rec</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="o">.</span><span class="n">draft</span><span class="o">.</span><span class="n">from_record</span><span class="p">(</span><span class="n">record_id</span><span class="p">)</span>
+
         <span class="k">return</span> <span class="n">WrappedRecord</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="p">,</span> <span class="n">rec</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
 </pre></div>
 
@@ -674,7 +687,7 @@ while a larger batch size is more efficient for traversing all results.</p>
     <span class="k">def</span> <span class="nf">_get_entity</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">draft_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">WrappedRecord</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="o">.</span><span class="n">draft</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">draft_id</span><span class="p">),</span> <span class="kc">True</span><span class="p">)</span>
 
-    <span class="c1"># this fits here nicely</span>
+    <span class="c1"># this fits here nicely as a general way to create new drafts</span>
     <span class="k">def</span> <span class="nf">create</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">record_id</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">new_version</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Create an empty draft, create new version or edit an existing record.</span>
@@ -686,10 +699,13 @@ while a larger batch size is more efficient for traversing all results.</p>
         <span class="k">if</span> <span class="n">record_id</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">rec</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="o">.</span><span class="n">draft</span><span class="o">.</span><span class="n">create</span><span class="p">()</span>
         <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># this is also accessible from the WrappedRecord,</span>
+            <span class="c1"># but we can save one GET request doing it directly</span>
             <span class="k">if</span> <span class="n">new_version</span><span class="p">:</span>
                 <span class="n">rec</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="o">.</span><span class="n">draft</span><span class="o">.</span><span class="n">new_version</span><span class="p">(</span><span class="n">record_id</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">rec</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="o">.</span><span class="n">draft</span><span class="o">.</span><span class="n">from_record</span><span class="p">(</span><span class="n">record_id</span><span class="p">)</span>
+
         <span class="k">return</span> <span class="n">WrappedRecord</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="p">,</span> <span class="n">rec</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
 </pre></div>
 
@@ -733,10 +749,13 @@ See: https://github.com/inveniosoftware/invenio-app-rdm/issues/714</p>
         <span class="k">if</span> <span class="n">record_id</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">rec</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="o">.</span><span class="n">draft</span><span class="o">.</span><span class="n">create</span><span class="p">()</span>
         <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># this is also accessible from the WrappedRecord,</span>
+            <span class="c1"># but we can save one GET request doing it directly</span>
             <span class="k">if</span> <span class="n">new_version</span><span class="p">:</span>
                 <span class="n">rec</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="o">.</span><span class="n">draft</span><span class="o">.</span><span class="n">new_version</span><span class="p">(</span><span class="n">record_id</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">rec</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="o">.</span><span class="n">draft</span><span class="o">.</span><span class="n">from_record</span><span class="p">(</span><span class="n">record_id</span><span class="p">)</span>
+
         <span class="k">return</span> <span class="n">WrappedRecord</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="p">,</span> <span class="n">rec</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
 </pre></div>
 

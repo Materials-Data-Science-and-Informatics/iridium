@@ -262,12 +262,7 @@
         <span class="sd">&quot;&quot;&quot;Return complete URL based on configured base URL and relative API path.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">irdm_url</span><span class="si">}</span><span class="s2">/api</span><span class="si">{</span><span class="n">path</span><span class="si">}</span><span class="s2">&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span>
-        <span class="n">irdm_url</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-        <span class="n">irdm_token</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">httpx_kwargs</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="p">{},</span>
-    <span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">irdm_url</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">irdm_token</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">httpx_kwargs</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Create an instance of the Invenio RDM API.</span>
 
@@ -304,12 +299,12 @@
             <span class="k">return</span> <span class="kc">False</span>
 
     <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">from_env</span><span class="p">(</span><span class="n">httpx_kwargs</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}):</span>
+    <span class="k">def</span> <span class="nf">from_env</span><span class="p">(</span><span class="o">**</span><span class="n">httpx_kwargs</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Get client instance based on configuration given in environment.&quot;&quot;&quot;</span>
         <span class="n">load_dotenv</span><span class="p">()</span>  <span class="c1"># get environment variables from possible .env file</span>
         <span class="n">url</span> <span class="o">=</span> <span class="n">get_env</span><span class="p">(</span><span class="s2">&quot;INVENIORDM_URL&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">)</span>
         <span class="n">token</span> <span class="o">=</span> <span class="n">get_env</span><span class="p">(</span><span class="s2">&quot;INVENIORDM_TOKEN&quot;</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">InvenioRDMClient</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">token</span><span class="p">,</span> <span class="n">httpx_kwargs</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">InvenioRDMClient</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">token</span><span class="p">,</span> <span class="o">**</span><span class="n">httpx_kwargs</span><span class="p">)</span>
 
 
 <span class="k">class</span> <span class="nc">SubAPI</span><span class="p">:</span>
@@ -823,12 +818,7 @@
         <span class="sd">&quot;&quot;&quot;Return complete URL based on configured base URL and relative API path.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">irdm_url</span><span class="si">}</span><span class="s2">/api</span><span class="si">{</span><span class="n">path</span><span class="si">}</span><span class="s2">&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span>
-        <span class="n">irdm_url</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-        <span class="n">irdm_token</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">httpx_kwargs</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="p">{},</span>
-    <span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">irdm_url</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">irdm_token</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">httpx_kwargs</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Create an instance of the Invenio RDM API.</span>
 
@@ -865,12 +855,12 @@
             <span class="k">return</span> <span class="kc">False</span>
 
     <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">from_env</span><span class="p">(</span><span class="n">httpx_kwargs</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}):</span>
+    <span class="k">def</span> <span class="nf">from_env</span><span class="p">(</span><span class="o">**</span><span class="n">httpx_kwargs</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Get client instance based on configuration given in environment.&quot;&quot;&quot;</span>
         <span class="n">load_dotenv</span><span class="p">()</span>  <span class="c1"># get environment variables from possible .env file</span>
         <span class="n">url</span> <span class="o">=</span> <span class="n">get_env</span><span class="p">(</span><span class="s2">&quot;INVENIORDM_URL&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">)</span>
         <span class="n">token</span> <span class="o">=</span> <span class="n">get_env</span><span class="p">(</span><span class="s2">&quot;INVENIORDM_TOKEN&quot;</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">InvenioRDMClient</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">token</span><span class="p">,</span> <span class="n">httpx_kwargs</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">InvenioRDMClient</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">token</span><span class="p">,</span> <span class="o">**</span><span class="n">httpx_kwargs</span><span class="p">)</span>
 </pre></div>
 
         </details>
@@ -883,21 +873,12 @@
                                         <div class="attr function"><a class="headerlink" href="#InvenioRDMClient.__init__">#&nbsp;&nbsp</a>
 
         
-            <span class="name">InvenioRDMClient</span><span class="signature">(
-    irdm_url: str,
-    irdm_token: Optional[str] = None,
-    httpx_kwargs: Dict[str, Any] = {}
-)</span>
+            <span class="name">InvenioRDMClient</span><span class="signature">(irdm_url: str, irdm_token: Optional[str] = None, **httpx_kwargs)</span>
     </div>
 
                 <details>
             <summary>View Source</summary>
-            <div class="codehilite"><pre><span></span>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span>
-        <span class="n">irdm_url</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-        <span class="n">irdm_token</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">httpx_kwargs</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="p">{},</span>
-    <span class="p">):</span>
+            <div class="codehilite"><pre><span></span>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">irdm_url</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">irdm_token</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">httpx_kwargs</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Create an instance of the Invenio RDM API.</span>
 
@@ -983,18 +964,18 @@ If you need to change them, create a new instance.</p>
                 <div class="decorator">@staticmethod</div>
 
             <span class="def">def</span>
-            <span class="name">from_env</span><span class="signature">(httpx_kwargs: Dict[str, Any] = {})</span>:
+            <span class="name">from_env</span><span class="signature">(**httpx_kwargs)</span>:
     </div>
 
                 <details>
             <summary>View Source</summary>
             <div class="codehilite"><pre><span></span>    <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">from_env</span><span class="p">(</span><span class="n">httpx_kwargs</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}):</span>
+    <span class="k">def</span> <span class="nf">from_env</span><span class="p">(</span><span class="o">**</span><span class="n">httpx_kwargs</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Get client instance based on configuration given in environment.&quot;&quot;&quot;</span>
         <span class="n">load_dotenv</span><span class="p">()</span>  <span class="c1"># get environment variables from possible .env file</span>
         <span class="n">url</span> <span class="o">=</span> <span class="n">get_env</span><span class="p">(</span><span class="s2">&quot;INVENIORDM_URL&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">)</span>
         <span class="n">token</span> <span class="o">=</span> <span class="n">get_env</span><span class="p">(</span><span class="s2">&quot;INVENIORDM_TOKEN&quot;</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">InvenioRDMClient</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">token</span><span class="p">,</span> <span class="n">httpx_kwargs</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">InvenioRDMClient</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">token</span><span class="p">,</span> <span class="o">**</span><span class="n">httpx_kwargs</span><span class="p">)</span>
 </pre></div>
 
         </details>
