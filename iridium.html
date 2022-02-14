@@ -30,7 +30,15 @@
 
                     <h2>Contents</h2>
                     <ul>
-  <li><a href="#iridium-manual">Iridium Manual</a></li>
+  <li><a href="#iridium">Iridium</a>
+  <ul>
+    <li><a href="#introduction">Introduction</a></li>
+    <li><a href="#import-iridium">Import Iridium</a></li>
+    <li><a href="#create-a-new-record">Create a new record</a></li>
+    <li><a href="#update-a-record">Update a record</a></li>
+    <li><a href="#query-records">Query records</a></li>
+    <li><a href="#query-vocabularies">Query vocabularies</a></li>
+  </ul></li>
 </ul>
 
 
@@ -63,20 +71,307 @@
                     <h1 class="modulename">
 iridium    </h1>
 
-                        <div class="docstring"><p>Welcome to Iridium.</p>
+                        <div class="docstring"><h1 id="iridium">Iridium</h1>
 
-<h1 id="iridium-manual">Iridium Manual</h1>
+<h2 id="introduction">Introduction</h2>
+
+<p>The goal of Iridium is to provide an easy-to-use Python interface for interacting
+with <a href="https://inveniordm.docs.cern.ch/">Invenio RDM</a>.</p>
+
+<p>Invenio RDM has a <a href="https://inveniordm.docs.cern.ch/reference/rest_api_index/">REST API</a>,
+but this API is <em>"[...] intended for advanced users, and developers of InvenioRDM
+that have some experience with using REST APIs [...]"</em>.</p>
+
+<p>Iridium is intended for <em>everyone else</em> who needs a programmatic interface to Invenio RDM,
+e.g.:</p>
+
+<ul>
+<li><strong>domain researchers and data scientists</strong> with basic user-level Python competence
+who would like to use an environment such as Jupyter notebooks
+e.g. in order to reuse or analyse available data.</li>
+<li><strong>developers</strong> who need to build lightweight external tooling around Invenio RDM
+e.g. as a part of bigger domain-specific solutions and workflows
+that use Invenio RDM as the underlying repository.</li>
+</ul>
+
+<p>In this tutorial you will learn how to use most of the Iridium interface.
+For a deeper look, consider looking into the more technical documentation of
+classes in the <code><a href="">iridium</a></code> package.</p>
+
+<h2 id="import-iridium">Import Iridium</h2>
+
+<p><strong>IMPORTANT:</strong> in order to use all the APIs, you need to get an <strong>API token</strong> from the
+Invenio RDM you are going to use. For this, sign in to your Invenio RDM, and go to
+<em>Settings -> Applications -> Personal access tokens</em> to create one.
+Without a token you will only be able to have read-only access to published records.</p>
+
+<p>Start with the following imports:</p>
+
+<div class="codehilite"><pre><span></span><code><span class="kn">from</span> <span class="nn">iridium</span> <span class="kn">import</span> <span class="n">Repository</span>
+<span class="kn">from</span> <span class="nn"><a href="iridium/inveniordm/models.html">iridium.inveniordm.models</a></span> <span class="kn">import</span> <span class="o">*</span>
+</code></pre></div>
+
+<p>A <code>Repository</code> object represents the top-level entry point from which all exposed
+functionality can be accessed. Get access to the Invenio RDM instance:</p>
+
+<div class="codehilite"><pre><span></span><code><span class="n">rdm</span> <span class="o">=</span> <span class="n">Repository</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="s2">&quot;https://www.your-invenio-rdm.org&quot;</span><span class="p">,</span> <span class="s2">&quot;YOUR_API_TOKEN&quot;</span><span class="p">)</span>
+</code></pre></div>
+
+<p><strong>Remark:</strong> If you are using a test instance of Invenio RDM that uses a self-signed
+certificate, you need to pass an extra argument <code>verify=False</code> to the <code>connect</code> method.
+Otherwise the connection will fail due to security reasons.</p>
+
+<h2 id="create-a-new-record">Create a new record</h2>
+
+<p>In Invenio, the workflow to update records always goes through record <em>drafts</em>.
+Create a draft for a new record like this:</p>
+
+<div class="codehilite"><pre><span></span><code><span class="n">draft</span> <span class="o">=</span> <span class="n">rdm</span><span class="o">.</span><span class="n">drafts</span><span class="o">.</span><span class="n">create</span><span class="p">()</span>
+</code></pre></div>
+
+<p>When you print or evaluate <code>draft</code> in your notebook, you will see something like:</p>
+
+<div class="codehilite"><pre><span></span><code><span class="p">{</span> <span class="s1">&#39;access&#39;</span><span class="p">:</span> <span class="p">{</span> <span class="s1">&#39;embargo&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;active&#39;</span><span class="p">:</span> <span class="kc">False</span><span class="p">},</span>
+              <span class="s1">&#39;files&#39;</span><span class="p">:</span> <span class="s1">&#39;public&#39;</span><span class="p">,</span>
+              <span class="s1">&#39;record&#39;</span><span class="p">:</span> <span class="s1">&#39;public&#39;</span><span class="p">,</span>
+              <span class="s1">&#39;status&#39;</span><span class="p">:</span> <span class="s1">&#39;metadata-only&#39;</span><span class="p">},</span>
+  <span class="s1">&#39;created&#39;</span><span class="p">:</span> <span class="s1">&#39;2022-02-14T10:21:36.081522+00:00&#39;</span><span class="p">,</span>
+  <span class="s1">&#39;expires_at&#39;</span><span class="p">:</span> <span class="s1">&#39;2022-02-14T10:21:36.081560&#39;</span><span class="p">,</span>
+  <span class="s1">&#39;files&#39;</span><span class="p">:</span> <span class="p">[],</span>
+  <span class="s1">&#39;id&#39;</span><span class="p">:</span> <span class="s1">&#39;k86r9-7b355&#39;</span><span class="p">,</span>
+  <span class="s1">&#39;is_published&#39;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+  <span class="s1">&#39;metadata&#39;</span><span class="p">:</span> <span class="p">{},</span>
+  <span class="s1">&#39;updated&#39;</span><span class="p">:</span> <span class="s1">&#39;2022-02-14T10:21:36.100746+00:00&#39;</span><span class="p">,</span>
+  <span class="s1">&#39;versions&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;index&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;is_latest&#39;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span> <span class="s1">&#39;is_latest_draft&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">}}</span>
+</code></pre></div>
+
+<p><strong>Remark:</strong> This is a slightly censored view at what Invenio RDM stores about drafts and
+records. Iridium will hide some fields that are confusing or too technical (you can still
+access them, if you know what you are doing).</p>
+
+<p>Both <code>save()</code> and <code>publish()</code> work exactly the same as you know it from the web interface.
+<strong>This means, you must <code>save()</code> changes you do to the metadata, otherwise they are lost
+once you get rid of your draft object.</strong>
+Also, changes you do to drafts are visible <em>only to you</em> until you <code>publish()</code> the draft.
+Note that <code>publish()</code> will also automatically <code>save()</code> your changes.</p>
+
+<p>We can try publishing the draft without adding any metadata:</p>
+
+<div class="codehilite"><pre><span></span><code><span class="n">draft</span><span class="o">.</span><span class="n">publish</span><span class="p">()</span>
+</code></pre></div>
+
+<p>We will get back a number of validation errors from Invenio RDM:</p>
+
+<div class="codehilite"><pre><span></span><code><span class="p">{</span> <span class="s1">&#39;files.enabled&#39;</span><span class="p">:</span> <span class="s1">&#39;Missing uploaded files. To disable files for this record &#39;</span>
+                   <span class="s1">&#39;please mark it as metadata-only.&#39;</span><span class="p">,</span>
+  <span class="s1">&#39;metadata.creators&#39;</span><span class="p">:</span> <span class="s1">&#39;Missing data for required field.&#39;</span><span class="p">,</span>
+  <span class="s1">&#39;metadata.publication_date&#39;</span><span class="p">:</span> <span class="s1">&#39;Missing data for required field.&#39;</span><span class="p">,</span>
+  <span class="s1">&#39;metadata.resource_type&#39;</span><span class="p">:</span> <span class="s1">&#39;Missing data for required field.&#39;</span><span class="p">,</span>
+  <span class="s1">&#39;metadata.title&#39;</span><span class="p">:</span> <span class="s1">&#39;Missing data for required field.&#39;</span><span class="p">}</span>
+</code></pre></div>
+
+<h3 id="uploading-a-file">Uploading a file</h3>
+
+<p>In order to fix the first problem, you either have to set <code>draft.files.enabled = False</code>,
+thus confirming that you want to create a <em>metadata-only</em> record, or you can add at least
+one file. We will take the second option here.
+To upload and attach <code>my_file.zip</code> to the draft, run:</p>
+
+<div class="codehilite"><pre><span></span><code><span class="n">draft</span><span class="o">.</span><span class="n">files</span><span class="o">.</span><span class="n">upload</span><span class="p">(</span><span class="s2">&quot;my_file.zip&quot;</span><span class="p">)</span>
+</code></pre></div>
+
+<p><strong>Remark:</strong> If you don't have a file stored on disk or want to store it under a different
+name in the record, you can use <code>draft.files.upload("target_filename.zip", data)</code>,
+where <code>data</code> can be an arbitrary binary stream. To create a suitable stream from a file,
+use <code>open(PATH_TO_FILE, "rb")</code>.</p>
+
+<p><strong>Example:</strong> <code>draft.files.upload("renamed.zip", open("my_file.zip", "rb"))</code> would upload the
+same file as above, but save it as <code>renamed.zip</code> in the draft.</p>
+
+<p>Now let us inspect <code>draft.files</code>:</p>
+
+<div class="codehilite"><pre><span></span><code><span class="p">{</span><span class="s1">&#39;my_file.zip&#39;</span><span class="p">:</span> <span class="n">FileMetadata</span><span class="p">(</span><span class="o">...</span><span class="p">)}</span>
+</code></pre></div>
+
+<p>We see that the new file is registered in the draft. We can also access the information
+that is stored alongside the uploaded file by inspecting <code>draft.files["my_file.zip"]</code>:</p>
+
+<div class="codehilite"><pre><span></span><code><span class="p">{</span> <span class="s1">&#39;bucket_id&#39;</span><span class="p">:</span> <span class="s1">&#39;263bcf0e-f74e-4d98-ab3a-3560b30c4c8b&#39;</span><span class="p">,</span>
+  <span class="s1">&#39;checksum&#39;</span><span class="p">:</span> <span class="s1">&#39;md5:1a6954f71cb8e867c6ea67b1d01c725b&#39;</span><span class="p">,</span>
+  <span class="s1">&#39;created&#39;</span><span class="p">:</span> <span class="s1">&#39;2022-02-14T11:01:24.484029+00:00&#39;</span><span class="p">,</span>
+  <span class="s1">&#39;file_id&#39;</span><span class="p">:</span> <span class="s1">&#39;b529e0c8-ce4b-4213-8d4b-ef3744aa4a5b&#39;</span><span class="p">,</span>
+  <span class="s1">&#39;key&#39;</span><span class="p">:</span> <span class="s1">&#39;my_file.zip&#39;</span><span class="p">,</span>
+  <span class="s1">&#39;links&#39;</span><span class="p">:</span> <span class="p">{</span> <span class="s1">&#39;commit&#39;</span><span class="p">:</span> <span class="s1">&#39;https://127.0.0.1:5000/api/records/k86r9-7b355/draft/files/README.md/commit&#39;</span><span class="p">,</span>
+             <span class="s1">&#39;content&#39;</span><span class="p">:</span> <span class="s1">&#39;https://127.0.0.1:5000/api/records/k86r9-7b355/draft/files/README.md/content&#39;</span><span class="p">,</span>
+             <span class="s1">&#39;self&#39;</span><span class="p">:</span> <span class="s1">&#39;https://127.0.0.1:5000/api/records/k86r9-7b355/draft/files/README.md&#39;</span><span class="p">},</span>
+  <span class="s1">&#39;metadata&#39;</span><span class="p">:</span> <span class="p">{},</span>
+  <span class="s1">&#39;mimetype&#39;</span><span class="p">:</span> <span class="s1">&#39;text/markdown&#39;</span><span class="p">,</span>
+  <span class="s1">&#39;size&#39;</span><span class="p">:</span> <span class="mi">2686</span><span class="p">,</span>
+  <span class="s1">&#39;status&#39;</span><span class="p">:</span> <span class="s1">&#39;completed&#39;</span><span class="p">,</span>
+  <span class="s1">&#39;storage_class&#39;</span><span class="p">:</span> <span class="s1">&#39;S&#39;</span><span class="p">,</span>
+  <span class="s1">&#39;updated&#39;</span><span class="p">:</span> <span class="s1">&#39;2022-02-14T11:01:24.590777+00:00&#39;</span><span class="p">,</span>
+  <span class="s1">&#39;version_id&#39;</span><span class="p">:</span> <span class="s1">&#39;e5b11c0a-60c3-42f7-be26-d332cd776310&#39;</span><span class="p">}</span>
+</code></pre></div>
+
+<p>The most interesting information is probably the <code>checksum</code>, that you can use to verify
+that no file corruption happened during upload (you could e.g. run <code>md5sum</code> on your file
+in the terminal and compare the checksum strings - they must be equal).</p>
+
+<h3 id="adding-some-metadata">Adding some metadata</h3>
+
+<p>In order to modify access restrictions or bibliographic metadata of a draft,
+you can edit the <code>draft.access</code> and <code>draft.metadata</code> fields directly
+(don't forget to <code>save()</code> afterwards).</p>
+
+<p>Now let us add the missing information Invenio RDM was complaining about.
+Iridium does not hide away or simplify the internal metadata model, but it provides
+classes that help you constructing the required entities (that is why we imported
+<code><a href="iridium/inveniordm/models.html">iridium.inveniordm.models</a></code> at the start).</p>
+
+<div class="codehilite"><pre><span></span><code><span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">date</span>
+
+<span class="c1"># add an arbitrary title</span>
+<span class="n">draft</span><span class="o">.</span><span class="n">metadata</span><span class="o">.</span><span class="n">title</span> <span class="o">=</span> <span class="s2">&quot;My amazing new dataset&quot;</span>
+<span class="c1"># publication date must be of the shape YYYY[-MM][-DD]</span>
+<span class="n">draft</span><span class="o">.</span><span class="n">metadata</span><span class="o">.</span><span class="n">publication_date</span> <span class="o">=</span> <span class="n">date</span><span class="o">.</span><span class="n">today</span><span class="p">()</span><span class="o">.</span><span class="n">isoformat</span><span class="p">()</span>  <span class="c1"># e.g.: 2022-10-20</span>
+<span class="c1"># you can check the existing types with list(rdm.vocabulary[VocType.resource_types])</span>
+<span class="n">draft</span><span class="o">.</span><span class="n">metadata</span><span class="o">.</span><span class="n">resource_type</span> <span class="o">=</span> <span class="n">VocabularyRef</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="s2">&quot;dataset&quot;</span><span class="p">)</span>
+
+<span class="n">draft</span><span class="o">.</span><span class="n">metadata</span><span class="o">.</span><span class="n">creators</span> <span class="o">=</span> <span class="p">[</span>
+  <span class="n">Creator</span><span class="p">(</span>
+  <span class="n">role</span><span class="o">=</span><span class="n">CreatorRole</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="s2">&quot;contactperson&quot;</span><span class="p">),</span>
+  <span class="n">affiliations</span><span class="o">=</span><span class="p">[</span><span class="n">Affiliation</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;CERN&quot;</span><span class="p">)],</span>
+  <span class="n">person_or_org</span><span class="o">=</span><span class="n">PersonOrOrg</span><span class="p">(</span><span class="n">family_name</span><span class="o">=</span><span class="s2">&quot;Doe&quot;</span><span class="p">,</span> <span class="n">given_name</span><span class="o">=</span><span class="s2">&quot;John&quot;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s2">&quot;personal&quot;</span><span class="p">))</span>
+<span class="p">]</span>
+
+<span class="n">draft</span><span class="o">.</span><span class="n">save</span><span class="p">()</span> <span class="c1"># should return no validation errors now</span>
+<span class="n">draft</span><span class="o">.</span><span class="n">publish</span><span class="p">()</span>
+</code></pre></div>
+
+<p>Notice that after <code>publish()</code> succeeds, we now hold a non-draft record object.
+You can check its record id in <code>draft.id</code>.</p>
+
+<p>Now lets verify that our new published record can be accessed:</p>
+
+<div class="codehilite"><pre><span></span><code><span class="n">rec</span> <span class="o">=</span> <span class="n">rdm</span><span class="o">.</span><span class="n">records</span><span class="p">[</span><span class="n">draft</span><span class="o">.</span><span class="n">id</span><span class="p">]</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">rec</span><span class="o">.</span><span class="n">metadata</span><span class="o">.</span><span class="n">title</span><span class="p">)</span>
+</code></pre></div>
+
+<p>We should see <code>My amazing new dataset</code> printed out to us.</p>
+
+<h2 id="update-a-record">Update a record</h2>
+
+<p>But what if we notice that we did a mistake?
+If the mistake was only in the metadata and not in the files, then we can easily fix it.
+For example, let us change the title of the record that we created:</p>
+
+<div class="codehilite"><pre><span></span><code><span class="n">rec</span> <span class="o">=</span> <span class="n">rdm</span><span class="o">.</span><span class="n">records</span><span class="p">[</span><span class="n">draft</span><span class="o">.</span><span class="n">id</span><span class="p">]</span>
+<span class="n">rec</span><span class="o">.</span><span class="n">edit</span><span class="p">()</span>
+<span class="n">rec</span><span class="o">.</span><span class="n">metadata</span><span class="o">.</span><span class="n">title</span> <span class="o">=</span> <span class="s2">&quot;My corrected new dataset&quot;</span>
+<span class="n">rec</span><span class="o">.</span><span class="n">publish</span><span class="p">()</span>
+</code></pre></div>
+
+<p>So we access the record, set it into editable mode (technically, we switch to a draft),
+update the metadata and <code>publish()</code> the changes - that's it.</p>
+
+<p>If our mistake is in the files that we uploaded, though, there is some more work involved.
+<strong>Invenio RDM only allows to update the files attached to a record if we create a new
+version of that record. The old files will forever remain accessible in the previous
+versions.</strong></p>
+
+<p>Currently, our fresh record has just one version:</p>
+
+<div class="codehilite"><pre><span></span><code><span class="nb">print</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">rec</span><span class="o">.</span><span class="n">versions</span><span class="p">))</span>  <span class="c1"># should print: 1</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">rec</span><span class="o">.</span><span class="n">versions</span><span class="p">)</span>       <span class="c1"># should print a list containing just the value of rec.id</span>
+</code></pre></div>
+
+<p>Now let us create a new version (which is another draft, but one linked to the
+previous version):</p>
+
+<div class="codehilite"><pre><span></span><code><span class="n">rec_new</span> <span class="o">=</span> <span class="n">rec</span><span class="o">.</span><span class="n">versions</span><span class="o">.</span><span class="n">create</span><span class="p">()</span>
+</code></pre></div>
+
+<p>We can use <code>rec_new.save()</code> to get the validation errors:</p>
+
+<div class="codehilite"><pre><span></span><code><span class="p">{</span> <span class="s1">&#39;files.enabled&#39;</span><span class="p">:</span> <span class="s1">&#39;Missing uploaded files. To disable files for this record &#39;</span>
+                   <span class="s1">&#39;please mark it as metadata-only.&#39;</span><span class="p">,</span>
+  <span class="s1">&#39;metadata.publication_date&#39;</span><span class="p">:</span> <span class="s1">&#39;Missing data for required field.&#39;</span><span class="p">}</span>
+</code></pre></div>
+
+<p>From this you learn two things:</p>
+
+<ol>
+<li>In a new version, the publication date is removed from the draft,
+forcing you to consciously update it.</li>
+<li>By default, the files from the previous version are not included in the new version.</li>
+</ol>
+
+<p>If you want to keep (a subset of) the files from the previous version in the record,
+use <code>rec_new.files.import_old()</code> to import them into the draft, so you will not have to
+upload them again. You can use <code>rec_new.files.delete(filename)</code> to remove such imported
+files as well as any files that you uploaded into an unpublished draft.</p>
+
+<p>To add a new file, proceed as described above, e.g. <code>rec_new.files.upload("other.data")</code>.</p>
+
+<p>Now you can set the new publication date and publish the new version.
+After this there should be two versions of your record and
+<code>rec.versions.latest()</code> should point to the new assigned <code>id</code> of the new version, i.e.
+be equal to <code>rec_new.id</code>.</p>
+
+<h2 id="query-records">Query records</h2>
 
 <p>TODO</p>
+
+<p><strong>Remark:</strong> The drafts can be queried similarly,
+just use <code>rdm.drafts</code> instead of <code>rdm.records</code>.</p>
+
+<h2 id="query-vocabularies">Query vocabularies</h2>
+
+<p>Invenio RDM provides a number of vocabularies that can be queried.
+See the <code>VocType</code> class for a list of the supported vocabularies.</p>
+
+<p>For example, we can print all software licenses as follows:</p>
+
+<div class="codehilite"><pre><span></span><code><span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="n">rdm</span><span class="o">.</span><span class="n">vocabulary</span><span class="p">[</span><span class="n">VocType</span><span class="o">.</span><span class="n">licenses</span><span class="p">](</span><span class="n">tags</span><span class="o">=</span><span class="s2">&quot;software&quot;</span><span class="p">):</span><span class="err">`</span>
+  <span class="nb">print</span><span class="p">(</span><span class="n">l</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
+</code></pre></div>
+
+<p>Or we can see how many listed languages are extinct:</p>
+
+<div class="codehilite"><pre><span></span><code><span class="nb">print</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">rdm</span><span class="o">.</span><span class="n">vocabulary</span><span class="p">[</span><span class="n">VocType</span><span class="o">.</span><span class="n">languages</span><span class="p">](</span><span class="n">tags</span><span class="o">=</span><span class="s2">&quot;extinct&quot;</span><span class="p">)))</span>
+</code></pre></div>
+
+<p>Or we can look at specific entries in more detail:</p>
+
+<div class="codehilite"><pre><span></span><code><span class="nb">print</span><span class="p">(</span><span class="n">rdm</span><span class="o">.</span><span class="n">vocabularies</span><span class="p">[</span><span class="n">VocType</span><span class="o">.</span><span class="n">resource_types</span><span class="p">][</span><span class="s2">&quot;dataset&quot;</span><span class="p">])</span>
+</code></pre></div>
+
+<p>resulting in an object like this:</p>
+
+<pre><code>{ 'created': '2022-01-11T09:15:42.699516+00:00',
+  'icon': 'table',
+  'id': 'dataset',
+  'links': { 'self': 'https://127.0.0.1:5000/api/vocabularies/resourcetypes/dataset'},
+  'props': { 'csl': 'dataset',
+             'datacite_general': 'Dataset',
+             'datacite_type': '',
+             'eurepo': 'info:eu-repo/semantics/other',
+             'openaire_resourceType': '21',
+             'openaire_type': 'dataset',
+             'schema.org': 'https://schema.org/Dataset',
+             'subtype': '',
+             'type': 'dataset'},
+  'revision_id': 1,
+  'tags': ['depositable', 'linkable'],
+  'title': {'en': 'Dataset'},
+  'type': 'resourcetypes',
+  'updated': '2022-01-11T09:15:42.753576+00:00'}
+</code></pre>
 </div>
 
                         <details>
             <summary>View Source</summary>
-            <div class="codehilite"><pre><span></span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">Welcome to Iridium.</span>
-
-<span class="sd">.. include:: ../MANUAL.md</span>
-<span class="sd">&quot;&quot;&quot;</span>
+            <div class="codehilite"><pre><span></span><span class="sd">&quot;&quot;&quot;.. include:: ../TUTORIAL.md&quot;&quot;&quot;</span>  <span class="c1"># noqa: D400</span>
 <span class="kn">import</span> <span class="nn">sys</span>
 <span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
 
@@ -86,6 +381,7 @@ iridium    </h1>
 <span class="c1"># re-export</span>
 <span class="kn">from</span> <span class="nn">.api</span> <span class="kn">import</span> <span class="n">Repository</span>  <span class="c1"># noqa: F401</span>
 
+<span class="c1"># for pdoc to understand the include:: directive</span>
 <span class="n">__docformat__</span> <span class="o">=</span> <span class="s2">&quot;restructuredtext&quot;</span>
 
 <span class="n">__pkg_path__</span><span class="p">:</span> <span class="n">Final</span><span class="p">[</span><span class="n">Path</span><span class="p">]</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">modules</span><span class="p">[</span><span class="vm">__name__</span><span class="p">]</span><span class="o">.</span><span class="vm">__file__</span><span class="p">)</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">resolve</span><span class="p">()</span>

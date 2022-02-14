@@ -49,6 +49,9 @@
                                 <a class="function" href="#Repository.from_env">from_env</a>
                         </li>
                         <li>
+                                <a class="function" href="#Repository.connect">connect</a>
+                        </li>
+                        <li>
                                 <a class="function" href="#Repository.connected">connected</a>
                         </li>
                 </ul>
@@ -70,12 +73,14 @@
                     <h1 class="modulename">
 <a href="./../iridium.html">iridium</a><wbr>.api    </h1>
 
-                        <div class="docstring"><p>Higher-level API for Invenio RDM.</p>
+                        <div class="docstring"><p>High-level API for Invenio RDM.</p>
 </div>
 
                         <details>
             <summary>View Source</summary>
-            <div class="codehilite"><pre><span></span><span class="sd">&quot;&quot;&quot;Higher-level API for Invenio RDM.&quot;&quot;&quot;</span>
+            <div class="codehilite"><pre><span></span><span class="sd">&quot;&quot;&quot;High-level API for Invenio RDM.&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Optional</span>
 
 <span class="kn">from</span> <span class="nn">.inveniordm</span> <span class="kn">import</span> <span class="n">InvenioRDMClient</span>
 <span class="kn">from</span> <span class="nn">.inveniordm.models</span> <span class="kn">import</span> <span class="n">VocType</span>
@@ -88,20 +93,43 @@
     <span class="vm">__slots__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;_client&quot;</span><span class="p">,</span> <span class="s2">&quot;records&quot;</span><span class="p">,</span> <span class="s2">&quot;drafts&quot;</span><span class="p">,</span> <span class="s2">&quot;vocabulary&quot;</span><span class="p">]</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Create an instance of the high-level Invenio RDM API.</span>
+
+<span class="sd">        Do not use directly. Use `connect` or `from_env` to get an instance.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="s2">&quot;client&quot;</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_client</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;client&quot;</span><span class="p">]</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_client</span> <span class="o">=</span> <span class="n">InvenioRDMClient</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_client</span> <span class="o">=</span> <span class="n">InvenioRDMClient</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">records</span> <span class="o">=</span> <span class="n">Records</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">drafts</span> <span class="o">=</span> <span class="n">Drafts</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">vocabulary</span> <span class="o">=</span> <span class="p">{</span><span class="n">vt</span><span class="p">:</span> <span class="n">Vocabulary</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="p">,</span> <span class="n">vt</span><span class="p">)</span> <span class="k">for</span> <span class="n">vt</span> <span class="ow">in</span> <span class="n">VocType</span><span class="p">}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">records</span><span class="p">:</span> <span class="n">Records</span> <span class="o">=</span> <span class="n">Records</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="p">)</span>
+        <span class="sd">&quot;&quot;&quot;Access interface for published records.&quot;&quot;&quot;</span>
 
-    <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">from_env</span><span class="p">(</span><span class="o">**</span><span class="n">httpx_kwargs</span><span class="p">):</span>
-        <span class="k">return</span> <span class="n">Repository</span><span class="p">(</span><span class="n">client</span><span class="o">=</span><span class="n">InvenioRDMClient</span><span class="o">.</span><span class="n">from_env</span><span class="p">(</span><span class="o">**</span><span class="n">httpx_kwargs</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">drafts</span><span class="p">:</span> <span class="n">Drafts</span> <span class="o">=</span> <span class="n">Drafts</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="p">)</span>
+        <span class="sd">&quot;&quot;&quot;Access interface for drafts.&quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">vocabulary</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Vocabulary</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="n">vt</span><span class="p">:</span> <span class="n">Vocabulary</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="p">,</span> <span class="n">vt</span><span class="p">)</span> <span class="k">for</span> <span class="n">vt</span> <span class="ow">in</span> <span class="n">VocType</span>
+        <span class="p">}</span>
+        <span class="sd">&quot;&quot;&quot;Access interface for vocabularies.&quot;&quot;&quot;</span>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">from_env</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="o">**</span><span class="n">httpx_kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get client instance based on configuration given in environment.</span>
+
+<span class="sd">        The expected environment variables are `INVENIORDM_URL` and `INVENIORDM_TOKEN`.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">client</span><span class="o">=</span><span class="n">InvenioRDMClient</span><span class="o">.</span><span class="n">from_env</span><span class="p">(</span><span class="o">**</span><span class="n">httpx_kwargs</span><span class="p">))</span>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">connect</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">url</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">token</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="o">**</span><span class="n">httpx_kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Get client instance based on provided credentials.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">token</span><span class="p">,</span> <span class="o">**</span><span class="n">httpx_kwargs</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">connected</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Check whether the configured Invenio RDM instance is accessible.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="o">.</span><span class="n">connected</span><span class="p">()</span>
 </pre></div>
 
@@ -125,20 +153,43 @@
     <span class="vm">__slots__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;_client&quot;</span><span class="p">,</span> <span class="s2">&quot;records&quot;</span><span class="p">,</span> <span class="s2">&quot;drafts&quot;</span><span class="p">,</span> <span class="s2">&quot;vocabulary&quot;</span><span class="p">]</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Create an instance of the high-level Invenio RDM API.</span>
+
+<span class="sd">        Do not use directly. Use `connect` or `from_env` to get an instance.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="s2">&quot;client&quot;</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_client</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;client&quot;</span><span class="p">]</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_client</span> <span class="o">=</span> <span class="n">InvenioRDMClient</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_client</span> <span class="o">=</span> <span class="n">InvenioRDMClient</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">records</span> <span class="o">=</span> <span class="n">Records</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">drafts</span> <span class="o">=</span> <span class="n">Drafts</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">vocabulary</span> <span class="o">=</span> <span class="p">{</span><span class="n">vt</span><span class="p">:</span> <span class="n">Vocabulary</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="p">,</span> <span class="n">vt</span><span class="p">)</span> <span class="k">for</span> <span class="n">vt</span> <span class="ow">in</span> <span class="n">VocType</span><span class="p">}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">records</span><span class="p">:</span> <span class="n">Records</span> <span class="o">=</span> <span class="n">Records</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="p">)</span>
+        <span class="sd">&quot;&quot;&quot;Access interface for published records.&quot;&quot;&quot;</span>
 
-    <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">from_env</span><span class="p">(</span><span class="o">**</span><span class="n">httpx_kwargs</span><span class="p">):</span>
-        <span class="k">return</span> <span class="n">Repository</span><span class="p">(</span><span class="n">client</span><span class="o">=</span><span class="n">InvenioRDMClient</span><span class="o">.</span><span class="n">from_env</span><span class="p">(</span><span class="o">**</span><span class="n">httpx_kwargs</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">drafts</span><span class="p">:</span> <span class="n">Drafts</span> <span class="o">=</span> <span class="n">Drafts</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="p">)</span>
+        <span class="sd">&quot;&quot;&quot;Access interface for drafts.&quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">vocabulary</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Vocabulary</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="n">vt</span><span class="p">:</span> <span class="n">Vocabulary</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="p">,</span> <span class="n">vt</span><span class="p">)</span> <span class="k">for</span> <span class="n">vt</span> <span class="ow">in</span> <span class="n">VocType</span>
+        <span class="p">}</span>
+        <span class="sd">&quot;&quot;&quot;Access interface for vocabularies.&quot;&quot;&quot;</span>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">from_env</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="o">**</span><span class="n">httpx_kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get client instance based on configuration given in environment.</span>
+
+<span class="sd">        The expected environment variables are `INVENIORDM_URL` and `INVENIORDM_TOKEN`.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">client</span><span class="o">=</span><span class="n">InvenioRDMClient</span><span class="o">.</span><span class="n">from_env</span><span class="p">(</span><span class="o">**</span><span class="n">httpx_kwargs</span><span class="p">))</span>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">connect</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">url</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">token</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="o">**</span><span class="n">httpx_kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Get client instance based on provided credentials.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">token</span><span class="p">,</span> <span class="o">**</span><span class="n">httpx_kwargs</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">connected</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Check whether the configured Invenio RDM instance is accessible.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="o">.</span><span class="n">connected</span><span class="p">()</span>
 </pre></div>
 
@@ -158,67 +209,122 @@
                 <details>
             <summary>View Source</summary>
             <div class="codehilite"><pre><span></span>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Create an instance of the high-level Invenio RDM API.</span>
+
+<span class="sd">        Do not use directly. Use `connect` or `from_env` to get an instance.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="s2">&quot;client&quot;</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_client</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;client&quot;</span><span class="p">]</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_client</span> <span class="o">=</span> <span class="n">InvenioRDMClient</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_client</span> <span class="o">=</span> <span class="n">InvenioRDMClient</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">records</span> <span class="o">=</span> <span class="n">Records</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">drafts</span> <span class="o">=</span> <span class="n">Drafts</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">vocabulary</span> <span class="o">=</span> <span class="p">{</span><span class="n">vt</span><span class="p">:</span> <span class="n">Vocabulary</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="p">,</span> <span class="n">vt</span><span class="p">)</span> <span class="k">for</span> <span class="n">vt</span> <span class="ow">in</span> <span class="n">VocType</span><span class="p">}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">records</span><span class="p">:</span> <span class="n">Records</span> <span class="o">=</span> <span class="n">Records</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="p">)</span>
+        <span class="sd">&quot;&quot;&quot;Access interface for published records.&quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">drafts</span><span class="p">:</span> <span class="n">Drafts</span> <span class="o">=</span> <span class="n">Drafts</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="p">)</span>
+        <span class="sd">&quot;&quot;&quot;Access interface for drafts.&quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">vocabulary</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Vocabulary</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="n">vt</span><span class="p">:</span> <span class="n">Vocabulary</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="p">,</span> <span class="n">vt</span><span class="p">)</span> <span class="k">for</span> <span class="n">vt</span> <span class="ow">in</span> <span class="n">VocType</span>
+        <span class="p">}</span>
+        <span class="sd">&quot;&quot;&quot;Access interface for vocabularies.&quot;&quot;&quot;</span>
 </pre></div>
 
         </details>
 
-    
+            <div class="docstring"><p>Create an instance of the high-level Invenio RDM API.</p>
+
+<p>Do not use directly. Use <code><a href="#Repository.connect">connect</a></code> or <code><a href="#Repository.from_env">from_env</a></code> to get an instance.</p>
+</div>
+
 
                             </div>
                             <div id="Repository.records" class="classattr">
                                             <div class="attr variable"><a class="headerlink" href="#Repository.records">#&nbsp;&nbsp</a>
 
-        <span class="name">records</span>
+        <span class="name">records</span><span class="annotation">: <a href="query.html#Records">iridium.query.Records</a></span>
     </div>
 
-    
+            <div class="docstring"><p>Access interface for published records.</p>
+</div>
+
 
                             </div>
                             <div id="Repository.drafts" class="classattr">
                                             <div class="attr variable"><a class="headerlink" href="#Repository.drafts">#&nbsp;&nbsp</a>
 
-        <span class="name">drafts</span>
+        <span class="name">drafts</span><span class="annotation">: <a href="query.html#Drafts">iridium.query.Drafts</a></span>
     </div>
 
-    
+            <div class="docstring"><p>Access interface for drafts.</p>
+</div>
+
 
                             </div>
                             <div id="Repository.vocabulary" class="classattr">
                                             <div class="attr variable"><a class="headerlink" href="#Repository.vocabulary">#&nbsp;&nbsp</a>
 
-        <span class="name">vocabulary</span>
+        <span class="name">vocabulary</span><span class="annotation">: Dict[str, <a href="query.html#Vocabulary">iridium.query.Vocabulary</a>]</span>
     </div>
 
-    
+            <div class="docstring"><p>Access interface for vocabularies.</p>
+</div>
+
 
                             </div>
                             <div id="Repository.from_env" class="classattr">
                                         <div class="attr function"><a class="headerlink" href="#Repository.from_env">#&nbsp;&nbsp</a>
 
-                <div class="decorator">@staticmethod</div>
+                <div class="decorator">@classmethod</div>
 
             <span class="def">def</span>
-            <span class="name">from_env</span><span class="signature">(**httpx_kwargs)</span>:
+            <span class="name">from_env</span><span class="signature">(cls, **httpx_kwargs)</span>:
     </div>
 
                 <details>
             <summary>View Source</summary>
-            <div class="codehilite"><pre><span></span>    <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">from_env</span><span class="p">(</span><span class="o">**</span><span class="n">httpx_kwargs</span><span class="p">):</span>
-        <span class="k">return</span> <span class="n">Repository</span><span class="p">(</span><span class="n">client</span><span class="o">=</span><span class="n">InvenioRDMClient</span><span class="o">.</span><span class="n">from_env</span><span class="p">(</span><span class="o">**</span><span class="n">httpx_kwargs</span><span class="p">))</span>
+            <div class="codehilite"><pre><span></span>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">from_env</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="o">**</span><span class="n">httpx_kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get client instance based on configuration given in environment.</span>
+
+<span class="sd">        The expected environment variables are `INVENIORDM_URL` and `INVENIORDM_TOKEN`.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">client</span><span class="o">=</span><span class="n">InvenioRDMClient</span><span class="o">.</span><span class="n">from_env</span><span class="p">(</span><span class="o">**</span><span class="n">httpx_kwargs</span><span class="p">))</span>
 </pre></div>
 
         </details>
 
-    
+            <div class="docstring"><p>Get client instance based on configuration given in environment.</p>
+
+<p>The expected environment variables are <code>INVENIORDM_URL</code> and <code>INVENIORDM_TOKEN</code>.</p>
+</div>
+
+
+                            </div>
+                            <div id="Repository.connect" class="classattr">
+                                        <div class="attr function"><a class="headerlink" href="#Repository.connect">#&nbsp;&nbsp</a>
+
+                <div class="decorator">@classmethod</div>
+
+            <span class="def">def</span>
+            <span class="name">connect</span><span class="signature">(cls, url: str, token: Union[str, NoneType], **httpx_kwargs)</span>:
+    </div>
+
+                <details>
+            <summary>View Source</summary>
+            <div class="codehilite"><pre><span></span>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">connect</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">url</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">token</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="o">**</span><span class="n">httpx_kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Get client instance based on provided credentials.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">token</span><span class="p">,</span> <span class="o">**</span><span class="n">httpx_kwargs</span><span class="p">)</span>
+</pre></div>
+
+        </details>
+
+            <div class="docstring"><p>Get client instance based on provided credentials.</p>
+</div>
+
 
                             </div>
                             <div id="Repository.connected" class="classattr">
@@ -232,12 +338,15 @@
                 <details>
             <summary>View Source</summary>
             <div class="codehilite"><pre><span></span>    <span class="k">def</span> <span class="nf">connected</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Check whether the configured Invenio RDM instance is accessible.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="o">.</span><span class="n">connected</span><span class="p">()</span>
 </pre></div>
 
         </details>
 
-    
+            <div class="docstring"><p>Check whether the configured Invenio RDM instance is accessible.</p>
+</div>
+
 
                             </div>
                 </section>

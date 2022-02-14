@@ -191,10 +191,10 @@
                     <h1 class="modulename">
 <a href="./../iridium.html">iridium</a><wbr>.inveniordm    </h1>
 
-                        <div class="docstring"><p>Thin InvenioRDM API REST API wrapper.</p>
+                        <div class="docstring"><p>Low-level InvenioRDM REST API wrapper.</p>
 
-<p>The classes just neatly organize the endpoints to be conveniently accessed
-through an <code><a href="#InvenioRDMClient">InvenioRDMClient</a></code> instance.</p>
+<p>The classes in this module just neatly organize the endpoints to be
+conveniently accessed through an <code><a href="#InvenioRDMClient">InvenioRDMClient</a></code> instance.</p>
 
 <p>The methods return plain <a href="https://pydantic-docs.helpmanual.io/">pydantic</a>
 models that serve as somewhat validated Python representation of
@@ -215,10 +215,10 @@ and then find the corresponding methods in this module.</p>
                         <details>
             <summary>View Source</summary>
             <div class="codehilite"><pre><span></span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">Thin InvenioRDM API REST API wrapper.</span>
+<span class="sd">Low-level InvenioRDM REST API wrapper.</span>
 
-<span class="sd">The classes just neatly organize the endpoints to be conveniently accessed</span>
-<span class="sd">through an `InvenioRDMClient` instance.</span>
+<span class="sd">The classes in this module just neatly organize the endpoints to be</span>
+<span class="sd">conveniently accessed through an `InvenioRDMClient` instance.</span>
 
 <span class="sd">The methods return plain [pydantic](https://pydantic-docs.helpmanual.io/)</span>
 <span class="sd">models that serve as somewhat validated Python representation of</span>
@@ -300,7 +300,6 @@ and then find the corresponding methods in this module.</p>
 <span class="sd">        Create an instance of the Invenio RDM API.</span>
 
 <span class="sd">        The instance is configured for the provided credentials and arguments.</span>
-<span class="sd">        If you need to change them, create a new instance.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">headers</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="k">if</span> <span class="n">httpx_kwargs</span> <span class="ow">and</span> <span class="s2">&quot;headers&quot;</span> <span class="ow">in</span> <span class="n">httpx_kwargs</span><span class="p">:</span>
@@ -325,7 +324,7 @@ and then find the corresponding methods in this module.</p>
     <span class="k">def</span> <span class="nf">connected</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Check that Invenio RDM is accessible.&quot;&quot;&quot;</span>
         <span class="k">try</span><span class="p">:</span>
-            <span class="n">r</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_endpoint</span><span class="p">(</span><span class="s2">&quot;/records&quot;</span><span class="p">))</span>
+            <span class="n">r</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_endpoint</span><span class="p">(</span><span class="s2">&quot;/records?size=1&quot;</span><span class="p">))</span>
             <span class="n">_raise_on_error_status</span><span class="p">(</span><span class="n">r</span><span class="p">)</span>
             <span class="k">return</span> <span class="kc">True</span>
         <span class="k">except</span><span class="p">:</span>  <span class="c1"># noqa: E722</span>
@@ -785,7 +784,7 @@ and then find the corresponding methods in this module.</p>
         <span class="n">fmeta</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">file_upload_complete</span><span class="p">(</span><span class="n">draft_id</span><span class="p">,</span> <span class="n">file</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
         <span class="k">assert</span> <span class="n">fmeta</span><span class="o">.</span><span class="n">checksum</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
         <span class="n">alg</span><span class="p">,</span> <span class="n">hsum</span> <span class="o">=</span> <span class="n">fmeta</span><span class="o">.</span><span class="n">checksum</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;:&quot;</span><span class="p">)</span>
-        <span class="n">hsum_verify</span> <span class="o">=</span> <span class="n">hashsum</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="n">alg</span><span class="p">)</span>
+        <span class="n">hsum_verify</span> <span class="o">=</span> <span class="n">hashsum</span><span class="p">(</span><span class="nb">open</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="s2">&quot;rb&quot;</span><span class="p">),</span> <span class="n">alg</span><span class="p">)</span>
         <span class="k">assert</span> <span class="n">hsum</span> <span class="o">==</span> <span class="n">hsum_verify</span>
 
         <span class="k">return</span> <span class="n">fmeta</span>
@@ -817,7 +816,6 @@ and then find the corresponding methods in this module.</p>
 <span class="sd">        Create an instance of the Invenio RDM API.</span>
 
 <span class="sd">        The instance is configured for the provided credentials and arguments.</span>
-<span class="sd">        If you need to change them, create a new instance.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">headers</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="k">if</span> <span class="n">httpx_kwargs</span> <span class="ow">and</span> <span class="s2">&quot;headers&quot;</span> <span class="ow">in</span> <span class="n">httpx_kwargs</span><span class="p">:</span>
@@ -842,7 +840,7 @@ and then find the corresponding methods in this module.</p>
     <span class="k">def</span> <span class="nf">connected</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Check that Invenio RDM is accessible.&quot;&quot;&quot;</span>
         <span class="k">try</span><span class="p">:</span>
-            <span class="n">r</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_endpoint</span><span class="p">(</span><span class="s2">&quot;/records&quot;</span><span class="p">))</span>
+            <span class="n">r</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_endpoint</span><span class="p">(</span><span class="s2">&quot;/records?size=1&quot;</span><span class="p">))</span>
             <span class="n">_raise_on_error_status</span><span class="p">(</span><span class="n">r</span><span class="p">)</span>
             <span class="k">return</span> <span class="kc">True</span>
         <span class="k">except</span><span class="p">:</span>  <span class="c1"># noqa: E722</span>
@@ -885,7 +883,6 @@ and then find the corresponding methods in this module.</p>
 <span class="sd">        Create an instance of the Invenio RDM API.</span>
 
 <span class="sd">        The instance is configured for the provided credentials and arguments.</span>
-<span class="sd">        If you need to change them, create a new instance.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">headers</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="k">if</span> <span class="n">httpx_kwargs</span> <span class="ow">and</span> <span class="s2">&quot;headers&quot;</span> <span class="ow">in</span> <span class="n">httpx_kwargs</span><span class="p">:</span>
@@ -905,8 +902,7 @@ and then find the corresponding methods in this module.</p>
 
             <div class="docstring"><p>Create an instance of the Invenio RDM API.</p>
 
-<p>The instance is configured for the provided credentials and arguments.
-If you need to change them, create a new instance.</p>
+<p>The instance is configured for the provided credentials and arguments.</p>
 </div>
 
 
@@ -924,7 +920,7 @@ If you need to change them, create a new instance.</p>
             <div class="codehilite"><pre><span></span>    <span class="k">def</span> <span class="nf">connected</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Check that Invenio RDM is accessible.&quot;&quot;&quot;</span>
         <span class="k">try</span><span class="p">:</span>
-            <span class="n">r</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_endpoint</span><span class="p">(</span><span class="s2">&quot;/records&quot;</span><span class="p">))</span>
+            <span class="n">r</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_endpoint</span><span class="p">(</span><span class="s2">&quot;/records?size=1&quot;</span><span class="p">))</span>
             <span class="n">_raise_on_error_status</span><span class="p">(</span><span class="n">r</span><span class="p">)</span>
             <span class="k">return</span> <span class="kc">True</span>
         <span class="k">except</span><span class="p">:</span>  <span class="c1"># noqa: E722</span>
@@ -2076,7 +2072,7 @@ https://inveniordm.docs.cern.ch/reference/rest_api_drafts_records/#user-records<
         <span class="n">fmeta</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">file_upload_complete</span><span class="p">(</span><span class="n">draft_id</span><span class="p">,</span> <span class="n">file</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
         <span class="k">assert</span> <span class="n">fmeta</span><span class="o">.</span><span class="n">checksum</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
         <span class="n">alg</span><span class="p">,</span> <span class="n">hsum</span> <span class="o">=</span> <span class="n">fmeta</span><span class="o">.</span><span class="n">checksum</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;:&quot;</span><span class="p">)</span>
-        <span class="n">hsum_verify</span> <span class="o">=</span> <span class="n">hashsum</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="n">alg</span><span class="p">)</span>
+        <span class="n">hsum_verify</span> <span class="o">=</span> <span class="n">hashsum</span><span class="p">(</span><span class="nb">open</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="s2">&quot;rb&quot;</span><span class="p">),</span> <span class="n">alg</span><span class="p">)</span>
         <span class="k">assert</span> <span class="n">hsum</span> <span class="o">==</span> <span class="n">hsum_verify</span>
 
         <span class="k">return</span> <span class="n">fmeta</span>
@@ -2645,7 +2641,7 @@ and a new id is provided for the new version.</p>
         <span class="n">fmeta</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">file_upload_complete</span><span class="p">(</span><span class="n">draft_id</span><span class="p">,</span> <span class="n">file</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
         <span class="k">assert</span> <span class="n">fmeta</span><span class="o">.</span><span class="n">checksum</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
         <span class="n">alg</span><span class="p">,</span> <span class="n">hsum</span> <span class="o">=</span> <span class="n">fmeta</span><span class="o">.</span><span class="n">checksum</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;:&quot;</span><span class="p">)</span>
-        <span class="n">hsum_verify</span> <span class="o">=</span> <span class="n">hashsum</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="n">alg</span><span class="p">)</span>
+        <span class="n">hsum_verify</span> <span class="o">=</span> <span class="n">hashsum</span><span class="p">(</span><span class="nb">open</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="s2">&quot;rb&quot;</span><span class="p">),</span> <span class="n">alg</span><span class="p">)</span>
         <span class="k">assert</span> <span class="n">hsum</span> <span class="o">==</span> <span class="n">hsum_verify</span>
 
         <span class="k">return</span> <span class="n">fmeta</span>

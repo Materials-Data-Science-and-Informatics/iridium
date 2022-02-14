@@ -76,6 +76,12 @@
 
             </li>
             <li>
+                    <a class="class" href="#CreatorRole">CreatorRole</a>
+                            <ul class="memberlist">
+                </ul>
+
+            </li>
+            <li>
                     <a class="class" href="#Creator">Creator</a>
                             <ul class="memberlist">
                 </ul>
@@ -274,16 +280,20 @@ https://github.com/inveniosoftware/invenio-rdm-records/blob/master/invenio_rdm_r
 
     <span class="nd">@root_validator</span>
     <span class="k">def</span> <span class="nf">require_id_or_name</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">values</span><span class="p">):</span>
-        <span class="n">has_id</span> <span class="o">=</span> <span class="s2">&quot;id&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">values</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">values</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">]</span>
-        <span class="n">has_name</span> <span class="o">=</span> <span class="s2">&quot;name&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">values</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">values</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]</span>
+        <span class="n">has_id</span> <span class="o">=</span> <span class="s2">&quot;id&quot;</span> <span class="ow">in</span> <span class="n">values</span> <span class="ow">or</span> <span class="n">values</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">]</span>
+        <span class="n">has_name</span> <span class="o">=</span> <span class="s2">&quot;name&quot;</span> <span class="ow">in</span> <span class="n">values</span> <span class="ow">or</span> <span class="n">values</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">has_id</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">has_name</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Affiliation needs an id or a free-text name&quot;</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">values</span>
 
 
+<span class="k">class</span> <span class="nc">CreatorRole</span><span class="p">(</span><span class="n">VocabularyRef</span><span class="p">):</span>
+    <span class="k">pass</span>
+
+
 <span class="k">class</span> <span class="nc">Creator</span><span class="p">(</span><span class="n">JSONModel</span><span class="p">):</span>
     <span class="n">person_or_org</span><span class="p">:</span> <span class="n">PersonOrOrg</span>
-    <span class="n">role</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">VocabularyRef</span><span class="p">]</span>
+    <span class="n">role</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">CreatorRole</span><span class="p">]</span>
     <span class="n">affiliations</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">Affiliation</span><span class="p">]]</span>
 
 
@@ -800,8 +810,8 @@ Otherwise these enhancements might lead to unintended consequences.</p>
 
     <span class="nd">@root_validator</span>
     <span class="k">def</span> <span class="nf">require_id_or_name</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">values</span><span class="p">):</span>
-        <span class="n">has_id</span> <span class="o">=</span> <span class="s2">&quot;id&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">values</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">values</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">]</span>
-        <span class="n">has_name</span> <span class="o">=</span> <span class="s2">&quot;name&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">values</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">values</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]</span>
+        <span class="n">has_id</span> <span class="o">=</span> <span class="s2">&quot;id&quot;</span> <span class="ow">in</span> <span class="n">values</span> <span class="ow">or</span> <span class="n">values</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">]</span>
+        <span class="n">has_name</span> <span class="o">=</span> <span class="s2">&quot;name&quot;</span> <span class="ow">in</span> <span class="n">values</span> <span class="ow">or</span> <span class="n">values</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">has_id</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">has_name</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Affiliation needs an id or a free-text name&quot;</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">values</span>
@@ -836,8 +846,8 @@ Otherwise these enhancements might lead to unintended consequences.</p>
             <summary>View Source</summary>
             <div class="codehilite"><pre><span></span>    <span class="nd">@root_validator</span>
     <span class="k">def</span> <span class="nf">require_id_or_name</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">values</span><span class="p">):</span>
-        <span class="n">has_id</span> <span class="o">=</span> <span class="s2">&quot;id&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">values</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">values</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">]</span>
-        <span class="n">has_name</span> <span class="o">=</span> <span class="s2">&quot;name&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">values</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">values</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]</span>
+        <span class="n">has_id</span> <span class="o">=</span> <span class="s2">&quot;id&quot;</span> <span class="ow">in</span> <span class="n">values</span> <span class="ow">or</span> <span class="n">values</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">]</span>
+        <span class="n">has_name</span> <span class="o">=</span> <span class="s2">&quot;name&quot;</span> <span class="ow">in</span> <span class="n">values</span> <span class="ow">or</span> <span class="n">values</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">has_id</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">has_name</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Affiliation needs an id or a free-text name&quot;</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">values</span>
@@ -875,6 +885,64 @@ Otherwise these enhancements might lead to unintended consequences.</p>
                                 </dl>
                             </div>
                 </section>
+                <section id="CreatorRole">
+                                <div class="attr class">
+        <a class="headerlink" href="#CreatorRole">#&nbsp;&nbsp</a>
+
+        
+        <span class="def">class</span>
+        <span class="name">CreatorRole</span><wbr>(<span class="base"><a href="#VocabularyRef">VocabularyRef</a></span>):
+    </div>
+
+                <details>
+            <summary>View Source</summary>
+            <div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">CreatorRole</span><span class="p">(</span><span class="n">VocabularyRef</span><span class="p">):</span>
+    <span class="k">pass</span>
+</pre></div>
+
+        </details>
+
+            <div class="docstring"><p>Subclass adding additional features to pydantic BaseModel for API responses.</p>
+
+<p>Models deriving from this variant:</p>
+
+<ul>
+<li>automatically are pretty-printed as JSON (for user convenience)</li>
+<li>can be toggled to return original, raw JSON dict (for debugging)</li>
+</ul>
+
+<p>Only use this for parsing JSON responses from API requests!
+Otherwise these enhancements might lead to unintended consequences.</p>
+</div>
+
+
+                            <div class="inherited">
+                                <h5>Inherited Members</h5>
+                                <dl>
+                                    <div><dt>pydantic.main.BaseModel</dt>
+                                <dd id="CreatorRole.__init__" class="function">BaseModel</dd>
+                <dd id="CreatorRole.Config" class="class">Config</dd>
+                <dd id="CreatorRole.dict" class="function">dict</dd>
+                <dd id="CreatorRole.json" class="function">json</dd>
+                <dd id="CreatorRole.parse_raw" class="function">parse_raw</dd>
+                <dd id="CreatorRole.parse_file" class="function">parse_file</dd>
+                <dd id="CreatorRole.from_orm" class="function">from_orm</dd>
+                <dd id="CreatorRole.construct" class="function">construct</dd>
+                <dd id="CreatorRole.copy" class="function">copy</dd>
+                <dd id="CreatorRole.schema" class="function">schema</dd>
+                <dd id="CreatorRole.schema_json" class="function">schema_json</dd>
+                <dd id="CreatorRole.validate" class="function">validate</dd>
+                <dd id="CreatorRole.update_forward_refs" class="function">update_forward_refs</dd>
+
+            </div>
+            <div><dt><a href="base.html#JSONModel">iridium.inveniordm.models.base.JSONModel</a></dt>
+                                <dd id="CreatorRole.raw_json" class="function"><a href="base.html#JSONModel.raw_json">raw_json</a></dd>
+                <dd id="CreatorRole.parse_obj" class="function"><a href="base.html#JSONModel.parse_obj">parse_obj</a></dd>
+
+            </div>
+                                </dl>
+                            </div>
+                </section>
                 <section id="Creator">
                                 <div class="attr class">
         <a class="headerlink" href="#Creator">#&nbsp;&nbsp</a>
@@ -888,7 +956,7 @@ Otherwise these enhancements might lead to unintended consequences.</p>
             <summary>View Source</summary>
             <div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">Creator</span><span class="p">(</span><span class="n">JSONModel</span><span class="p">):</span>
     <span class="n">person_or_org</span><span class="p">:</span> <span class="n">PersonOrOrg</span>
-    <span class="n">role</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">VocabularyRef</span><span class="p">]</span>
+    <span class="n">role</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">CreatorRole</span><span class="p">]</span>
     <span class="n">affiliations</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">Affiliation</span><span class="p">]]</span>
 </pre></div>
 

@@ -187,15 +187,16 @@
                     <h1 class="modulename">
 <a href="./../iridium.html">iridium</a><wbr>.record    </h1>
 
-                        <div class="docstring"><p>Convenience wrapper for draft and record API.</p>
+                        <div class="docstring"><p>High-level interface for draft and record API.</p>
 </div>
 
                         <details>
             <summary>View Source</summary>
-            <div class="codehilite"><pre><span></span><span class="sd">&quot;&quot;&quot;Convenience wrapper for draft and record API.&quot;&quot;&quot;</span>
+            <div class="codehilite"><pre><span></span><span class="sd">&quot;&quot;&quot;High-level interface for draft and record API.&quot;&quot;&quot;</span>
 <span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
 
 <span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span>
+<span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">BinaryIO</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Iterable</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Tuple</span>
 
 <span class="kn">from</span> <span class="nn">.generic</span> <span class="kn">import</span> <span class="n">AccessProxy</span><span class="p">,</span> <span class="n">Query</span>
@@ -213,7 +214,7 @@
 
 <span class="k">class</span> <span class="nc">WrappedRecord</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Class that wraps the raw data and the low-level REST API into something convenient.</span>
+<span class="sd">    Wrapper around the low-level record and draft REST APIs.</span>
 
 <span class="sd">    It can be used to perform all operations that are possible on individual records.</span>
 
@@ -223,12 +224,11 @@
 <span class="sd">    the allowed methods through runtime inspection.</span>
 
 <span class="sd">    The `access_links` and `files` attributes expose special interfaces with</span>
-<span class="sd">    immediate synchronization with the server.</span>
+<span class="sd">    **immediate synchronization** with the server.</span>
+<span class="sd">    Changes to the `metadata` and `access` attributes are **synchronized only</span>
+<span class="sd">    on `save()` or `publish()`**.</span>
 
-<span class="sd">    Changes to the `metadata` and `access` attributes are synchronized only</span>
-<span class="sd">    on `save()` or `publish()`.</span>
-
-<span class="sd">    All other attributes are to be considered read-only,</span>
+<span class="sd">    **All other attributes** are to be treated as **read-only**,</span>
 <span class="sd">    overwriting them will have no effect on the actual data on the server.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
@@ -261,18 +261,18 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_versions</span><span class="p">:</span> <span class="n">RecordVersions</span> <span class="o">=</span> <span class="n">RecordVersions</span><span class="p">(</span><span class="n">cl</span><span class="p">,</span> <span class="n">rec</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">files</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">files</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">WrappedFiles</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Return interface for managing files in this record.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_files</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">access_links</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">access_links</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">AccessLinks</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Return interface for managing access links for this record.&quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_expect_published</span><span class="p">()</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_access_links</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">versions</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">versions</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">RecordVersions</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Return all versions of the current record.&quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_expect_published</span><span class="p">()</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_versions</span>
@@ -298,8 +298,8 @@
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Check whether the current draft is in sync with the draft on in Invenio RDM.</span>
 
-<span class="sd">        This means that they must agree on access, metadata and files attributes,</span>
-<span class="sd">        as these are the ones modifiable by the user.</span>
+<span class="sd">        This means that they must agree on `access`, `metadata` and `files`</span>
+<span class="sd">        attributes, as these are the ones modifiable by the user.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_expect_draft</span><span class="p">()</span>
 
@@ -329,9 +329,23 @@
 <span class="sd">        just request it again from the repository.</span>
 
 <span class="sd">        The method returns this object itself for convenience, e.g. to write:</span>
-<span class="sd">        `draft = rdm.records[&quot;REC_ID&quot;].edit()`</span>
-<span class="sd">        which is equivalent to:</span>
-<span class="sd">        `draft = rdm.drafts.create(&quot;REC_ID&quot;, new_version=False)`</span>
+
+<span class="sd">        ```</span>
+<span class="sd">        draft = rdm.records[&quot;REC_ID&quot;].edit()</span>
+<span class="sd">        ```</span>
+
+<span class="sd">        which is shorter than:</span>
+
+<span class="sd">        ```</span>
+<span class="sd">        rec = rdm.records[&quot;REC_ID&quot;]</span>
+<span class="sd">        rec.edit()</span>
+<span class="sd">        ```</span>
+
+<span class="sd">        and is equivalent to the slightly more efficient:</span>
+
+<span class="sd">        ```</span>
+<span class="sd">        draft = rdm.drafts.create(&quot;REC_ID&quot;, new_version=False)</span>
+<span class="sd">        ```</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_expect_published</span><span class="p">()</span>
 
@@ -339,7 +353,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_is_draft</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="k">return</span> <span class="bp">self</span>
 
-    <span class="k">def</span> <span class="nf">save</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">save</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">PrettyRepr</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]]]:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Save changes to draft record.</span>
 
@@ -362,7 +376,7 @@
         <span class="c1"># don&#39;t need to wrap None for printing... would print &#39;None&#39;</span>
         <span class="k">return</span> <span class="n">PrettyRepr</span><span class="p">(</span><span class="n">errs</span><span class="p">)</span> <span class="k">if</span> <span class="n">errs</span> <span class="k">else</span> <span class="kc">None</span>
 
-    <span class="k">def</span> <span class="nf">publish</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">publish</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Save and publish the draft as the actual record.</span>
 
@@ -385,7 +399,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_record</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="o">.</span><span class="n">draft</span><span class="o">.</span><span class="n">publish</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_record</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_is_draft</span> <span class="o">=</span> <span class="kc">False</span>
 
-    <span class="k">def</span> <span class="nf">delete</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">delete</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Delete this draft record.</span>
 
@@ -418,12 +432,18 @@
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Attribute </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2"> is read-only!&quot;</span><span class="p">)</span>
 
     <span class="c1"># magic methods must be proxied by hand</span>
-    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="n">patch</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;files&quot;</span><span class="p">:</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">files</span><span class="o">.</span><span class="n">keys</span><span class="p">())}</span>
-        <span class="k">return</span> <span class="nb">repr</span><span class="p">(</span><span class="n">PrettyRepr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_record</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">exclude</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;links&quot;</span><span class="p">},</span> <span class="n">update</span><span class="o">=</span><span class="n">patch</span><span class="p">)))</span>
+    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="k">return</span> <span class="nb">repr</span><span class="p">(</span>
+            <span class="n">PrettyRepr</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_record</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span>
+                    <span class="n">exclude</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;links&quot;</span><span class="p">,</span> <span class="s2">&quot;revision_id&quot;</span><span class="p">,</span> <span class="s2">&quot;parent&quot;</span><span class="p">,</span> <span class="s2">&quot;pids&quot;</span><span class="p">},</span>
+                    <span class="n">update</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;files&quot;</span><span class="p">:</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">files</span><span class="o">.</span><span class="n">keys</span><span class="p">())},</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
 
     <span class="c1"># help the shell to list what&#39;s there</span>
-    <span class="k">def</span> <span class="fm">__dir__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__dir__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterable</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
         <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__dir__</span><span class="p">()</span>
 
 
@@ -625,6 +645,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">enabled</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Get/set whether file uploads are enabled for this record or draft.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_files</span><span class="o">.</span><span class="n">enabled</span>
 
     <span class="nd">@enabled</span><span class="o">.</span><span class="n">setter</span>
@@ -658,7 +679,11 @@
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;File with this name already in record: </span><span class="si">{</span><span class="n">filename</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">download</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">BinaryIO</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Download file from record or draft.&quot;&quot;&quot;</span>
+        <span class="sd">&quot;&quot;&quot;Download file from record or draft.</span>
+
+<span class="sd">        Returns a binary stream as output, you have to manually `read` it</span>
+<span class="sd">        and, if needed, e.g. write to a file.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_check_enabled</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_check_filename</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
 
@@ -689,14 +714,26 @@
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_files</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="o">.</span><span class="n">draft</span><span class="o">.</span><span class="n">files_import</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_parent</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">upload</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="n">BinaryIO</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">upload</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">BinaryIO</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Upload a file.</span>
+<span class="sd">        Upload a file to the record.</span>
 
-<span class="sd">        Takes a binary stream as input, you have to `open` your file yourself with `&quot;rb&quot;`.</span>
+<span class="sd">        If only passed a string, will interpret it as a local path and upload file</span>
+<span class="sd">        to the record as a file with the same name as the original.</span>
+
+<span class="sd">        If passed a binary data stream as a second argument, will upload the data</span>
+<span class="sd">        and store it in the record under the name given in the first argument.</span>
+
+<span class="sd">        Use the two-argument call to &quot;rename&quot; a file in the record or to upload data</span>
+<span class="sd">        that is not stored in a file (e.g. to avoid writing it to disk just for upload).</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_check_mutable</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_check_enabled</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="n">data</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s2">&quot;rb&quot;</span><span class="p">)</span>
+            <span class="n">filename</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span><span class="o">.</span><span class="n">name</span>
+
         <span class="bp">self</span><span class="o">.</span><span class="n">_check_filename</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="o">.</span><span class="n">draft</span><span class="o">.</span><span class="n">file_upload_start</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_parent</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="n">filename</span><span class="p">)</span>
@@ -717,9 +754,11 @@
         <span class="k">return</span> <span class="p">{</span><span class="n">fileinfo</span><span class="o">.</span><span class="n">key</span><span class="p">:</span> <span class="n">fileinfo</span> <span class="k">for</span> <span class="n">fileinfo</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_files</span><span class="o">.</span><span class="n">entries</span><span class="p">}</span>
 
     <span class="k">def</span> <span class="nf">keys</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterable</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;Return uploaded filenames.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_entries_dict</span><span class="p">()</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
 
     <span class="k">def</span> <span class="nf">values</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">FileMetadata</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;Return file metadata of uploaded files.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_entries_dict</span><span class="p">()</span><span class="o">.</span><span class="n">values</span><span class="p">()</span>
 
     <span class="k">def</span> <span class="nf">items</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">FileMetadata</span><span class="p">]]:</span>
@@ -729,9 +768,11 @@
         <span class="k">return</span> <span class="nb">iter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_entries_dict</span><span class="p">())</span>
 
     <span class="k">def</span> <span class="fm">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Return number of uploaded files.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_entries_dict</span><span class="p">())</span>
 
     <span class="k">def</span> <span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">FileMetadata</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Get file metadata of given filename.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_entries_dict</span><span class="p">()[</span><span class="n">filename</span><span class="p">]</span>
 
     <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
@@ -756,7 +797,7 @@
             <summary>View Source</summary>
             <div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">WrappedRecord</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Class that wraps the raw data and the low-level REST API into something convenient.</span>
+<span class="sd">    Wrapper around the low-level record and draft REST APIs.</span>
 
 <span class="sd">    It can be used to perform all operations that are possible on individual records.</span>
 
@@ -766,12 +807,11 @@
 <span class="sd">    the allowed methods through runtime inspection.</span>
 
 <span class="sd">    The `access_links` and `files` attributes expose special interfaces with</span>
-<span class="sd">    immediate synchronization with the server.</span>
+<span class="sd">    **immediate synchronization** with the server.</span>
+<span class="sd">    Changes to the `metadata` and `access` attributes are **synchronized only</span>
+<span class="sd">    on `save()` or `publish()`**.</span>
 
-<span class="sd">    Changes to the `metadata` and `access` attributes are synchronized only</span>
-<span class="sd">    on `save()` or `publish()`.</span>
-
-<span class="sd">    All other attributes are to be considered read-only,</span>
+<span class="sd">    **All other attributes** are to be treated as **read-only**,</span>
 <span class="sd">    overwriting them will have no effect on the actual data on the server.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
@@ -804,18 +844,18 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_versions</span><span class="p">:</span> <span class="n">RecordVersions</span> <span class="o">=</span> <span class="n">RecordVersions</span><span class="p">(</span><span class="n">cl</span><span class="p">,</span> <span class="n">rec</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">files</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">files</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">WrappedFiles</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Return interface for managing files in this record.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_files</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">access_links</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">access_links</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">AccessLinks</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Return interface for managing access links for this record.&quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_expect_published</span><span class="p">()</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_access_links</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">versions</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">versions</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">RecordVersions</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Return all versions of the current record.&quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_expect_published</span><span class="p">()</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_versions</span>
@@ -841,8 +881,8 @@
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Check whether the current draft is in sync with the draft on in Invenio RDM.</span>
 
-<span class="sd">        This means that they must agree on access, metadata and files attributes,</span>
-<span class="sd">        as these are the ones modifiable by the user.</span>
+<span class="sd">        This means that they must agree on `access`, `metadata` and `files`</span>
+<span class="sd">        attributes, as these are the ones modifiable by the user.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_expect_draft</span><span class="p">()</span>
 
@@ -872,9 +912,23 @@
 <span class="sd">        just request it again from the repository.</span>
 
 <span class="sd">        The method returns this object itself for convenience, e.g. to write:</span>
-<span class="sd">        `draft = rdm.records[&quot;REC_ID&quot;].edit()`</span>
-<span class="sd">        which is equivalent to:</span>
-<span class="sd">        `draft = rdm.drafts.create(&quot;REC_ID&quot;, new_version=False)`</span>
+
+<span class="sd">        ```</span>
+<span class="sd">        draft = rdm.records[&quot;REC_ID&quot;].edit()</span>
+<span class="sd">        ```</span>
+
+<span class="sd">        which is shorter than:</span>
+
+<span class="sd">        ```</span>
+<span class="sd">        rec = rdm.records[&quot;REC_ID&quot;]</span>
+<span class="sd">        rec.edit()</span>
+<span class="sd">        ```</span>
+
+<span class="sd">        and is equivalent to the slightly more efficient:</span>
+
+<span class="sd">        ```</span>
+<span class="sd">        draft = rdm.drafts.create(&quot;REC_ID&quot;, new_version=False)</span>
+<span class="sd">        ```</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_expect_published</span><span class="p">()</span>
 
@@ -882,7 +936,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_is_draft</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="k">return</span> <span class="bp">self</span>
 
-    <span class="k">def</span> <span class="nf">save</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">save</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">PrettyRepr</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]]]:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Save changes to draft record.</span>
 
@@ -905,7 +959,7 @@
         <span class="c1"># don&#39;t need to wrap None for printing... would print &#39;None&#39;</span>
         <span class="k">return</span> <span class="n">PrettyRepr</span><span class="p">(</span><span class="n">errs</span><span class="p">)</span> <span class="k">if</span> <span class="n">errs</span> <span class="k">else</span> <span class="kc">None</span>
 
-    <span class="k">def</span> <span class="nf">publish</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">publish</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Save and publish the draft as the actual record.</span>
 
@@ -928,7 +982,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_record</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="o">.</span><span class="n">draft</span><span class="o">.</span><span class="n">publish</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_record</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_is_draft</span> <span class="o">=</span> <span class="kc">False</span>
 
-    <span class="k">def</span> <span class="nf">delete</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">delete</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Delete this draft record.</span>
 
@@ -961,18 +1015,24 @@
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Attribute </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2"> is read-only!&quot;</span><span class="p">)</span>
 
     <span class="c1"># magic methods must be proxied by hand</span>
-    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="n">patch</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;files&quot;</span><span class="p">:</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">files</span><span class="o">.</span><span class="n">keys</span><span class="p">())}</span>
-        <span class="k">return</span> <span class="nb">repr</span><span class="p">(</span><span class="n">PrettyRepr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_record</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">exclude</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;links&quot;</span><span class="p">},</span> <span class="n">update</span><span class="o">=</span><span class="n">patch</span><span class="p">)))</span>
+    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="k">return</span> <span class="nb">repr</span><span class="p">(</span>
+            <span class="n">PrettyRepr</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_record</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span>
+                    <span class="n">exclude</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;links&quot;</span><span class="p">,</span> <span class="s2">&quot;revision_id&quot;</span><span class="p">,</span> <span class="s2">&quot;parent&quot;</span><span class="p">,</span> <span class="s2">&quot;pids&quot;</span><span class="p">},</span>
+                    <span class="n">update</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;files&quot;</span><span class="p">:</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">files</span><span class="o">.</span><span class="n">keys</span><span class="p">())},</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
 
     <span class="c1"># help the shell to list what&#39;s there</span>
-    <span class="k">def</span> <span class="fm">__dir__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__dir__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterable</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
         <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__dir__</span><span class="p">()</span>
 </pre></div>
 
         </details>
 
-            <div class="docstring"><p>Class that wraps the raw data and the low-level REST API into something convenient.</p>
+            <div class="docstring"><p>Wrapper around the low-level record and draft REST APIs.</p>
 
 <p>It can be used to perform all operations that are possible on individual records.</p>
 
@@ -982,12 +1042,11 @@ Therefore, this class covers both kinds of entities and determines
 the allowed methods through runtime inspection.</p>
 
 <p>The <code><a href="#WrappedRecord.access_links">access_links</a></code> and <code><a href="#WrappedRecord.files">files</a></code> attributes expose special interfaces with
-immediate synchronization with the server.</p>
+<strong>immediate synchronization</strong> with the server.
+Changes to the <code>metadata</code> and <code>access</code> attributes are <strong>synchronized only
+on <code><a href="#WrappedRecord.save">save()</a></code> or <code><a href="#WrappedRecord.publish">publish()</a></code></strong>.</p>
 
-<p>Changes to the <code>metadata</code> and <code>access</code> attributes are synchronized only
-on <code><a href="#WrappedRecord.save">save()</a></code> or <code><a href="#WrappedRecord.publish">publish()</a></code>.</p>
-
-<p>All other attributes are to be considered read-only,
+<p><strong>All other attributes</strong> are to be treated as <strong>read-only</strong>,
 overwriting them will have no effect on the actual data on the server.</p>
 </div>
 
@@ -1033,7 +1092,7 @@ overwriting them will have no effect on the actual data on the server.</p>
                             <div id="WrappedRecord.files" class="classattr">
                                             <div class="attr variable"><a class="headerlink" href="#WrappedRecord.files">#&nbsp;&nbsp</a>
 
-        <span class="name">files</span>
+        <span class="name">files</span><span class="annotation">: <a href="#WrappedFiles">iridium.record.WrappedFiles</a></span>
     </div>
 
             <div class="docstring"><p>Return interface for managing files in this record.</p>
@@ -1044,7 +1103,7 @@ overwriting them will have no effect on the actual data on the server.</p>
                             <div id="WrappedRecord.access_links" class="classattr">
                                             <div class="attr variable"><a class="headerlink" href="#WrappedRecord.access_links">#&nbsp;&nbsp</a>
 
-        <span class="name">access_links</span>
+        <span class="name">access_links</span><span class="annotation">: <a href="#AccessLinks">iridium.record.AccessLinks</a></span>
     </div>
 
             <div class="docstring"><p>Return interface for managing access links for this record.</p>
@@ -1055,7 +1114,7 @@ overwriting them will have no effect on the actual data on the server.</p>
                             <div id="WrappedRecord.versions" class="classattr">
                                             <div class="attr variable"><a class="headerlink" href="#WrappedRecord.versions">#&nbsp;&nbsp</a>
 
-        <span class="name">versions</span>
+        <span class="name">versions</span><span class="annotation">: <a href="#RecordVersions">iridium.record.RecordVersions</a></span>
     </div>
 
             <div class="docstring"><p>Return all versions of the current record.</p>
@@ -1090,8 +1149,8 @@ overwriting them will have no effect on the actual data on the server.</p>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Check whether the current draft is in sync with the draft on in Invenio RDM.</span>
 
-<span class="sd">        This means that they must agree on access, metadata and files attributes,</span>
-<span class="sd">        as these are the ones modifiable by the user.</span>
+<span class="sd">        This means that they must agree on `access`, `metadata` and `files`</span>
+<span class="sd">        attributes, as these are the ones modifiable by the user.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_expect_draft</span><span class="p">()</span>
 
@@ -1114,8 +1173,8 @@ overwriting them will have no effect on the actual data on the server.</p>
 
             <div class="docstring"><p>Check whether the current draft is in sync with the draft on in Invenio RDM.</p>
 
-<p>This means that they must agree on access, metadata and files attributes,
-as these are the ones modifiable by the user.</p>
+<p>This means that they must agree on <code>access</code>, <code>metadata</code> and <code><a href="#WrappedRecord.files">files</a></code>
+attributes, as these are the ones modifiable by the user.</p>
 </div>
 
 
@@ -1142,9 +1201,23 @@ as these are the ones modifiable by the user.</p>
 <span class="sd">        just request it again from the repository.</span>
 
 <span class="sd">        The method returns this object itself for convenience, e.g. to write:</span>
-<span class="sd">        `draft = rdm.records[&quot;REC_ID&quot;].edit()`</span>
-<span class="sd">        which is equivalent to:</span>
-<span class="sd">        `draft = rdm.drafts.create(&quot;REC_ID&quot;, new_version=False)`</span>
+
+<span class="sd">        ```</span>
+<span class="sd">        draft = rdm.records[&quot;REC_ID&quot;].edit()</span>
+<span class="sd">        ```</span>
+
+<span class="sd">        which is shorter than:</span>
+
+<span class="sd">        ```</span>
+<span class="sd">        rec = rdm.records[&quot;REC_ID&quot;]</span>
+<span class="sd">        rec.edit()</span>
+<span class="sd">        ```</span>
+
+<span class="sd">        and is equivalent to the slightly more efficient:</span>
+
+<span class="sd">        ```</span>
+<span class="sd">        draft = rdm.drafts.create(&quot;REC_ID&quot;, new_version=False)</span>
+<span class="sd">        ```</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_expect_published</span><span class="p">()</span>
 
@@ -1164,10 +1237,21 @@ For this, change metadata accordingly and call <code><a href="#WrappedRecord.sav
 To get back from the draft to the original record, without publishing,
 just request it again from the repository.</p>
 
-<p>The method returns this object itself for convenience, e.g. to write:
-<code>draft = rdm.records["REC_ID"].edit()</code>
-which is equivalent to:
-<code>draft = rdm.drafts.create("REC_ID", new_version=False)</code></p>
+<p>The method returns this object itself for convenience, e.g. to write:</p>
+
+<pre><code>draft = rdm.records["REC_ID"].edit()
+</code></pre>
+
+<p>which is shorter than:</p>
+
+<pre><code>rec = rdm.records["REC_ID"]
+rec.edit()
+</code></pre>
+
+<p>and is equivalent to the slightly more efficient:</p>
+
+<pre><code>draft = rdm.drafts.create("REC_ID", new_version=False)
+</code></pre>
 </div>
 
 
@@ -1177,12 +1261,12 @@ which is equivalent to:
 
         
             <span class="def">def</span>
-            <span class="name">save</span><span class="signature">(self)</span>:
+            <span class="name">save</span><span class="signature">(self) -&gt; Union[<a href="pprint.html#PrettyRepr">iridium.pprint.PrettyRepr</a>[Dict[str, str]], NoneType]</span>:
     </div>
 
                 <details>
             <summary>View Source</summary>
-            <div class="codehilite"><pre><span></span>    <span class="k">def</span> <span class="nf">save</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+            <div class="codehilite"><pre><span></span>    <span class="k">def</span> <span class="nf">save</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">PrettyRepr</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]]]:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Save changes to draft record.</span>
 
@@ -1225,12 +1309,12 @@ The changes will only be visible to others after calling <code><a href="#Wrapped
 
         
             <span class="def">def</span>
-            <span class="name">publish</span><span class="signature">(self)</span>:
+            <span class="name">publish</span><span class="signature">(self) -&gt; None</span>:
     </div>
 
                 <details>
             <summary>View Source</summary>
-            <div class="codehilite"><pre><span></span>    <span class="k">def</span> <span class="nf">publish</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+            <div class="codehilite"><pre><span></span>    <span class="k">def</span> <span class="nf">publish</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Save and publish the draft as the actual record.</span>
 
@@ -1274,12 +1358,12 @@ The changes will only be visible to others after calling <code><a href="#Wrapped
 
         
             <span class="def">def</span>
-            <span class="name">delete</span><span class="signature">(self)</span>:
+            <span class="name">delete</span><span class="signature">(self) -&gt; None</span>:
     </div>
 
                 <details>
             <summary>View Source</summary>
-            <div class="codehilite"><pre><span></span>    <span class="k">def</span> <span class="nf">delete</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+            <div class="codehilite"><pre><span></span>    <span class="k">def</span> <span class="nf">delete</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Delete this draft record.</span>
 
@@ -1934,6 +2018,7 @@ is equivalent to:
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">enabled</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Get/set whether file uploads are enabled for this record or draft.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_files</span><span class="o">.</span><span class="n">enabled</span>
 
     <span class="nd">@enabled</span><span class="o">.</span><span class="n">setter</span>
@@ -1967,7 +2052,11 @@ is equivalent to:
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;File with this name already in record: </span><span class="si">{</span><span class="n">filename</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">download</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">BinaryIO</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Download file from record or draft.&quot;&quot;&quot;</span>
+        <span class="sd">&quot;&quot;&quot;Download file from record or draft.</span>
+
+<span class="sd">        Returns a binary stream as output, you have to manually `read` it</span>
+<span class="sd">        and, if needed, e.g. write to a file.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_check_enabled</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_check_filename</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
 
@@ -1998,14 +2087,26 @@ is equivalent to:
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_files</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="o">.</span><span class="n">draft</span><span class="o">.</span><span class="n">files_import</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_parent</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">upload</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="n">BinaryIO</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">upload</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">BinaryIO</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Upload a file.</span>
+<span class="sd">        Upload a file to the record.</span>
 
-<span class="sd">        Takes a binary stream as input, you have to `open` your file yourself with `&quot;rb&quot;`.</span>
+<span class="sd">        If only passed a string, will interpret it as a local path and upload file</span>
+<span class="sd">        to the record as a file with the same name as the original.</span>
+
+<span class="sd">        If passed a binary data stream as a second argument, will upload the data</span>
+<span class="sd">        and store it in the record under the name given in the first argument.</span>
+
+<span class="sd">        Use the two-argument call to &quot;rename&quot; a file in the record or to upload data</span>
+<span class="sd">        that is not stored in a file (e.g. to avoid writing it to disk just for upload).</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_check_mutable</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_check_enabled</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="n">data</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s2">&quot;rb&quot;</span><span class="p">)</span>
+            <span class="n">filename</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span><span class="o">.</span><span class="n">name</span>
+
         <span class="bp">self</span><span class="o">.</span><span class="n">_check_filename</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="o">.</span><span class="n">draft</span><span class="o">.</span><span class="n">file_upload_start</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_parent</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="n">filename</span><span class="p">)</span>
@@ -2026,9 +2127,11 @@ is equivalent to:
         <span class="k">return</span> <span class="p">{</span><span class="n">fileinfo</span><span class="o">.</span><span class="n">key</span><span class="p">:</span> <span class="n">fileinfo</span> <span class="k">for</span> <span class="n">fileinfo</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_files</span><span class="o">.</span><span class="n">entries</span><span class="p">}</span>
 
     <span class="k">def</span> <span class="nf">keys</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterable</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;Return uploaded filenames.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_entries_dict</span><span class="p">()</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
 
     <span class="k">def</span> <span class="nf">values</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">FileMetadata</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;Return file metadata of uploaded files.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_entries_dict</span><span class="p">()</span><span class="o">.</span><span class="n">values</span><span class="p">()</span>
 
     <span class="k">def</span> <span class="nf">items</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">FileMetadata</span><span class="p">]]:</span>
@@ -2038,9 +2141,11 @@ is equivalent to:
         <span class="k">return</span> <span class="nb">iter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_entries_dict</span><span class="p">())</span>
 
     <span class="k">def</span> <span class="fm">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Return number of uploaded files.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_entries_dict</span><span class="p">())</span>
 
     <span class="k">def</span> <span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">FileMetadata</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Get file metadata of given filename.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_entries_dict</span><span class="p">()[</span><span class="n">filename</span><span class="p">]</span>
 
     <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
@@ -2088,7 +2193,9 @@ is equivalent to:
         <span class="name">enabled</span><span class="annotation">: bool</span>
     </div>
 
-    
+            <div class="docstring"><p>Get/set whether file uploads are enabled for this record or draft.</p>
+</div>
+
 
                             </div>
                             <div id="WrappedFiles.download" class="classattr">
@@ -2102,7 +2209,11 @@ is equivalent to:
                 <details>
             <summary>View Source</summary>
             <div class="codehilite"><pre><span></span>    <span class="k">def</span> <span class="nf">download</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">BinaryIO</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Download file from record or draft.&quot;&quot;&quot;</span>
+        <span class="sd">&quot;&quot;&quot;Download file from record or draft.</span>
+
+<span class="sd">        Returns a binary stream as output, you have to manually `read` it</span>
+<span class="sd">        and, if needed, e.g. write to a file.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_check_enabled</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_check_filename</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
 
@@ -2115,6 +2226,9 @@ is equivalent to:
         </details>
 
             <div class="docstring"><p>Download file from record or draft.</p>
+
+<p>Returns a binary stream as output, you have to manually <code>read</code> it
+and, if needed, e.g. write to a file.</p>
 </div>
 
 
@@ -2182,19 +2296,31 @@ is equivalent to:
 
         
             <span class="def">def</span>
-            <span class="name">upload</span><span class="signature">(self, filename: str, data: &lt;class &#39;BinaryIO&#39;&gt;)</span>:
+            <span class="name">upload</span><span class="signature">(self, filename: str, data: Union[BinaryIO, NoneType] = None)</span>:
     </div>
 
                 <details>
             <summary>View Source</summary>
-            <div class="codehilite"><pre><span></span>    <span class="k">def</span> <span class="nf">upload</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="n">BinaryIO</span><span class="p">):</span>
+            <div class="codehilite"><pre><span></span>    <span class="k">def</span> <span class="nf">upload</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">BinaryIO</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Upload a file.</span>
+<span class="sd">        Upload a file to the record.</span>
 
-<span class="sd">        Takes a binary stream as input, you have to `open` your file yourself with `&quot;rb&quot;`.</span>
+<span class="sd">        If only passed a string, will interpret it as a local path and upload file</span>
+<span class="sd">        to the record as a file with the same name as the original.</span>
+
+<span class="sd">        If passed a binary data stream as a second argument, will upload the data</span>
+<span class="sd">        and store it in the record under the name given in the first argument.</span>
+
+<span class="sd">        Use the two-argument call to &quot;rename&quot; a file in the record or to upload data</span>
+<span class="sd">        that is not stored in a file (e.g. to avoid writing it to disk just for upload).</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_check_mutable</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_check_enabled</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="n">data</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s2">&quot;rb&quot;</span><span class="p">)</span>
+            <span class="n">filename</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span><span class="o">.</span><span class="n">name</span>
+
         <span class="bp">self</span><span class="o">.</span><span class="n">_check_filename</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="o">.</span><span class="n">draft</span><span class="o">.</span><span class="n">file_upload_start</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_parent</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="n">filename</span><span class="p">)</span>
@@ -2205,9 +2331,16 @@ is equivalent to:
 
         </details>
 
-            <div class="docstring"><p>Upload a file.</p>
+            <div class="docstring"><p>Upload a file to the record.</p>
 
-<p>Takes a binary stream as input, you have to <code>open</code> your file yourself with <code>"rb"</code>.</p>
+<p>If only passed a string, will interpret it as a local path and upload file
+to the record as a file with the same name as the original.</p>
+
+<p>If passed a binary data stream as a second argument, will upload the data
+and store it in the record under the name given in the first argument.</p>
+
+<p>Use the two-argument call to "rename" a file in the record or to upload data
+that is not stored in a file (e.g. to avoid writing it to disk just for upload).</p>
 </div>
 
 
@@ -2223,12 +2356,15 @@ is equivalent to:
                 <details>
             <summary>View Source</summary>
             <div class="codehilite"><pre><span></span>    <span class="k">def</span> <span class="nf">keys</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterable</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;Return uploaded filenames.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_entries_dict</span><span class="p">()</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
 </pre></div>
 
         </details>
 
-    
+            <div class="docstring"><p>Return uploaded filenames.</p>
+</div>
+
 
                             </div>
                             <div id="WrappedFiles.values" class="classattr">
@@ -2242,12 +2378,15 @@ is equivalent to:
                 <details>
             <summary>View Source</summary>
             <div class="codehilite"><pre><span></span>    <span class="k">def</span> <span class="nf">values</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">FileMetadata</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;Return file metadata of uploaded files.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_entries_dict</span><span class="p">()</span><span class="o">.</span><span class="n">values</span><span class="p">()</span>
 </pre></div>
 
         </details>
 
-    
+            <div class="docstring"><p>Return file metadata of uploaded files.</p>
+</div>
+
 
                             </div>
                             <div id="WrappedFiles.items" class="classattr">

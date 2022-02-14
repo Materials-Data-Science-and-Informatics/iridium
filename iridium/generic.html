@@ -265,7 +265,7 @@ that are returned by Invenio RDM from its ElasticSearch index.</p>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Forbidden keyword argument &#39;page&#39;!&quot;</span><span class="p">)</span>
 
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">pgsz</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_dict_key</span> <span class="o">=</span> <span class="nb">id</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_dict_key</span> <span class="o">=</span> <span class="n">dict_key</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_query_args</span> <span class="o">=</span> <span class="n">kwargs</span>
 
     <span class="nd">@abstractmethod</span>
@@ -714,7 +714,7 @@ For example, a generic mapping type might be defined as::</p>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Forbidden keyword argument &#39;page&#39;!&quot;</span><span class="p">)</span>
 
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">pgsz</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_dict_key</span> <span class="o">=</span> <span class="nb">id</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_dict_key</span> <span class="o">=</span> <span class="n">dict_key</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_query_args</span> <span class="o">=</span> <span class="n">kwargs</span>
 
     <span class="nd">@abstractmethod</span>

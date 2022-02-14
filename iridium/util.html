@@ -52,23 +52,27 @@
                     <h1 class="modulename">
 <a href="./../iridium.html">iridium</a><wbr>.util    </h1>
 
-                        <div class="docstring"><p>Helper functions to allow using JSON and YAML interchangably and taking care of $refs.</p>
+                        <div class="docstring"><p>Helper functions.</p>
 </div>
 
                         <details>
             <summary>View Source</summary>
-            <div class="codehilite"><pre><span></span><span class="sd">&quot;&quot;&quot;Helper functions to allow using JSON and YAML interchangably and taking care of $refs.&quot;&quot;&quot;</span>
+            <div class="codehilite"><pre><span></span><span class="sd">&quot;&quot;&quot;Helper functions.&quot;&quot;&quot;</span>
 
 <span class="kn">import</span> <span class="nn">hashlib</span>
 <span class="kn">import</span> <span class="nn">os</span>
-<span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">BinaryIO</span>
 
 
-<span class="k">def</span> <span class="nf">get_env</span><span class="p">(</span><span class="n">varname</span><span class="p">,</span> <span class="n">defval</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Get environment variable. If no default value is missing, raise a runtime error.&quot;&quot;&quot;</span>
-    <span class="n">env</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">varname</span><span class="p">,</span> <span class="n">defval</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">get_env</span><span class="p">(</span><span class="n">var_name</span><span class="p">,</span> <span class="n">def_val</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Get environment variable.</span>
+
+<span class="sd">    If no default value is given and value is missing, raises a runtime error.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">env</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">var_name</span><span class="p">,</span> <span class="n">def_val</span><span class="p">)</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">env</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">varname</span><span class="si">}</span><span class="s2"> is not set in shell environment or .env file!&quot;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">var_name</span><span class="si">}</span><span class="s2"> is not set in shell environment or .env file!&quot;</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">env</span>
 
 
@@ -80,19 +84,18 @@
 <span class="p">}</span>
 
 
-<span class="k">def</span> <span class="nf">hashsum</span><span class="p">(</span><span class="n">file</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">alg</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Compute hashsum for a file using selected algorithm.&quot;&quot;&quot;</span>
+<span class="k">def</span> <span class="nf">hashsum</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="n">BinaryIO</span><span class="p">,</span> <span class="n">alg</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Compute hashsum from given binary file stream using selected algorithm.&quot;&quot;&quot;</span>
     <span class="k">try</span><span class="p">:</span>
         <span class="n">h</span> <span class="o">=</span> <span class="n">_hash_alg</span><span class="p">[</span><span class="n">alg</span><span class="p">]()</span>
     <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unsupported hashsum: </span><span class="si">{</span><span class="n">alg</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 
-    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="s2">&quot;rb&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
-        <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
-            <span class="n">chunk</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">h</span><span class="o">.</span><span class="n">block_size</span><span class="p">)</span>
-            <span class="k">if</span> <span class="ow">not</span> <span class="n">chunk</span><span class="p">:</span>
-                <span class="k">break</span>
-            <span class="n">h</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">chunk</span><span class="p">)</span>
+    <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+        <span class="n">chunk</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">h</span><span class="o">.</span><span class="n">block_size</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">chunk</span><span class="p">:</span>
+            <span class="k">break</span>
+        <span class="n">h</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">chunk</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">h</span><span class="o">.</span><span class="n">hexdigest</span><span class="p">()</span>
 </pre></div>
@@ -105,22 +108,28 @@
 
         
             <span class="def">def</span>
-            <span class="name">get_env</span><span class="signature">(varname, defval=None)</span>:
+            <span class="name">get_env</span><span class="signature">(var_name, def_val=None)</span>:
     </div>
 
                 <details>
             <summary>View Source</summary>
-            <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">get_env</span><span class="p">(</span><span class="n">varname</span><span class="p">,</span> <span class="n">defval</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Get environment variable. If no default value is missing, raise a runtime error.&quot;&quot;&quot;</span>
-    <span class="n">env</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">varname</span><span class="p">,</span> <span class="n">defval</span><span class="p">)</span>
+            <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">get_env</span><span class="p">(</span><span class="n">var_name</span><span class="p">,</span> <span class="n">def_val</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Get environment variable.</span>
+
+<span class="sd">    If no default value is given and value is missing, raises a runtime error.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">env</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">var_name</span><span class="p">,</span> <span class="n">def_val</span><span class="p">)</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">env</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">varname</span><span class="si">}</span><span class="s2"> is not set in shell environment or .env file!&quot;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">var_name</span><span class="si">}</span><span class="s2"> is not set in shell environment or .env file!&quot;</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">env</span>
 </pre></div>
 
         </details>
 
-            <div class="docstring"><p>Get environment variable. If no default value is missing, raise a runtime error.</p>
+            <div class="docstring"><p>Get environment variable.</p>
+
+<p>If no default value is given and value is missing, raises a runtime error.</p>
 </div>
 
 
@@ -130,31 +139,30 @@
 
         
             <span class="def">def</span>
-            <span class="name">hashsum</span><span class="signature">(file: pathlib.Path, alg: str)</span>:
+            <span class="name">hashsum</span><span class="signature">(data: &lt;class &#39;BinaryIO&#39;&gt;, alg: str)</span>:
     </div>
 
                 <details>
             <summary>View Source</summary>
-            <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">hashsum</span><span class="p">(</span><span class="n">file</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">alg</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Compute hashsum for a file using selected algorithm.&quot;&quot;&quot;</span>
+            <div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">hashsum</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="n">BinaryIO</span><span class="p">,</span> <span class="n">alg</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Compute hashsum from given binary file stream using selected algorithm.&quot;&quot;&quot;</span>
     <span class="k">try</span><span class="p">:</span>
         <span class="n">h</span> <span class="o">=</span> <span class="n">_hash_alg</span><span class="p">[</span><span class="n">alg</span><span class="p">]()</span>
     <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unsupported hashsum: </span><span class="si">{</span><span class="n">alg</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 
-    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="s2">&quot;rb&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
-        <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
-            <span class="n">chunk</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">h</span><span class="o">.</span><span class="n">block_size</span><span class="p">)</span>
-            <span class="k">if</span> <span class="ow">not</span> <span class="n">chunk</span><span class="p">:</span>
-                <span class="k">break</span>
-            <span class="n">h</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">chunk</span><span class="p">)</span>
+    <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+        <span class="n">chunk</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">h</span><span class="o">.</span><span class="n">block_size</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">chunk</span><span class="p">:</span>
+            <span class="k">break</span>
+        <span class="n">h</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">chunk</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">h</span><span class="o">.</span><span class="n">hexdigest</span><span class="p">()</span>
 </pre></div>
 
         </details>
 
-            <div class="docstring"><p>Compute hashsum for a file using selected algorithm.</p>
+            <div class="docstring"><p>Compute hashsum from given binary file stream using selected algorithm.</p>
 </div>
 
 
