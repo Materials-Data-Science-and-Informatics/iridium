@@ -1,3 +1,0 @@
-# Iridium Manual
-
-TODO

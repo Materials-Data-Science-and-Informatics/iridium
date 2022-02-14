@@ -1,15 +1,19 @@
-"""Helper functions to allow using JSON and YAML interchangably and taking care of $refs."""
+"""Helper functions."""
 
 import hashlib
 import os
-from pathlib import Path
+from typing import BinaryIO
 
 
-def get_env(varname, defval=None):
-    """Get environment variable. If no default value is missing, raise a runtime error."""
-    env = os.environ.get(varname, defval)
+def get_env(var_name, def_val=None):
+    """
+    Get environment variable.
+
+    If no default value is given and value is missing, raises a runtime error.
+    """
+    env = os.environ.get(var_name, def_val)
     if not env:
-        raise RuntimeError(f"{varname} is not set in shell environment or .env file!")
+        raise RuntimeError(f"{var_name} is not set in shell environment or .env file!")
     return env
 
 
@@ -21,18 +25,17 @@ _hash_alg = {
 }
 
 
-def hashsum(file: Path, alg: str):
-    """Compute hashsum for a file using selected algorithm."""
+def hashsum(data: BinaryIO, alg: str):
+    """Compute hashsum from given binary file stream using selected algorithm."""
     try:
         h = _hash_alg[alg]()
     except KeyError:
         raise ValueError(f"Unsupported hashsum: {alg}")
 
-    with open(file, "rb") as f:
-        while True:
-            chunk = f.read(h.block_size)
-            if not chunk:
-                break
-            h.update(chunk)
+    while True:
+        chunk = data.read(h.block_size)
+        if not chunk:
+            break
+        h.update(chunk)
 
     return h.hexdigest()

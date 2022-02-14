@@ -1,7 +1,8 @@
-"""Convenience wrapper for draft and record API."""
+"""High-level interface for draft and record API."""
 from __future__ import annotations
 
 from datetime import datetime
+from pathlib import Path
 from typing import BinaryIO, Dict, Iterable, Optional, Tuple
 
 from .generic import AccessProxy, Query
@@ -19,7 +20,7 @@ from .pprint import NoPrint, PrettyRepr
 
 class WrappedRecord:
     """
-    Class that wraps the raw data and the low-level REST API into something convenient.
+    Wrapper around the low-level record and draft REST APIs.
 
     It can be used to perform all operations that are possible on individual records.
 
@@ -29,12 +30,11 @@ class WrappedRecord:
     the allowed methods through runtime inspection.
 
     The `access_links` and `files` attributes expose special interfaces with
-    immediate synchronization with the server.
+    **immediate synchronization** with the server.
+    Changes to the `metadata` and `access` attributes are **synchronized only
+    on `save()` or `publish()`**.
 
-    Changes to the `metadata` and `access` attributes are synchronized only
-    on `save()` or `publish()`.
-
-    All other attributes are to be considered read-only,
+    **All other attributes** are to be treated as **read-only**,
     overwriting them will have no effect on the actual data on the server.
     """
 
@@ -67,18 +67,18 @@ class WrappedRecord:
         self._versions: RecordVersions = RecordVersions(cl, rec.id)
 
     @property
-    def files(self):
+    def files(self) -> WrappedFiles:
         """Return interface for managing files in this record."""
         return self._files
 
     @property
-    def access_links(self):
+    def access_links(self) -> AccessLinks:
         """Return interface for managing access links for this record."""
         self._expect_published()
         return self._access_links
 
     @property
-    def versions(self):
+    def versions(self) -> RecordVersions:
         """Return all versions of the current record."""
         self._expect_published()
         return self._versions
@@ -104,8 +104,8 @@ class WrappedRecord:
         """
         Check whether the current draft is in sync with the draft on in Invenio RDM.
 
-        This means that they must agree on access, metadata and files attributes,
-        as these are the ones modifiable by the user.
+        This means that they must agree on `access`, `metadata` and `files`
+        attributes, as these are the ones modifiable by the user.
         """
         self._expect_draft()
 
@@ -135,9 +135,23 @@ class WrappedRecord:
         just request it again from the repository.
 
         The method returns this object itself for convenience, e.g. to write:
-        `draft = rdm.records["REC_ID"].edit()`
-        which is equivalent to:
-        `draft = rdm.drafts.create("REC_ID", new_version=False)`
+
+        ```
+        draft = rdm.records["REC_ID"].edit()
+        ```
+
+        which is shorter than:
+
+        ```
+        rec = rdm.records["REC_ID"]
+        rec.edit()
+        ```
+
+        and is equivalent to the slightly more efficient:
+
+        ```
+        draft = rdm.drafts.create("REC_ID", new_version=False)
+        ```
         """
         self._expect_published()
 
@@ -145,7 +159,7 @@ class WrappedRecord:
         self._is_draft = True
         return self
 
-    def save(self):
+    def save(self) -> Optional[PrettyRepr[Dict[str, str]]]:
         """
         Save changes to draft record.
 
@@ -168,7 +182,7 @@ class WrappedRecord:
         # don't need to wrap None for printing... would print 'None'
         return PrettyRepr(errs) if errs else None
 
-    def publish(self):
+    def publish(self) -> None:
         """
         Save and publish the draft as the actual record.
 
@@ -191,7 +205,7 @@ class WrappedRecord:
         self._record = self._client.draft.publish(self._record.id)
         self._is_draft = False
 
-    def delete(self):
+    def delete(self) -> None:
         """
         Delete this draft record.
 
@@ -224,12 +238,18 @@ class WrappedRecord:
             raise ValueError(f"Attribute {name} is read-only!")
 
     # magic methods must be proxied by hand
-    def __repr__(self):
-        patch = {"files": list(self.files.keys())}
-        return repr(PrettyRepr(self._record.copy(exclude={"links"}, update=patch)))
+    def __repr__(self) -> str:
+        return repr(
+            PrettyRepr(
+                self._record.copy(
+                    exclude={"links", "revision_id", "parent", "pids"},
+                    update={"files": list(self.files.keys())},
+                )
+            )
+        )
 
     # help the shell to list what's there
-    def __dir__(self):
+    def __dir__(self) -> Iterable[str]:
         return super().__dir__()
 
 
@@ -431,6 +451,7 @@ class WrappedFiles:
 
     @property
     def enabled(self) -> bool:
+        """Get/set whether file uploads are enabled for this record or draft."""
         return self._files.enabled
 
     @enabled.setter
@@ -464,7 +485,11 @@ class WrappedFiles:
             raise ValueError(f"File with this name already in record: {filename}")
 
     def download(self, filename: str) -> BinaryIO:
-        """Download file from record or draft."""
+        """Download file from record or draft.
+
+        Returns a binary stream as output, you have to manually `read` it
+        and, if needed, e.g. write to a file.
+        """
         self._check_enabled()
         self._check_filename(filename)
 
@@ -495,14 +520,26 @@ class WrappedFiles:
 
         self._files = self._client.draft.files_import(self._parent.id)
 
-    def upload(self, filename: str, data: BinaryIO):
+    def upload(self, filename: str, data: Optional[BinaryIO] = None):
         """
-        Upload a file.
+        Upload a file to the record.
 
-        Takes a binary stream as input, you have to `open` your file yourself with `"rb"`.
+        If only passed a string, will interpret it as a local path and upload file
+        to the record as a file with the same name as the original.
+
+        If passed a binary data stream as a second argument, will upload the data
+        and store it in the record under the name given in the first argument.
+
+        Use the two-argument call to "rename" a file in the record or to upload data
+        that is not stored in a file (e.g. to avoid writing it to disk just for upload).
         """
         self._check_mutable()
         self._check_enabled()
+
+        if data is None:
+            data = open(filename, "rb")
+            filename = Path(filename).name
+
         self._check_filename(filename, False)
 
         self._client.draft.file_upload_start(self._parent.id, filename)
@@ -523,9 +560,11 @@ class WrappedFiles:
         return {fileinfo.key: fileinfo for fileinfo in self._files.entries}
 
     def keys(self) -> Iterable[str]:
+        """Return uploaded filenames."""
         return self._entries_dict().keys()
 
     def values(self) -> Iterable[FileMetadata]:
+        """Return file metadata of uploaded files."""
         return self._entries_dict().values()
 
     def items(self) -> Iterable[Tuple[str, FileMetadata]]:
@@ -535,9 +574,11 @@ class WrappedFiles:
         return iter(self._entries_dict())
 
     def __len__(self) -> int:
+        """Return number of uploaded files."""
         return len(self._entries_dict())
 
     def __getitem__(self, filename) -> FileMetadata:
+        """Get file metadata of given filename."""
         return self._entries_dict()[filename]
 
     def __repr__(self) -> str:

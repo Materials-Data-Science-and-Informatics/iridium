@@ -30,7 +30,7 @@ might follow when there is interest and the REST APIs are stabilized.
 
 ## Getting Started
 
-Probably you are interested in the high-level API. For this, read the [manual](MANUAL.md).
+Probably you are interested in the high-level API. For this, read the [tutorial](TUTORIAL.md).
 
 It is not advised to use the low-level API directly, unless you are an Invenio RDM expert.
 The low-level API documentation is minimal and located

@@ -162,7 +162,7 @@ class Query(PaginatedList[T]):
             raise ValueError("Forbidden keyword argument 'page'!")
 
         super().__init__(pgsz)
-        self._dict_key = id
+        self._dict_key = dict_key
         self._query_args = kwargs
 
     @abstractmethod

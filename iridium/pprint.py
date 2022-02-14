@@ -2,7 +2,7 @@
 
 import pprint
 import sys
-from typing import Any, Dict
+from typing import Any, Dict, Generic, TypeVar
 
 import wrapt
 
@@ -21,14 +21,17 @@ def pp(obj) -> str:
     return pprint.pformat(obj, **pprint_args)
 
 
-class NoPrint(wrapt.ObjectProxy):
+T = TypeVar("T")
+
+
+class NoPrint(wrapt.ObjectProxy, Generic[T]):
     """Wrap any class to avoid printing it."""
 
     def __repr__(self) -> str:
         return f"{type(self.__wrapped__).__name__}(...)"
 
 
-class PrettyRepr(wrapt.ObjectProxy):
+class PrettyRepr(wrapt.ObjectProxy, Generic[T]):
     """Wrap any class to apply pretty-printing to it."""
 
     def __repr__(self) -> str:

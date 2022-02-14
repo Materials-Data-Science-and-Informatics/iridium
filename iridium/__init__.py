@@ -1,8 +1,4 @@
-"""
-Welcome to Iridium.
-
-.. include:: ../MANUAL.md
-"""
+""".. include:: ../TUTORIAL.md"""  # noqa: D400
 import sys
 from pathlib import Path
 
@@ -12,6 +8,7 @@ from typing_extensions import Final
 # re-export
 from .api import Repository  # noqa: F401
 
+# for pdoc to understand the include:: directive
 __docformat__ = "restructuredtext"
 
 __pkg_path__: Final[Path] = Path(sys.modules[__name__].__file__).parent.resolve()

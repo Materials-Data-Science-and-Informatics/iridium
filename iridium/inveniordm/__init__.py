@@ -1,8 +1,8 @@
 """
-Thin InvenioRDM API REST API wrapper.
+Low-level InvenioRDM REST API wrapper.
 
-The classes just neatly organize the endpoints to be conveniently accessed
-through an `InvenioRDMClient` instance.
+The classes in this module just neatly organize the endpoints to be
+conveniently accessed through an `InvenioRDMClient` instance.
 
 The methods return plain [pydantic](https://pydantic-docs.helpmanual.io/)
 models that serve as somewhat validated Python representation of
@@ -84,7 +84,6 @@ class InvenioRDMClient:
         Create an instance of the Invenio RDM API.
 
         The instance is configured for the provided credentials and arguments.
-        If you need to change them, create a new instance.
         """
         headers: Dict[str, str] = {}
         if httpx_kwargs and "headers" in httpx_kwargs:
@@ -109,7 +108,7 @@ class InvenioRDMClient:
     def connected(self) -> bool:
         """Check that Invenio RDM is accessible."""
         try:
-            r = self.client.get(self._endpoint("/records"))
+            r = self.client.get(self._endpoint("/records?size=1"))
             _raise_on_error_status(r)
             return True
         except:  # noqa: E722
@@ -569,7 +568,7 @@ class DraftAPI(SubAPI):
         fmeta = self.file_upload_complete(draft_id, file.name)
         assert fmeta.checksum is not None
         alg, hsum = fmeta.checksum.split(":")
-        hsum_verify = hashsum(file, alg)
+        hsum_verify = hashsum(open(file, "rb"), alg)
         assert hsum == hsum_verify
 
         return fmeta

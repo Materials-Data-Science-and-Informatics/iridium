@@ -68,16 +68,20 @@ class Affiliation(JSONModel):
 
     @root_validator
     def require_id_or_name(cls, values):
-        has_id = "id" not in values or not values["id"]
-        has_name = "name" not in values or not values["name"]
+        has_id = "id" in values or values["id"]
+        has_name = "name" in values or values["name"]
         if not has_id and not has_name:
             raise ValueError("Affiliation needs an id or a free-text name")
         return values
 
 
+class CreatorRole(VocabularyRef):
+    pass
+
+
 class Creator(JSONModel):
     person_or_org: PersonOrOrg
-    role: Optional[VocabularyRef]
+    role: Optional[CreatorRole]
     affiliations: Optional[List[Affiliation]]
 
 

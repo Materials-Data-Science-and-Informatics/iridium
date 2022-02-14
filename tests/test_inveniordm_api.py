@@ -106,7 +106,7 @@ def test_new_draft(rdm, dummy_file, get_test_record, testutils):
     assert fs3.status == "completed"
     assert fs3.checksum is not None
     alg, hsum = fs3.checksum.split(":")
-    hsum_verify = hashsum(somefile, alg)
+    hsum_verify = hashsum(open(somefile, "rb"), alg)
     assert hsum == hsum_verify
 
     # check that metadata of file is now as expected:
@@ -171,8 +171,8 @@ def test_version_from_record(rdm, get_test_record, dummy_file):
     file1 = dummy_file("test1.txt")
     file2 = dummy_file("test2.txt")
     file3 = dummy_file("test3.txt")
-    hsum2 = hashsum(file2, "md5")
-    hsum3 = hashsum(file3, "md5")
+    hsum2 = hashsum(open(file2, "rb"), "md5")
+    hsum3 = hashsum(open(file3, "rb"), "md5")
 
     # 2nd version: enable files, add test1.txt
     drft = rdm.draft.new_version(drft.id)
