@@ -40,6 +40,21 @@ class PersonOrOrg(JSONModel):
     family_name: Optional[str]
     identifiers: Optional[List[Identifier]]
 
+    def __setattr__(self, key, value):
+        if type == PersonOrOrgType.ORGANIZATIONAL:
+            if key in ["given_name", "family_name"]:
+                raise ValueError(f"An organization does not have {key}")
+        else:
+            if key in ["given_name", "family_name"]:
+                super().__setattr__(key, value)
+                super().__setattr__("name", f"{self.family_name}, {self.given_name}")
+                return
+            elif key == "name":
+                raise AttributeError(
+                    "Cannot set name directly! Use 'given_name' and 'family_name'!"
+                )
+        super().__setattr__(key, value)
+
     @root_validator
     def validate_names(cls, values):
         if "type" not in values:
