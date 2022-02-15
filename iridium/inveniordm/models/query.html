@@ -49,6 +49,21 @@
 
             </li>
             <li>
+                    <a class="class" href="#AccessStatus">AccessStatus</a>
+                            <ul class="memberlist">
+                        <li>
+                                <a class="variable" href="#AccessStatus.open">open</a>
+                        </li>
+                        <li>
+                                <a class="variable" href="#AccessStatus.metadata_only">metadata_only</a>
+                        </li>
+                        <li>
+                                <a class="variable" href="#AccessStatus.embargoed">embargoed</a>
+                        </li>
+                </ul>
+
+            </li>
+            <li>
                     <a class="class" href="#RecQueryArgs">RecQueryArgs</a>
                             <ul class="memberlist">
                 </ul>
@@ -259,19 +274,34 @@
 
     <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Assemble query parameter string to add to URL (without the leading &#39;?&#39;).&quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="s2">&quot;&amp;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
-            <span class="p">[</span>
-                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">k</span><span class="si">}</span><span class="s2">=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="n">k</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span>
-                <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span>
-                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
-            <span class="p">]</span>
-        <span class="p">)</span>
+        <span class="n">nonempty_lists</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="n">k</span>
+            <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="n">k</span><span class="p">],</span> <span class="nb">list</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="n">k</span><span class="p">])</span> <span class="o">&gt;</span> <span class="mi">0</span>
+        <span class="p">}</span>
+        <span class="n">lists</span> <span class="o">=</span> <span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">k</span><span class="si">}</span><span class="s2">=</span><span class="si">{</span><span class="n">v</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">nonempty_lists</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="n">k</span><span class="p">]]</span>
+        <span class="n">singl</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">k</span><span class="si">}</span><span class="s2">=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="n">k</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">k</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">nonempty_lists</span>
+        <span class="p">]</span>
+        <span class="k">return</span> <span class="s2">&quot;&amp;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">singl</span> <span class="o">+</span> <span class="n">lists</span><span class="p">)</span>
+
+
+<span class="k">class</span> <span class="nc">AccessStatus</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">Enum</span><span class="p">):</span>
+    <span class="nb">open</span> <span class="o">=</span> <span class="s2">&quot;open&quot;</span>
+    <span class="n">metadata_only</span> <span class="o">=</span> <span class="s2">&quot;metadata-only&quot;</span>
+    <span class="n">embargoed</span> <span class="o">=</span> <span class="s2">&quot;embargoed&quot;</span>
 
 
 <span class="k">class</span> <span class="nc">RecQueryArgs</span><span class="p">(</span><span class="n">QueryArgs</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;https://inveniordm.docs.cern.ch/reference/rest_api_drafts_records/#search-records&quot;&quot;&quot;</span>
 
     <span class="n">allversions</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span>
+
+    <span class="c1"># these are used in the web ui, no documentation:</span>
+    <span class="n">access_status</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">AccessStatus</span><span class="p">]]</span>
+    <span class="n">resource_type</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span>
 
 
 <span class="k">class</span> <span class="nc">VocQueryArgs</span><span class="p">(</span><span class="n">QueryArgs</span><span class="p">):</span>
@@ -440,13 +470,18 @@
 
     <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Assemble query parameter string to add to URL (without the leading &#39;?&#39;).&quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="s2">&quot;&amp;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
-            <span class="p">[</span>
-                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">k</span><span class="si">}</span><span class="s2">=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="n">k</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span>
-                <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span>
-                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
-            <span class="p">]</span>
-        <span class="p">)</span>
+        <span class="n">nonempty_lists</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="n">k</span>
+            <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="n">k</span><span class="p">],</span> <span class="nb">list</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="n">k</span><span class="p">])</span> <span class="o">&gt;</span> <span class="mi">0</span>
+        <span class="p">}</span>
+        <span class="n">lists</span> <span class="o">=</span> <span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">k</span><span class="si">}</span><span class="s2">=</span><span class="si">{</span><span class="n">v</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">nonempty_lists</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="n">k</span><span class="p">]]</span>
+        <span class="n">singl</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">k</span><span class="si">}</span><span class="s2">=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="n">k</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">k</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">nonempty_lists</span>
+        <span class="p">]</span>
+        <span class="k">return</span> <span class="s2">&quot;&amp;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">singl</span> <span class="o">+</span> <span class="n">lists</span><span class="p">)</span>
 </pre></div>
 
         </details>
@@ -519,6 +554,115 @@
 
                             </div>
                 </section>
+                <section id="AccessStatus">
+                                <div class="attr class">
+        <a class="headerlink" href="#AccessStatus">#&nbsp;&nbsp</a>
+
+        
+        <span class="def">class</span>
+        <span class="name">AccessStatus</span><wbr>(<span class="base">builtins.str</span>, <span class="base">enum.Enum</span>):
+    </div>
+
+                <details>
+            <summary>View Source</summary>
+            <div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">AccessStatus</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">Enum</span><span class="p">):</span>
+    <span class="nb">open</span> <span class="o">=</span> <span class="s2">&quot;open&quot;</span>
+    <span class="n">metadata_only</span> <span class="o">=</span> <span class="s2">&quot;metadata-only&quot;</span>
+    <span class="n">embargoed</span> <span class="o">=</span> <span class="s2">&quot;embargoed&quot;</span>
+</pre></div>
+
+        </details>
+
+            <div class="docstring"><p>An enumeration.</p>
+</div>
+
+
+                            <div id="AccessStatus.open" class="classattr">
+                                            <div class="attr variable"><a class="headerlink" href="#AccessStatus.open">#&nbsp;&nbsp</a>
+
+        <span class="name">open</span><span class="default_value"> = &lt;<a href="#AccessStatus.open">AccessStatus.open</a>: &#39;open&#39;&gt;</span>
+    </div>
+
+    
+
+                            </div>
+                            <div id="AccessStatus.metadata_only" class="classattr">
+                                            <div class="attr variable"><a class="headerlink" href="#AccessStatus.metadata_only">#&nbsp;&nbsp</a>
+
+        <span class="name">metadata_only</span><span class="default_value"> = &lt;<a href="#AccessStatus.metadata_only">AccessStatus.metadata_only</a>: &#39;metadata-only&#39;&gt;</span>
+    </div>
+
+    
+
+                            </div>
+                            <div id="AccessStatus.embargoed" class="classattr">
+                                            <div class="attr variable"><a class="headerlink" href="#AccessStatus.embargoed">#&nbsp;&nbsp</a>
+
+        <span class="name">embargoed</span><span class="default_value"> = &lt;<a href="#AccessStatus.embargoed">AccessStatus.embargoed</a>: &#39;embargoed&#39;&gt;</span>
+    </div>
+
+    
+
+                            </div>
+                            <div class="inherited">
+                                <h5>Inherited Members</h5>
+                                <dl>
+                                    <div><dt>enum.Enum</dt>
+                                <dd id="AccessStatus.name" class="variable">name</dd>
+                <dd id="AccessStatus.value" class="variable">value</dd>
+
+            </div>
+            <div><dt>builtins.str</dt>
+                                <dd id="AccessStatus.encode" class="function">encode</dd>
+                <dd id="AccessStatus.replace" class="function">replace</dd>
+                <dd id="AccessStatus.split" class="function">split</dd>
+                <dd id="AccessStatus.rsplit" class="function">rsplit</dd>
+                <dd id="AccessStatus.join" class="function">join</dd>
+                <dd id="AccessStatus.capitalize" class="function">capitalize</dd>
+                <dd id="AccessStatus.casefold" class="function">casefold</dd>
+                <dd id="AccessStatus.title" class="function">title</dd>
+                <dd id="AccessStatus.center" class="function">center</dd>
+                <dd id="AccessStatus.count" class="function">count</dd>
+                <dd id="AccessStatus.expandtabs" class="function">expandtabs</dd>
+                <dd id="AccessStatus.find" class="function">find</dd>
+                <dd id="AccessStatus.partition" class="function">partition</dd>
+                <dd id="AccessStatus.index" class="function">index</dd>
+                <dd id="AccessStatus.ljust" class="function">ljust</dd>
+                <dd id="AccessStatus.lower" class="function">lower</dd>
+                <dd id="AccessStatus.lstrip" class="function">lstrip</dd>
+                <dd id="AccessStatus.rfind" class="function">rfind</dd>
+                <dd id="AccessStatus.rindex" class="function">rindex</dd>
+                <dd id="AccessStatus.rjust" class="function">rjust</dd>
+                <dd id="AccessStatus.rstrip" class="function">rstrip</dd>
+                <dd id="AccessStatus.rpartition" class="function">rpartition</dd>
+                <dd id="AccessStatus.splitlines" class="function">splitlines</dd>
+                <dd id="AccessStatus.strip" class="function">strip</dd>
+                <dd id="AccessStatus.swapcase" class="function">swapcase</dd>
+                <dd id="AccessStatus.translate" class="function">translate</dd>
+                <dd id="AccessStatus.upper" class="function">upper</dd>
+                <dd id="AccessStatus.startswith" class="function">startswith</dd>
+                <dd id="AccessStatus.endswith" class="function">endswith</dd>
+                <dd id="AccessStatus.isascii" class="function">isascii</dd>
+                <dd id="AccessStatus.islower" class="function">islower</dd>
+                <dd id="AccessStatus.isupper" class="function">isupper</dd>
+                <dd id="AccessStatus.istitle" class="function">istitle</dd>
+                <dd id="AccessStatus.isspace" class="function">isspace</dd>
+                <dd id="AccessStatus.isdecimal" class="function">isdecimal</dd>
+                <dd id="AccessStatus.isdigit" class="function">isdigit</dd>
+                <dd id="AccessStatus.isnumeric" class="function">isnumeric</dd>
+                <dd id="AccessStatus.isalpha" class="function">isalpha</dd>
+                <dd id="AccessStatus.isalnum" class="function">isalnum</dd>
+                <dd id="AccessStatus.isidentifier" class="function">isidentifier</dd>
+                <dd id="AccessStatus.isprintable" class="function">isprintable</dd>
+                <dd id="AccessStatus.zfill" class="function">zfill</dd>
+                <dd id="AccessStatus.format" class="function">format</dd>
+                <dd id="AccessStatus.format_map" class="function">format_map</dd>
+                <dd id="AccessStatus.maketrans" class="function">maketrans</dd>
+
+            </div>
+                                </dl>
+                            </div>
+                </section>
                 <section id="RecQueryArgs">
                                 <div class="attr class">
         <a class="headerlink" href="#RecQueryArgs">#&nbsp;&nbsp</a>
@@ -534,6 +678,10 @@
     <span class="sd">&quot;&quot;&quot;https://inveniordm.docs.cern.ch/reference/rest_api_drafts_records/#search-records&quot;&quot;&quot;</span>
 
     <span class="n">allversions</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span>
+
+    <span class="c1"># these are used in the web ui, no documentation:</span>
+    <span class="n">access_status</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">AccessStatus</span><span class="p">]]</span>
+    <span class="n">resource_type</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span>
 </pre></div>
 
         </details>
