@@ -144,7 +144,7 @@ class Query(PaginatedList[T]):
     """
     Class for convenient access to query results.
 
-    Results are by default assumed to have an `id` attribute for dict-like access.
+    Results are by default assumed to have a string `id` attribute for dict-like access.
 
     Allowed keyword arguments: normal `QueryArgs`, but without `page`.
 
@@ -185,18 +185,18 @@ class Query(PaginatedList[T]):
 
     def dict(self):
         """Convert to a real `dict` (this downloads all query results!)."""
-        return {r.__dict__[self._dict_key]: r for r in iter(self)}  # type: ignore
+        return {r.__dict__[self._dict_key]: r for r in iter(self)}
 
     # these behave like a dict, but are lazy (not pulling everything, unless forced),
     # could be useful to list "the first few results":
 
     def items(self) -> Iterable[Tuple[str, T]]:
         """Return (id, result) key-value pais in query result order."""
-        return ((x.id, x) for x in iter(self))  # type: ignore
+        return ((x.__dict__[self._dict_key], x) for x in iter(self))
 
     def keys(self) -> Iterable[str]:
         """Return ids of entities in query result order."""
-        return (x.__dict__[self._dict_key] for x in iter(self))  # type: ignore
+        return (x.__dict__[self._dict_key] for x in iter(self))
 
     def values(self) -> Iterable[T]:
         """Return entities in query result order."""
@@ -220,7 +220,7 @@ class Query(PaginatedList[T]):
         if isinstance(obj, str):
             return obj in self.keys()
         else:
-            super().__contains__(obj)
+            return super().__contains__(obj)
 
     def __getitem__(self, key):  # -> T
         """
@@ -230,7 +230,10 @@ class Query(PaginatedList[T]):
         If passed an int, will perform filterless query and take n-th result.
         """
         if isinstance(key, str):
-            return self.dict()[key]
+            try:
+                return next((k, v) for k, v in self.items() if k == key)[1]
+            except StopIteration:
+                raise KeyError
         else:
             return super().__getitem__(key)
 
@@ -253,6 +256,7 @@ class AccessProxy(ABC, Generic[T]):
     """
 
     def __init__(self, client: InvenioRDMClient):
+        # only initialized here for convenience of _get_query and _get_entity
         self._client = client
 
     def __call__(self, *args, **kwargs):
@@ -311,7 +315,7 @@ class AccessProxy(ABC, Generic[T]):
             raise TypeError("Passed key must be either string id or an int!")
 
     def __contains__(self, obj: str) -> bool:
-        """Check whether an entity exists."""
+        """Check whether an entity with given id exists."""
         try:
             self.__getitem__(obj)
             return True
