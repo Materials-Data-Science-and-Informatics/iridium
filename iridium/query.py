@@ -51,6 +51,8 @@ class DraftQuery(Query):
         self._client = cl
 
     def _query_items(self, **kwargs) -> Results:
+        if "user" in kwargs:  # must be true anyway, forbid overriding it
+            raise ValueError("'user' is not allowed as a keyword argument here!")
         # a draft query is just a record query for unpublished records by the user
         if "q" not in kwargs:
             kwargs["q"] = ""

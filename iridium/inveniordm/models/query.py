@@ -38,19 +38,34 @@ class QueryArgs(BaseModel):
 
     def __str__(self):
         """Assemble query parameter string to add to URL (without the leading '?')."""
-        return "&".join(
-            [
-                f"{k}={self.__dict__[k]}"
-                for k in self.__dict__
-                if self.__dict__[k] is not None
-            ]
-        )
+        nonempty_lists = {
+            k
+            for k in self.__dict__.keys()
+            if isinstance(self.__dict__[k], list) and len(self.__dict__[k]) > 0
+        }
+        lists = [f"{k}={v}" for k in nonempty_lists for v in self.__dict__[k]]
+        singl = [
+            f"{k}={self.__dict__[k]}"
+            for k in self.__dict__
+            if self.__dict__[k] is not None and k not in nonempty_lists
+        ]
+        return "&".join(singl + lists)
+
+
+class AccessStatus(str, Enum):
+    open = "open"
+    metadata_only = "metadata-only"
+    embargoed = "embargoed"
 
 
 class RecQueryArgs(QueryArgs):
     """https://inveniordm.docs.cern.ch/reference/rest_api_drafts_records/#search-records"""
 
     allversions: Optional[bool]
+
+    # these are used in the web ui, no documentation:
+    access_status: Optional[List[AccessStatus]]
+    resource_type: Optional[List[str]]
 
 
 class VocQueryArgs(QueryArgs):

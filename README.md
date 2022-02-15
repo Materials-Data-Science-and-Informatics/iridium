@@ -46,7 +46,7 @@ Run `pre-commit install` after cloning to enable pre-commit to enforce the requi
 
 Run `pytest` before merging your changes to make sure you did not break anything.
 
-To generate documentation, run `pdoc --html -o docs python_app_template`.
+To generate documentation, run `pdoc --html -o docs iridium`.
 
 To check coverage, use `pytest --cov`.
 

@@ -354,6 +354,8 @@ class AccessLinks(AccessProxy):
         self._record_id: str = rec_id
 
     def _get_query(self, **kwargs) -> Query:
+        if len(kwargs) > 0:
+            raise ValueError("Additional query parameters may not be passed here!")
         return AccessLinkQuery(self._client, self._record_id)
 
     def _get_entity(self, link_id: str):
@@ -397,6 +399,8 @@ class RecordVersions(AccessProxy):
         self._record_id: str = rec_id
 
     def _get_query(self, **kwargs) -> Query:
+        if len(kwargs) > 0:
+            raise ValueError("Additional query parameters may not be passed here!")
         return RecordVersionsQuery(self._client, self._record_id)
 
     def _get_entity(self, record_id: str):

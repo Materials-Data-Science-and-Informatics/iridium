@@ -115,10 +115,9 @@ draft.files.upload("my_file.zip")
 **Remark:** If you don't have a file stored on disk or want to store it under a different
 name in the record, you can use `draft.files.upload("target_filename.zip", data)`,
 where `data` can be an arbitrary binary stream. To create a suitable stream from a file,
-use `open(PATH_TO_FILE, "rb")`.
-
-**Example:** `draft.files.upload("renamed.zip", open("my_file.zip", "rb"))` would upload the
-same file as above, but save it as `renamed.zip` in the draft.
+use `open(PATH_TO_FILE, "rb")`. For example,
+`draft.files.upload("renamed.zip", open("my_file.zip", "rb"))` would upload the same file
+as above, but save it as `renamed.zip` in the draft.
 
 Now let us inspect `draft.files`:
 
@@ -179,21 +178,20 @@ draft.metadata.creators = [
   person_or_org=PersonOrOrg(family_name="Doe", given_name="John", type="personal"))
 ]
 
-draft.save() # should return no validation errors now
+draft.save()    # should return no validation errors now!
 draft.publish()
 ```
 
-Notice that after `publish()` succeeds, we now hold a non-draft record object.
-You can check its record id in `draft.id`.
-
-Now lets verify that our new published record can be accessed:
+Notice that after `publish()` succeeds, the object we called `draft` actually
+becomes a non-draft record object. You can check its record id in `draft.id`.
+Now let us verify that our new published record can be accessed:
 
 ```python
 rec = rdm.records[draft.id]
 print(rec.metadata.title)
 ```
 
-We should see `My amazing new dataset` printed out to us.
+You should see `My amazing new dataset` printed out to you.
 
 ## Update a record
 
@@ -252,24 +250,94 @@ To add a new file, proceed as described above, e.g. `rec_new.files.upload("other
 
 Now you can set the new publication date and publish the new version.
 After this there should be two versions of your record and
-`rec.versions.latest()` should point to the new assigned `id` of the new version, i.e.
-be equal to `rec_new.id`.
+`rec.versions.latest()` should point to the new version, i.e.
+`rec.versions.latest().id` now equals `rec_new.id`.
 
-## Query records
+## Access and query records
 
-TODO
+Most entities that can be queried conform to one common interface -
+they are subclasses of `iridium.generic.AccessProxy`.
+This interface unifies dict-like retrieval of individual entities and list-like access
+to query results into one convenient object.
 
-**Remark:** The drafts can be queried similarly,
-just use `rdm.drafts` instead of `rdm.records`.
+In the following we will look at how you can use this for records (via `rdm.records`)
+as an example, but access to most other queryable entities such as:
+* record drafts (`rdm.drafts`),
+* record versions (`rdm.records[rec_id].versions`)
+* record access links (`rdm.records[rec_id].access_links`)
+* and vocabularies (`rdm.vocabulary[VocType.some_vocabulary]`)
+works in the same way, the only difference being the query parameters that are accepted.
 
-## Query vocabularies
+You have already seen that you can access records by their id with
+`rdm.records["record_id"]`. On failure, you will get a `KeyError`, like when using a dict.
+You can also use `"record_id" in rdm.records` to check whether a record with the
+corresponding id exists, just like you can check for the existence of a key in a dict.
+
+When you use `rdm.records` as the `Iterable` for a `for`-loop, you will iterate through
+all existing public records, for example you could list all record titles like this:
+
+```python
+for rec in rdm.records:
+  print(rec.metadata.title)
+```
+
+Using `rdm.records` like this is effectively a *query without any filters*. To apply
+filters, you can pass query parameters as call arguments to this object:
+
+```python
+for rec in rdm.records(q="amazing"):
+  print(rec.metadata.title)
+```
+
+The `q` parameter is corresponding to the "search text field" in the web interface and
+supports both free-text queries and special ElasticSearch syntax (see
+[here](https://inveniordm.web.cern.ch/help/search)).
+You can also apply filters you know from the web interface, e.g. the query
+
+```python
+rdm.records(resource_type=["dataset", "publication"])
+```
+
+will return only records with one of the two specified resource types, and
+
+```python
+rdm.records(access_status=["metadata-only"])
+```
+
+will return only records that have no files attached.
+
+Internally, Invenio RDM does not return all results at once, but *paginates* them, i.e.
+groups them into pages of a fixed size and allows to request these pages. While this
+is a natural fit for a web interface, this is a technical detail you most likely don't
+want to think much about. Therefore, **Iridium will take care of loading result pages on
+demand for you**. A result page is only loaded once your code wants to access the
+corresponding result.
+
+This is especially useful if you e.g. want to access the first couple of results out of a
+thousand. But if you in fact want to traverse all results, the automatic page size might
+be suboptimal, slowing you code down (due to a larger number of network requests).
+Therefore, in most query interfaces you can provide the parameter `size` to control the
+number of results that are loaded "at once" so you can adjust this to your use-case:
+
+```python
+for rec in rdm.records(q="amazing", size=200):
+  print(rec.metadata.title)
+```
+
+does the same as above, but your code will load 200 results at once,
+instead of the default of 10 of the Invenio RDM API. By default, Iridium keeps 10 as the
+default for record queries (where often you might want only the "top results"), but
+increases the page size for vocabulary queries. You can experiment with the `size`
+argument and find out what works best for you.
+
+## Access and query vocabularies
 
 Invenio RDM provides a number of vocabularies that can be queried.
 See the `VocType` class for a list of the supported vocabularies.
 
 For example, we can print all software licenses as follows:
 ```python
-for l in rdm.vocabulary[VocType.licenses](tags="software"):`
+for l in rdm.vocabulary[VocType.licenses](tags="software"):
   print(l.id)
 ```
 
@@ -284,7 +352,7 @@ print(rdm.vocabularies[VocType.resource_types]["dataset"])
 ```
 
 resulting in an object like this:
-```
+```python
 { 'created': '2022-01-11T09:15:42.699516+00:00',
   'icon': 'table',
   'id': 'dataset',
