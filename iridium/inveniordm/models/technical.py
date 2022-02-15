@@ -222,6 +222,16 @@ class Entity(JSONModel):
     https://github.com/inveniosoftware/invenio-records-resources/blob/master/invenio_records_resources/services/records/schema.py#L22
     """
 
+    @property
+    def _read_only(self):
+        return super()._read_only + [
+            "id",
+            "created",
+            "updated",
+            "links",
+            "revision_id",
+        ]
+
     id: str
     created: datetime  # dump_only
     updated: datetime  # dump_only
@@ -252,6 +262,17 @@ class Record(Entity):
     class Config:
         extra = Extra.forbid
 
+    @property
+    def _read_only(self):
+        return super()._read_only + [
+            "parent",
+            "versions",
+            "is_published",
+            "pids",
+            "expires_at",
+            "errors",
+        ]
+
     # RecordSchema(overridden)
     parent: Parent
     versions: Versions  # dump_only
@@ -266,5 +287,4 @@ class Record(Entity):
     # revision: int  # dump_only, seems to be unused
 
     expires_at: Optional[datetime]  # seems to be only used in drafts
-
     errors: Optional[List[ValidationError]]  # seems to be only used in drafts

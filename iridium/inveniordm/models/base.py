@@ -14,11 +14,24 @@ class JSONModel(BaseModel):
 
     Models deriving from this variant:
     * automatically are pretty-printed as JSON (for user convenience)
+    * can have read-only attributes declared that prevent direct setting
     * can be toggled to return original, raw JSON dict (for debugging)
 
     Only use this for parsing JSON responses from API requests!
     Otherwise these enhancements might lead to unintended consequences.
     """
+
+    @property
+    def _read_only(self):
+        return []
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+    def __setattr__(self, key, value):
+        if key in self._read_only:
+            raise AttributeError(f"'{key}' is a read-only attribute!")
+        super().__setattr__(key, value)
 
     _raw_json: bool = False
 

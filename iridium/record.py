@@ -230,7 +230,8 @@ class WrappedRecord:
         return self._record.__getattribute__(name)
 
     def __setattr__(self, name: str, value):
-        if name in ["metadata", "access"]:  # the only usefully writable record fields
+        # if name in ["metadata", "access"]:  # the only usefully writable record fields
+        if name[0] != "_":  # the only usefully writable record fields
             return self._record.__setattr__(name, value)
         elif name in self.__slots__:  # private, local attribute
             super().__setattr__(name, value)
