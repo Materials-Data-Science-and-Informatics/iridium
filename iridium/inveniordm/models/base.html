@@ -34,6 +34,9 @@
                     <a class="class" href="#JSONModel">JSONModel</a>
                             <ul class="memberlist">
                         <li>
+                                <a class="function" href="#JSONModel.__init__">JSONModel</a>
+                        </li>
+                        <li>
                                 <a class="function" href="#JSONModel.raw_json">raw_json</a>
                         </li>
                         <li>
@@ -79,11 +82,24 @@
 
 <span class="sd">    Models deriving from this variant:</span>
 <span class="sd">    * automatically are pretty-printed as JSON (for user convenience)</span>
+<span class="sd">    * can have read-only attributes declared that prevent direct setting</span>
 <span class="sd">    * can be toggled to return original, raw JSON dict (for debugging)</span>
 
 <span class="sd">    Only use this for parsing JSON responses from API requests!</span>
 <span class="sd">    Otherwise these enhancements might lead to unintended consequences.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">_read_only</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">[]</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="fm">__setattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_only</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;&#39;</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2">&#39; is a read-only attribute!&quot;</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__setattr__</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
 
     <span class="n">_raw_json</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
 
@@ -138,11 +154,24 @@
 
 <span class="sd">    Models deriving from this variant:</span>
 <span class="sd">    * automatically are pretty-printed as JSON (for user convenience)</span>
+<span class="sd">    * can have read-only attributes declared that prevent direct setting</span>
 <span class="sd">    * can be toggled to return original, raw JSON dict (for debugging)</span>
 
 <span class="sd">    Only use this for parsing JSON responses from API requests!</span>
 <span class="sd">    Otherwise these enhancements might lead to unintended consequences.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">_read_only</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">[]</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="fm">__setattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_only</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;&#39;</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2">&#39; is a read-only attribute!&quot;</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__setattr__</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
 
     <span class="n">_raw_json</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
 
@@ -185,6 +214,7 @@
 
 <ul>
 <li>automatically are pretty-printed as JSON (for user convenience)</li>
+<li>can have read-only attributes declared that prevent direct setting</li>
 <li>can be toggled to return original, raw JSON dict (for debugging)</li>
 </ul>
 
@@ -193,6 +223,28 @@ Otherwise these enhancements might lead to unintended consequences.</p>
 </div>
 
 
+                            <div id="JSONModel.__init__" class="classattr">
+                                        <div class="attr function"><a class="headerlink" href="#JSONModel.__init__">#&nbsp;&nbsp</a>
+
+        
+            <span class="name">JSONModel</span><span class="signature">(*args, **kwargs)</span>
+    </div>
+
+                <details>
+            <summary>View Source</summary>
+            <div class="codehilite"><pre><span></span>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+</pre></div>
+
+        </details>
+
+            <div class="docstring"><p>Create a new model by parsing and validating input data from keyword arguments.</p>
+
+<p>Raises ValidationError if the input data cannot be parsed to form a valid model.</p>
+</div>
+
+
+                            </div>
                             <div id="JSONModel.raw_json" class="classattr">
                                         <div class="attr function"><a class="headerlink" href="#JSONModel.raw_json">#&nbsp;&nbsp</a>
 
@@ -251,8 +303,7 @@ Otherwise these enhancements might lead to unintended consequences.</p>
                                 <h5>Inherited Members</h5>
                                 <dl>
                                     <div><dt>pydantic.main.BaseModel</dt>
-                                <dd id="JSONModel.__init__" class="function">BaseModel</dd>
-                <dd id="JSONModel.Config" class="class">Config</dd>
+                                <dd id="JSONModel.Config" class="class">Config</dd>
                 <dd id="JSONModel.dict" class="function">dict</dd>
                 <dd id="JSONModel.json" class="function">json</dd>
                 <dd id="JSONModel.parse_raw" class="function">parse_raw</dd>

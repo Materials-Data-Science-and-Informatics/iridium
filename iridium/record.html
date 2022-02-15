@@ -424,7 +424,8 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_record</span><span class="o">.</span><span class="fm">__getattribute__</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="fm">__setattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
-        <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;metadata&quot;</span><span class="p">,</span> <span class="s2">&quot;access&quot;</span><span class="p">]:</span>  <span class="c1"># the only usefully writable record fields</span>
+        <span class="c1"># if name in [&quot;metadata&quot;, &quot;access&quot;]:  # the only usefully writable record fields</span>
+        <span class="k">if</span> <span class="n">name</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="s2">&quot;_&quot;</span><span class="p">:</span>  <span class="c1"># the only usefully writable record fields</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_record</span><span class="o">.</span><span class="fm">__setattr__</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
         <span class="k">elif</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__slots__</span><span class="p">:</span>  <span class="c1"># private, local attribute</span>
             <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__setattr__</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
@@ -1011,7 +1012,8 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_record</span><span class="o">.</span><span class="fm">__getattribute__</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="fm">__setattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
-        <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;metadata&quot;</span><span class="p">,</span> <span class="s2">&quot;access&quot;</span><span class="p">]:</span>  <span class="c1"># the only usefully writable record fields</span>
+        <span class="c1"># if name in [&quot;metadata&quot;, &quot;access&quot;]:  # the only usefully writable record fields</span>
+        <span class="k">if</span> <span class="n">name</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="s2">&quot;_&quot;</span><span class="p">:</span>  <span class="c1"># the only usefully writable record fields</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_record</span><span class="o">.</span><span class="fm">__setattr__</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
         <span class="k">elif</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__slots__</span><span class="p">:</span>  <span class="c1"># private, local attribute</span>
             <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__setattr__</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
@@ -1612,7 +1614,7 @@ the fields <code><a href="#WrappedAccessLink.expires_at">expires_at</a></code> a
 
             <div class="docstring"><p>Class for convenient access to query results.</p>
 
-<p>Results are by default assumed to have an <code>id</code> attribute for dict-like access.</p>
+<p>Results are by default assumed to have a string <code>id</code> attribute for dict-like access.</p>
 
 <p>Allowed keyword arguments: normal <code>QueryArgs</code>, but without <code>page</code>.</p>
 
@@ -1797,7 +1799,7 @@ while a larger batch size is more efficient for traversing all results.</p>
 
             <div class="docstring"><p>Class for convenient access to query results.</p>
 
-<p>Results are by default assumed to have an <code>id</code> attribute for dict-like access.</p>
+<p>Results are by default assumed to have a string <code>id</code> attribute for dict-like access.</p>
 
 <p>Allowed keyword arguments: normal <code>QueryArgs</code>, but without <code>page</code>.</p>
 

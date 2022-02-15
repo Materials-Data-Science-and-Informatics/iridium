@@ -252,6 +252,21 @@ https://github.com/inveniosoftware/invenio-rdm-records/blob/master/invenio_rdm_r
     <span class="n">family_name</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span>
     <span class="n">identifiers</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">Identifier</span><span class="p">]]</span>
 
+    <span class="k">def</span> <span class="fm">__setattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">type</span> <span class="o">==</span> <span class="n">PersonOrOrgType</span><span class="o">.</span><span class="n">ORGANIZATIONAL</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;given_name&quot;</span><span class="p">,</span> <span class="s2">&quot;family_name&quot;</span><span class="p">]:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;An organization does not have </span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;given_name&quot;</span><span class="p">,</span> <span class="s2">&quot;family_name&quot;</span><span class="p">]:</span>
+                <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__setattr__</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+                <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__setattr__</span><span class="p">(</span><span class="s2">&quot;name&quot;</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">family_name</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">given_name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="k">return</span>
+            <span class="k">elif</span> <span class="n">key</span> <span class="o">==</span> <span class="s2">&quot;name&quot;</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span>
+                    <span class="s2">&quot;Cannot set name directly! Use &#39;given_name&#39; and &#39;family_name&#39;!&quot;</span>
+                <span class="p">)</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__setattr__</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+
     <span class="nd">@root_validator</span>
     <span class="k">def</span> <span class="nf">validate_names</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">values</span><span class="p">):</span>
         <span class="k">if</span> <span class="s2">&quot;type&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">values</span><span class="p">:</span>
@@ -480,6 +495,7 @@ https://github.com/inveniosoftware/invenio-rdm-records/blob/master/invenio_rdm_r
 
 <ul>
 <li>automatically are pretty-printed as JSON (for user convenience)</li>
+<li>can have read-only attributes declared that prevent direct setting</li>
 <li>can be toggled to return original, raw JSON dict (for debugging)</li>
 </ul>
 
@@ -491,9 +507,14 @@ Otherwise these enhancements might lead to unintended consequences.</p>
                             <div class="inherited">
                                 <h5>Inherited Members</h5>
                                 <dl>
-                                    <div><dt>pydantic.main.BaseModel</dt>
-                                <dd id="Identifier.__init__" class="function">BaseModel</dd>
-                <dd id="Identifier.Config" class="class">Config</dd>
+                                    <div><dt><a href="base.html#JSONModel">iridium.inveniordm.models.base.JSONModel</a></dt>
+                                <dd id="Identifier.__init__" class="function"><a href="base.html#JSONModel.__init__">JSONModel</a></dd>
+                <dd id="Identifier.raw_json" class="function"><a href="base.html#JSONModel.raw_json">raw_json</a></dd>
+                <dd id="Identifier.parse_obj" class="function"><a href="base.html#JSONModel.parse_obj">parse_obj</a></dd>
+
+            </div>
+            <div><dt>pydantic.main.BaseModel</dt>
+                                <dd id="Identifier.Config" class="class">Config</dd>
                 <dd id="Identifier.dict" class="function">dict</dd>
                 <dd id="Identifier.json" class="function">json</dd>
                 <dd id="Identifier.parse_raw" class="function">parse_raw</dd>
@@ -505,11 +526,6 @@ Otherwise these enhancements might lead to unintended consequences.</p>
                 <dd id="Identifier.schema_json" class="function">schema_json</dd>
                 <dd id="Identifier.validate" class="function">validate</dd>
                 <dd id="Identifier.update_forward_refs" class="function">update_forward_refs</dd>
-
-            </div>
-            <div><dt><a href="base.html#JSONModel">iridium.inveniordm.models.base.JSONModel</a></dt>
-                                <dd id="Identifier.raw_json" class="function"><a href="base.html#JSONModel.raw_json">raw_json</a></dd>
-                <dd id="Identifier.parse_obj" class="function"><a href="base.html#JSONModel.parse_obj">parse_obj</a></dd>
 
             </div>
                                 </dl>
@@ -538,6 +554,7 @@ Otherwise these enhancements might lead to unintended consequences.</p>
 
 <ul>
 <li>automatically are pretty-printed as JSON (for user convenience)</li>
+<li>can have read-only attributes declared that prevent direct setting</li>
 <li>can be toggled to return original, raw JSON dict (for debugging)</li>
 </ul>
 
@@ -549,9 +566,14 @@ Otherwise these enhancements might lead to unintended consequences.</p>
                             <div class="inherited">
                                 <h5>Inherited Members</h5>
                                 <dl>
-                                    <div><dt>pydantic.main.BaseModel</dt>
-                                <dd id="VocabularyRef.__init__" class="function">BaseModel</dd>
-                <dd id="VocabularyRef.Config" class="class">Config</dd>
+                                    <div><dt><a href="base.html#JSONModel">iridium.inveniordm.models.base.JSONModel</a></dt>
+                                <dd id="VocabularyRef.__init__" class="function"><a href="base.html#JSONModel.__init__">JSONModel</a></dd>
+                <dd id="VocabularyRef.raw_json" class="function"><a href="base.html#JSONModel.raw_json">raw_json</a></dd>
+                <dd id="VocabularyRef.parse_obj" class="function"><a href="base.html#JSONModel.parse_obj">parse_obj</a></dd>
+
+            </div>
+            <div><dt>pydantic.main.BaseModel</dt>
+                                <dd id="VocabularyRef.Config" class="class">Config</dd>
                 <dd id="VocabularyRef.dict" class="function">dict</dd>
                 <dd id="VocabularyRef.json" class="function">json</dd>
                 <dd id="VocabularyRef.parse_raw" class="function">parse_raw</dd>
@@ -563,11 +585,6 @@ Otherwise these enhancements might lead to unintended consequences.</p>
                 <dd id="VocabularyRef.schema_json" class="function">schema_json</dd>
                 <dd id="VocabularyRef.validate" class="function">validate</dd>
                 <dd id="VocabularyRef.update_forward_refs" class="function">update_forward_refs</dd>
-
-            </div>
-            <div><dt><a href="base.html#JSONModel">iridium.inveniordm.models.base.JSONModel</a></dt>
-                                <dd id="VocabularyRef.raw_json" class="function"><a href="base.html#JSONModel.raw_json">raw_json</a></dd>
-                <dd id="VocabularyRef.parse_obj" class="function"><a href="base.html#JSONModel.parse_obj">parse_obj</a></dd>
 
             </div>
                                 </dl>
@@ -690,6 +707,21 @@ Otherwise these enhancements might lead to unintended consequences.</p>
     <span class="n">family_name</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span>
     <span class="n">identifiers</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">Identifier</span><span class="p">]]</span>
 
+    <span class="k">def</span> <span class="fm">__setattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">type</span> <span class="o">==</span> <span class="n">PersonOrOrgType</span><span class="o">.</span><span class="n">ORGANIZATIONAL</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;given_name&quot;</span><span class="p">,</span> <span class="s2">&quot;family_name&quot;</span><span class="p">]:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;An organization does not have </span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;given_name&quot;</span><span class="p">,</span> <span class="s2">&quot;family_name&quot;</span><span class="p">]:</span>
+                <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__setattr__</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+                <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__setattr__</span><span class="p">(</span><span class="s2">&quot;name&quot;</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">family_name</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">given_name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="k">return</span>
+            <span class="k">elif</span> <span class="n">key</span> <span class="o">==</span> <span class="s2">&quot;name&quot;</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span>
+                    <span class="s2">&quot;Cannot set name directly! Use &#39;given_name&#39; and &#39;family_name&#39;!&quot;</span>
+                <span class="p">)</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__setattr__</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+
     <span class="nd">@root_validator</span>
     <span class="k">def</span> <span class="nf">validate_names</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">values</span><span class="p">):</span>
         <span class="k">if</span> <span class="s2">&quot;type&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">values</span><span class="p">:</span>
@@ -720,6 +752,7 @@ Otherwise these enhancements might lead to unintended consequences.</p>
 
 <ul>
 <li>automatically are pretty-printed as JSON (for user convenience)</li>
+<li>can have read-only attributes declared that prevent direct setting</li>
 <li>can be toggled to return original, raw JSON dict (for debugging)</li>
 </ul>
 
@@ -769,9 +802,14 @@ Otherwise these enhancements might lead to unintended consequences.</p>
                             <div class="inherited">
                                 <h5>Inherited Members</h5>
                                 <dl>
-                                    <div><dt>pydantic.main.BaseModel</dt>
-                                <dd id="PersonOrOrg.__init__" class="function">BaseModel</dd>
-                <dd id="PersonOrOrg.Config" class="class">Config</dd>
+                                    <div><dt><a href="base.html#JSONModel">iridium.inveniordm.models.base.JSONModel</a></dt>
+                                <dd id="PersonOrOrg.__init__" class="function"><a href="base.html#JSONModel.__init__">JSONModel</a></dd>
+                <dd id="PersonOrOrg.raw_json" class="function"><a href="base.html#JSONModel.raw_json">raw_json</a></dd>
+                <dd id="PersonOrOrg.parse_obj" class="function"><a href="base.html#JSONModel.parse_obj">parse_obj</a></dd>
+
+            </div>
+            <div><dt>pydantic.main.BaseModel</dt>
+                                <dd id="PersonOrOrg.Config" class="class">Config</dd>
                 <dd id="PersonOrOrg.dict" class="function">dict</dd>
                 <dd id="PersonOrOrg.json" class="function">json</dd>
                 <dd id="PersonOrOrg.parse_raw" class="function">parse_raw</dd>
@@ -783,11 +821,6 @@ Otherwise these enhancements might lead to unintended consequences.</p>
                 <dd id="PersonOrOrg.schema_json" class="function">schema_json</dd>
                 <dd id="PersonOrOrg.validate" class="function">validate</dd>
                 <dd id="PersonOrOrg.update_forward_refs" class="function">update_forward_refs</dd>
-
-            </div>
-            <div><dt><a href="base.html#JSONModel">iridium.inveniordm.models.base.JSONModel</a></dt>
-                                <dd id="PersonOrOrg.raw_json" class="function"><a href="base.html#JSONModel.raw_json">raw_json</a></dd>
-                <dd id="PersonOrOrg.parse_obj" class="function"><a href="base.html#JSONModel.parse_obj">parse_obj</a></dd>
 
             </div>
                                 </dl>
@@ -825,6 +858,7 @@ Otherwise these enhancements might lead to unintended consequences.</p>
 
 <ul>
 <li>automatically are pretty-printed as JSON (for user convenience)</li>
+<li>can have read-only attributes declared that prevent direct setting</li>
 <li>can be toggled to return original, raw JSON dict (for debugging)</li>
 </ul>
 
@@ -861,9 +895,14 @@ Otherwise these enhancements might lead to unintended consequences.</p>
                             <div class="inherited">
                                 <h5>Inherited Members</h5>
                                 <dl>
-                                    <div><dt>pydantic.main.BaseModel</dt>
-                                <dd id="Affiliation.__init__" class="function">BaseModel</dd>
-                <dd id="Affiliation.Config" class="class">Config</dd>
+                                    <div><dt><a href="base.html#JSONModel">iridium.inveniordm.models.base.JSONModel</a></dt>
+                                <dd id="Affiliation.__init__" class="function"><a href="base.html#JSONModel.__init__">JSONModel</a></dd>
+                <dd id="Affiliation.raw_json" class="function"><a href="base.html#JSONModel.raw_json">raw_json</a></dd>
+                <dd id="Affiliation.parse_obj" class="function"><a href="base.html#JSONModel.parse_obj">parse_obj</a></dd>
+
+            </div>
+            <div><dt>pydantic.main.BaseModel</dt>
+                                <dd id="Affiliation.Config" class="class">Config</dd>
                 <dd id="Affiliation.dict" class="function">dict</dd>
                 <dd id="Affiliation.json" class="function">json</dd>
                 <dd id="Affiliation.parse_raw" class="function">parse_raw</dd>
@@ -875,11 +914,6 @@ Otherwise these enhancements might lead to unintended consequences.</p>
                 <dd id="Affiliation.schema_json" class="function">schema_json</dd>
                 <dd id="Affiliation.validate" class="function">validate</dd>
                 <dd id="Affiliation.update_forward_refs" class="function">update_forward_refs</dd>
-
-            </div>
-            <div><dt><a href="base.html#JSONModel">iridium.inveniordm.models.base.JSONModel</a></dt>
-                                <dd id="Affiliation.raw_json" class="function"><a href="base.html#JSONModel.raw_json">raw_json</a></dd>
-                <dd id="Affiliation.parse_obj" class="function"><a href="base.html#JSONModel.parse_obj">parse_obj</a></dd>
 
             </div>
                                 </dl>
@@ -908,6 +942,7 @@ Otherwise these enhancements might lead to unintended consequences.</p>
 
 <ul>
 <li>automatically are pretty-printed as JSON (for user convenience)</li>
+<li>can have read-only attributes declared that prevent direct setting</li>
 <li>can be toggled to return original, raw JSON dict (for debugging)</li>
 </ul>
 
@@ -919,9 +954,14 @@ Otherwise these enhancements might lead to unintended consequences.</p>
                             <div class="inherited">
                                 <h5>Inherited Members</h5>
                                 <dl>
-                                    <div><dt>pydantic.main.BaseModel</dt>
-                                <dd id="CreatorRole.__init__" class="function">BaseModel</dd>
-                <dd id="CreatorRole.Config" class="class">Config</dd>
+                                    <div><dt><a href="base.html#JSONModel">iridium.inveniordm.models.base.JSONModel</a></dt>
+                                <dd id="CreatorRole.__init__" class="function"><a href="base.html#JSONModel.__init__">JSONModel</a></dd>
+                <dd id="CreatorRole.raw_json" class="function"><a href="base.html#JSONModel.raw_json">raw_json</a></dd>
+                <dd id="CreatorRole.parse_obj" class="function"><a href="base.html#JSONModel.parse_obj">parse_obj</a></dd>
+
+            </div>
+            <div><dt>pydantic.main.BaseModel</dt>
+                                <dd id="CreatorRole.Config" class="class">Config</dd>
                 <dd id="CreatorRole.dict" class="function">dict</dd>
                 <dd id="CreatorRole.json" class="function">json</dd>
                 <dd id="CreatorRole.parse_raw" class="function">parse_raw</dd>
@@ -933,11 +973,6 @@ Otherwise these enhancements might lead to unintended consequences.</p>
                 <dd id="CreatorRole.schema_json" class="function">schema_json</dd>
                 <dd id="CreatorRole.validate" class="function">validate</dd>
                 <dd id="CreatorRole.update_forward_refs" class="function">update_forward_refs</dd>
-
-            </div>
-            <div><dt><a href="base.html#JSONModel">iridium.inveniordm.models.base.JSONModel</a></dt>
-                                <dd id="CreatorRole.raw_json" class="function"><a href="base.html#JSONModel.raw_json">raw_json</a></dd>
-                <dd id="CreatorRole.parse_obj" class="function"><a href="base.html#JSONModel.parse_obj">parse_obj</a></dd>
 
             </div>
                                 </dl>
@@ -968,6 +1003,7 @@ Otherwise these enhancements might lead to unintended consequences.</p>
 
 <ul>
 <li>automatically are pretty-printed as JSON (for user convenience)</li>
+<li>can have read-only attributes declared that prevent direct setting</li>
 <li>can be toggled to return original, raw JSON dict (for debugging)</li>
 </ul>
 
@@ -979,9 +1015,14 @@ Otherwise these enhancements might lead to unintended consequences.</p>
                             <div class="inherited">
                                 <h5>Inherited Members</h5>
                                 <dl>
-                                    <div><dt>pydantic.main.BaseModel</dt>
-                                <dd id="Creator.__init__" class="function">BaseModel</dd>
-                <dd id="Creator.Config" class="class">Config</dd>
+                                    <div><dt><a href="base.html#JSONModel">iridium.inveniordm.models.base.JSONModel</a></dt>
+                                <dd id="Creator.__init__" class="function"><a href="base.html#JSONModel.__init__">JSONModel</a></dd>
+                <dd id="Creator.raw_json" class="function"><a href="base.html#JSONModel.raw_json">raw_json</a></dd>
+                <dd id="Creator.parse_obj" class="function"><a href="base.html#JSONModel.parse_obj">parse_obj</a></dd>
+
+            </div>
+            <div><dt>pydantic.main.BaseModel</dt>
+                                <dd id="Creator.Config" class="class">Config</dd>
                 <dd id="Creator.dict" class="function">dict</dd>
                 <dd id="Creator.json" class="function">json</dd>
                 <dd id="Creator.parse_raw" class="function">parse_raw</dd>
@@ -993,11 +1034,6 @@ Otherwise these enhancements might lead to unintended consequences.</p>
                 <dd id="Creator.schema_json" class="function">schema_json</dd>
                 <dd id="Creator.validate" class="function">validate</dd>
                 <dd id="Creator.update_forward_refs" class="function">update_forward_refs</dd>
-
-            </div>
-            <div><dt><a href="base.html#JSONModel">iridium.inveniordm.models.base.JSONModel</a></dt>
-                                <dd id="Creator.raw_json" class="function"><a href="base.html#JSONModel.raw_json">raw_json</a></dd>
-                <dd id="Creator.parse_obj" class="function"><a href="base.html#JSONModel.parse_obj">parse_obj</a></dd>
 
             </div>
                                 </dl>
@@ -1028,6 +1064,7 @@ Otherwise these enhancements might lead to unintended consequences.</p>
 
 <ul>
 <li>automatically are pretty-printed as JSON (for user convenience)</li>
+<li>can have read-only attributes declared that prevent direct setting</li>
 <li>can be toggled to return original, raw JSON dict (for debugging)</li>
 </ul>
 
@@ -1039,9 +1076,14 @@ Otherwise these enhancements might lead to unintended consequences.</p>
                             <div class="inherited">
                                 <h5>Inherited Members</h5>
                                 <dl>
-                                    <div><dt>pydantic.main.BaseModel</dt>
-                                <dd id="Contributor.__init__" class="function">BaseModel</dd>
-                <dd id="Contributor.Config" class="class">Config</dd>
+                                    <div><dt><a href="base.html#JSONModel">iridium.inveniordm.models.base.JSONModel</a></dt>
+                                <dd id="Contributor.__init__" class="function"><a href="base.html#JSONModel.__init__">JSONModel</a></dd>
+                <dd id="Contributor.raw_json" class="function"><a href="base.html#JSONModel.raw_json">raw_json</a></dd>
+                <dd id="Contributor.parse_obj" class="function"><a href="base.html#JSONModel.parse_obj">parse_obj</a></dd>
+
+            </div>
+            <div><dt>pydantic.main.BaseModel</dt>
+                                <dd id="Contributor.Config" class="class">Config</dd>
                 <dd id="Contributor.dict" class="function">dict</dd>
                 <dd id="Contributor.json" class="function">json</dd>
                 <dd id="Contributor.parse_raw" class="function">parse_raw</dd>
@@ -1053,11 +1095,6 @@ Otherwise these enhancements might lead to unintended consequences.</p>
                 <dd id="Contributor.schema_json" class="function">schema_json</dd>
                 <dd id="Contributor.validate" class="function">validate</dd>
                 <dd id="Contributor.update_forward_refs" class="function">update_forward_refs</dd>
-
-            </div>
-            <div><dt><a href="base.html#JSONModel">iridium.inveniordm.models.base.JSONModel</a></dt>
-                                <dd id="Contributor.raw_json" class="function"><a href="base.html#JSONModel.raw_json">raw_json</a></dd>
-                <dd id="Contributor.parse_obj" class="function"><a href="base.html#JSONModel.parse_obj">parse_obj</a></dd>
 
             </div>
                                 </dl>
@@ -1088,6 +1125,7 @@ Otherwise these enhancements might lead to unintended consequences.</p>
 
 <ul>
 <li>automatically are pretty-printed as JSON (for user convenience)</li>
+<li>can have read-only attributes declared that prevent direct setting</li>
 <li>can be toggled to return original, raw JSON dict (for debugging)</li>
 </ul>
 
@@ -1099,9 +1137,14 @@ Otherwise these enhancements might lead to unintended consequences.</p>
                             <div class="inherited">
                                 <h5>Inherited Members</h5>
                                 <dl>
-                                    <div><dt>pydantic.main.BaseModel</dt>
-                                <dd id="Title.__init__" class="function">BaseModel</dd>
-                <dd id="Title.Config" class="class">Config</dd>
+                                    <div><dt><a href="base.html#JSONModel">iridium.inveniordm.models.base.JSONModel</a></dt>
+                                <dd id="Title.__init__" class="function"><a href="base.html#JSONModel.__init__">JSONModel</a></dd>
+                <dd id="Title.raw_json" class="function"><a href="base.html#JSONModel.raw_json">raw_json</a></dd>
+                <dd id="Title.parse_obj" class="function"><a href="base.html#JSONModel.parse_obj">parse_obj</a></dd>
+
+            </div>
+            <div><dt>pydantic.main.BaseModel</dt>
+                                <dd id="Title.Config" class="class">Config</dd>
                 <dd id="Title.dict" class="function">dict</dd>
                 <dd id="Title.json" class="function">json</dd>
                 <dd id="Title.parse_raw" class="function">parse_raw</dd>
@@ -1113,11 +1156,6 @@ Otherwise these enhancements might lead to unintended consequences.</p>
                 <dd id="Title.schema_json" class="function">schema_json</dd>
                 <dd id="Title.validate" class="function">validate</dd>
                 <dd id="Title.update_forward_refs" class="function">update_forward_refs</dd>
-
-            </div>
-            <div><dt><a href="base.html#JSONModel">iridium.inveniordm.models.base.JSONModel</a></dt>
-                                <dd id="Title.raw_json" class="function"><a href="base.html#JSONModel.raw_json">raw_json</a></dd>
-                <dd id="Title.parse_obj" class="function"><a href="base.html#JSONModel.parse_obj">parse_obj</a></dd>
 
             </div>
                                 </dl>
@@ -1148,6 +1186,7 @@ Otherwise these enhancements might lead to unintended consequences.</p>
 
 <ul>
 <li>automatically are pretty-printed as JSON (for user convenience)</li>
+<li>can have read-only attributes declared that prevent direct setting</li>
 <li>can be toggled to return original, raw JSON dict (for debugging)</li>
 </ul>
 
@@ -1159,9 +1198,14 @@ Otherwise these enhancements might lead to unintended consequences.</p>
                             <div class="inherited">
                                 <h5>Inherited Members</h5>
                                 <dl>
-                                    <div><dt>pydantic.main.BaseModel</dt>
-                                <dd id="Description.__init__" class="function">BaseModel</dd>
-                <dd id="Description.Config" class="class">Config</dd>
+                                    <div><dt><a href="base.html#JSONModel">iridium.inveniordm.models.base.JSONModel</a></dt>
+                                <dd id="Description.__init__" class="function"><a href="base.html#JSONModel.__init__">JSONModel</a></dd>
+                <dd id="Description.raw_json" class="function"><a href="base.html#JSONModel.raw_json">raw_json</a></dd>
+                <dd id="Description.parse_obj" class="function"><a href="base.html#JSONModel.parse_obj">parse_obj</a></dd>
+
+            </div>
+            <div><dt>pydantic.main.BaseModel</dt>
+                                <dd id="Description.Config" class="class">Config</dd>
                 <dd id="Description.dict" class="function">dict</dd>
                 <dd id="Description.json" class="function">json</dd>
                 <dd id="Description.parse_raw" class="function">parse_raw</dd>
@@ -1173,11 +1217,6 @@ Otherwise these enhancements might lead to unintended consequences.</p>
                 <dd id="Description.schema_json" class="function">schema_json</dd>
                 <dd id="Description.validate" class="function">validate</dd>
                 <dd id="Description.update_forward_refs" class="function">update_forward_refs</dd>
-
-            </div>
-            <div><dt><a href="base.html#JSONModel">iridium.inveniordm.models.base.JSONModel</a></dt>
-                                <dd id="Description.raw_json" class="function"><a href="base.html#JSONModel.raw_json">raw_json</a></dd>
-                <dd id="Description.parse_obj" class="function"><a href="base.html#JSONModel.parse_obj">parse_obj</a></dd>
 
             </div>
                                 </dl>
@@ -1218,6 +1257,7 @@ Otherwise these enhancements might lead to unintended consequences.</p>
 
 <ul>
 <li>automatically are pretty-printed as JSON (for user convenience)</li>
+<li>can have read-only attributes declared that prevent direct setting</li>
 <li>can be toggled to return original, raw JSON dict (for debugging)</li>
 </ul>
 
@@ -1256,9 +1296,14 @@ Otherwise these enhancements might lead to unintended consequences.</p>
                             <div class="inherited">
                                 <h5>Inherited Members</h5>
                                 <dl>
-                                    <div><dt>pydantic.main.BaseModel</dt>
-                                <dd id="Subject.__init__" class="function">BaseModel</dd>
-                <dd id="Subject.Config" class="class">Config</dd>
+                                    <div><dt><a href="base.html#JSONModel">iridium.inveniordm.models.base.JSONModel</a></dt>
+                                <dd id="Subject.__init__" class="function"><a href="base.html#JSONModel.__init__">JSONModel</a></dd>
+                <dd id="Subject.raw_json" class="function"><a href="base.html#JSONModel.raw_json">raw_json</a></dd>
+                <dd id="Subject.parse_obj" class="function"><a href="base.html#JSONModel.parse_obj">parse_obj</a></dd>
+
+            </div>
+            <div><dt>pydantic.main.BaseModel</dt>
+                                <dd id="Subject.Config" class="class">Config</dd>
                 <dd id="Subject.dict" class="function">dict</dd>
                 <dd id="Subject.json" class="function">json</dd>
                 <dd id="Subject.parse_raw" class="function">parse_raw</dd>
@@ -1270,11 +1315,6 @@ Otherwise these enhancements might lead to unintended consequences.</p>
                 <dd id="Subject.schema_json" class="function">schema_json</dd>
                 <dd id="Subject.validate" class="function">validate</dd>
                 <dd id="Subject.update_forward_refs" class="function">update_forward_refs</dd>
-
-            </div>
-            <div><dt><a href="base.html#JSONModel">iridium.inveniordm.models.base.JSONModel</a></dt>
-                                <dd id="Subject.raw_json" class="function"><a href="base.html#JSONModel.raw_json">raw_json</a></dd>
-                <dd id="Subject.parse_obj" class="function"><a href="base.html#JSONModel.parse_obj">parse_obj</a></dd>
 
             </div>
                                 </dl>
@@ -1305,6 +1345,7 @@ Otherwise these enhancements might lead to unintended consequences.</p>
 
 <ul>
 <li>automatically are pretty-printed as JSON (for user convenience)</li>
+<li>can have read-only attributes declared that prevent direct setting</li>
 <li>can be toggled to return original, raw JSON dict (for debugging)</li>
 </ul>
 
@@ -1316,9 +1357,14 @@ Otherwise these enhancements might lead to unintended consequences.</p>
                             <div class="inherited">
                                 <h5>Inherited Members</h5>
                                 <dl>
-                                    <div><dt>pydantic.main.BaseModel</dt>
-                                <dd id="RecordDate.__init__" class="function">BaseModel</dd>
-                <dd id="RecordDate.Config" class="class">Config</dd>
+                                    <div><dt><a href="base.html#JSONModel">iridium.inveniordm.models.base.JSONModel</a></dt>
+                                <dd id="RecordDate.__init__" class="function"><a href="base.html#JSONModel.__init__">JSONModel</a></dd>
+                <dd id="RecordDate.raw_json" class="function"><a href="base.html#JSONModel.raw_json">raw_json</a></dd>
+                <dd id="RecordDate.parse_obj" class="function"><a href="base.html#JSONModel.parse_obj">parse_obj</a></dd>
+
+            </div>
+            <div><dt>pydantic.main.BaseModel</dt>
+                                <dd id="RecordDate.Config" class="class">Config</dd>
                 <dd id="RecordDate.dict" class="function">dict</dd>
                 <dd id="RecordDate.json" class="function">json</dd>
                 <dd id="RecordDate.parse_raw" class="function">parse_raw</dd>
@@ -1330,11 +1376,6 @@ Otherwise these enhancements might lead to unintended consequences.</p>
                 <dd id="RecordDate.schema_json" class="function">schema_json</dd>
                 <dd id="RecordDate.validate" class="function">validate</dd>
                 <dd id="RecordDate.update_forward_refs" class="function">update_forward_refs</dd>
-
-            </div>
-            <div><dt><a href="base.html#JSONModel">iridium.inveniordm.models.base.JSONModel</a></dt>
-                                <dd id="RecordDate.raw_json" class="function"><a href="base.html#JSONModel.raw_json">raw_json</a></dd>
-                <dd id="RecordDate.parse_obj" class="function"><a href="base.html#JSONModel.parse_obj">parse_obj</a></dd>
 
             </div>
                                 </dl>
@@ -1365,6 +1406,7 @@ Otherwise these enhancements might lead to unintended consequences.</p>
 
 <ul>
 <li>automatically are pretty-printed as JSON (for user convenience)</li>
+<li>can have read-only attributes declared that prevent direct setting</li>
 <li>can be toggled to return original, raw JSON dict (for debugging)</li>
 </ul>
 
@@ -1376,9 +1418,14 @@ Otherwise these enhancements might lead to unintended consequences.</p>
                             <div class="inherited">
                                 <h5>Inherited Members</h5>
                                 <dl>
-                                    <div><dt>pydantic.main.BaseModel</dt>
-                                <dd id="RelatedIdentifier.__init__" class="function">BaseModel</dd>
-                <dd id="RelatedIdentifier.Config" class="class">Config</dd>
+                                    <div><dt><a href="base.html#JSONModel">iridium.inveniordm.models.base.JSONModel</a></dt>
+                                <dd id="RelatedIdentifier.__init__" class="function"><a href="base.html#JSONModel.__init__">JSONModel</a></dd>
+                <dd id="RelatedIdentifier.raw_json" class="function"><a href="base.html#JSONModel.raw_json">raw_json</a></dd>
+                <dd id="RelatedIdentifier.parse_obj" class="function"><a href="base.html#JSONModel.parse_obj">parse_obj</a></dd>
+
+            </div>
+            <div><dt>pydantic.main.BaseModel</dt>
+                                <dd id="RelatedIdentifier.Config" class="class">Config</dd>
                 <dd id="RelatedIdentifier.dict" class="function">dict</dd>
                 <dd id="RelatedIdentifier.json" class="function">json</dd>
                 <dd id="RelatedIdentifier.parse_raw" class="function">parse_raw</dd>
@@ -1390,11 +1437,6 @@ Otherwise these enhancements might lead to unintended consequences.</p>
                 <dd id="RelatedIdentifier.schema_json" class="function">schema_json</dd>
                 <dd id="RelatedIdentifier.validate" class="function">validate</dd>
                 <dd id="RelatedIdentifier.update_forward_refs" class="function">update_forward_refs</dd>
-
-            </div>
-            <div><dt><a href="base.html#JSONModel">iridium.inveniordm.models.base.JSONModel</a></dt>
-                                <dd id="RelatedIdentifier.raw_json" class="function"><a href="base.html#JSONModel.raw_json">raw_json</a></dd>
-                <dd id="RelatedIdentifier.parse_obj" class="function"><a href="base.html#JSONModel.parse_obj">parse_obj</a></dd>
 
             </div>
                                 </dl>
@@ -1425,6 +1467,7 @@ Otherwise these enhancements might lead to unintended consequences.</p>
 
 <ul>
 <li>automatically are pretty-printed as JSON (for user convenience)</li>
+<li>can have read-only attributes declared that prevent direct setting</li>
 <li>can be toggled to return original, raw JSON dict (for debugging)</li>
 </ul>
 
@@ -1436,9 +1479,14 @@ Otherwise these enhancements might lead to unintended consequences.</p>
                             <div class="inherited">
                                 <h5>Inherited Members</h5>
                                 <dl>
-                                    <div><dt>pydantic.main.BaseModel</dt>
-                                <dd id="Funder.__init__" class="function">BaseModel</dd>
-                <dd id="Funder.Config" class="class">Config</dd>
+                                    <div><dt><a href="base.html#JSONModel">iridium.inveniordm.models.base.JSONModel</a></dt>
+                                <dd id="Funder.__init__" class="function"><a href="base.html#JSONModel.__init__">JSONModel</a></dd>
+                <dd id="Funder.raw_json" class="function"><a href="base.html#JSONModel.raw_json">raw_json</a></dd>
+                <dd id="Funder.parse_obj" class="function"><a href="base.html#JSONModel.parse_obj">parse_obj</a></dd>
+
+            </div>
+            <div><dt>pydantic.main.BaseModel</dt>
+                                <dd id="Funder.Config" class="class">Config</dd>
                 <dd id="Funder.dict" class="function">dict</dd>
                 <dd id="Funder.json" class="function">json</dd>
                 <dd id="Funder.parse_raw" class="function">parse_raw</dd>
@@ -1450,11 +1498,6 @@ Otherwise these enhancements might lead to unintended consequences.</p>
                 <dd id="Funder.schema_json" class="function">schema_json</dd>
                 <dd id="Funder.validate" class="function">validate</dd>
                 <dd id="Funder.update_forward_refs" class="function">update_forward_refs</dd>
-
-            </div>
-            <div><dt><a href="base.html#JSONModel">iridium.inveniordm.models.base.JSONModel</a></dt>
-                                <dd id="Funder.raw_json" class="function"><a href="base.html#JSONModel.raw_json">raw_json</a></dd>
-                <dd id="Funder.parse_obj" class="function"><a href="base.html#JSONModel.parse_obj">parse_obj</a></dd>
 
             </div>
                                 </dl>
@@ -1486,6 +1529,7 @@ Otherwise these enhancements might lead to unintended consequences.</p>
 
 <ul>
 <li>automatically are pretty-printed as JSON (for user convenience)</li>
+<li>can have read-only attributes declared that prevent direct setting</li>
 <li>can be toggled to return original, raw JSON dict (for debugging)</li>
 </ul>
 
@@ -1497,9 +1541,14 @@ Otherwise these enhancements might lead to unintended consequences.</p>
                             <div class="inherited">
                                 <h5>Inherited Members</h5>
                                 <dl>
-                                    <div><dt>pydantic.main.BaseModel</dt>
-                                <dd id="Award.__init__" class="function">BaseModel</dd>
-                <dd id="Award.Config" class="class">Config</dd>
+                                    <div><dt><a href="base.html#JSONModel">iridium.inveniordm.models.base.JSONModel</a></dt>
+                                <dd id="Award.__init__" class="function"><a href="base.html#JSONModel.__init__">JSONModel</a></dd>
+                <dd id="Award.raw_json" class="function"><a href="base.html#JSONModel.raw_json">raw_json</a></dd>
+                <dd id="Award.parse_obj" class="function"><a href="base.html#JSONModel.parse_obj">parse_obj</a></dd>
+
+            </div>
+            <div><dt>pydantic.main.BaseModel</dt>
+                                <dd id="Award.Config" class="class">Config</dd>
                 <dd id="Award.dict" class="function">dict</dd>
                 <dd id="Award.json" class="function">json</dd>
                 <dd id="Award.parse_raw" class="function">parse_raw</dd>
@@ -1511,11 +1560,6 @@ Otherwise these enhancements might lead to unintended consequences.</p>
                 <dd id="Award.schema_json" class="function">schema_json</dd>
                 <dd id="Award.validate" class="function">validate</dd>
                 <dd id="Award.update_forward_refs" class="function">update_forward_refs</dd>
-
-            </div>
-            <div><dt><a href="base.html#JSONModel">iridium.inveniordm.models.base.JSONModel</a></dt>
-                                <dd id="Award.raw_json" class="function"><a href="base.html#JSONModel.raw_json">raw_json</a></dd>
-                <dd id="Award.parse_obj" class="function"><a href="base.html#JSONModel.parse_obj">parse_obj</a></dd>
 
             </div>
                                 </dl>
@@ -1553,6 +1597,7 @@ Otherwise these enhancements might lead to unintended consequences.</p>
 
 <ul>
 <li>automatically are pretty-printed as JSON (for user convenience)</li>
+<li>can have read-only attributes declared that prevent direct setting</li>
 <li>can be toggled to return original, raw JSON dict (for debugging)</li>
 </ul>
 
@@ -1589,9 +1634,14 @@ Otherwise these enhancements might lead to unintended consequences.</p>
                             <div class="inherited">
                                 <h5>Inherited Members</h5>
                                 <dl>
-                                    <div><dt>pydantic.main.BaseModel</dt>
-                                <dd id="Funding.__init__" class="function">BaseModel</dd>
-                <dd id="Funding.Config" class="class">Config</dd>
+                                    <div><dt><a href="base.html#JSONModel">iridium.inveniordm.models.base.JSONModel</a></dt>
+                                <dd id="Funding.__init__" class="function"><a href="base.html#JSONModel.__init__">JSONModel</a></dd>
+                <dd id="Funding.raw_json" class="function"><a href="base.html#JSONModel.raw_json">raw_json</a></dd>
+                <dd id="Funding.parse_obj" class="function"><a href="base.html#JSONModel.parse_obj">parse_obj</a></dd>
+
+            </div>
+            <div><dt>pydantic.main.BaseModel</dt>
+                                <dd id="Funding.Config" class="class">Config</dd>
                 <dd id="Funding.dict" class="function">dict</dd>
                 <dd id="Funding.json" class="function">json</dd>
                 <dd id="Funding.parse_raw" class="function">parse_raw</dd>
@@ -1603,11 +1653,6 @@ Otherwise these enhancements might lead to unintended consequences.</p>
                 <dd id="Funding.schema_json" class="function">schema_json</dd>
                 <dd id="Funding.validate" class="function">validate</dd>
                 <dd id="Funding.update_forward_refs" class="function">update_forward_refs</dd>
-
-            </div>
-            <div><dt><a href="base.html#JSONModel">iridium.inveniordm.models.base.JSONModel</a></dt>
-                                <dd id="Funding.raw_json" class="function"><a href="base.html#JSONModel.raw_json">raw_json</a></dd>
-                <dd id="Funding.parse_obj" class="function"><a href="base.html#JSONModel.parse_obj">parse_obj</a></dd>
 
             </div>
                                 </dl>
@@ -1637,6 +1682,7 @@ Otherwise these enhancements might lead to unintended consequences.</p>
 
 <ul>
 <li>automatically are pretty-printed as JSON (for user convenience)</li>
+<li>can have read-only attributes declared that prevent direct setting</li>
 <li>can be toggled to return original, raw JSON dict (for debugging)</li>
 </ul>
 
@@ -1648,9 +1694,14 @@ Otherwise these enhancements might lead to unintended consequences.</p>
                             <div class="inherited">
                                 <h5>Inherited Members</h5>
                                 <dl>
-                                    <div><dt>pydantic.main.BaseModel</dt>
-                                <dd id="Reference.__init__" class="function">BaseModel</dd>
-                <dd id="Reference.Config" class="class">Config</dd>
+                                    <div><dt><a href="base.html#JSONModel">iridium.inveniordm.models.base.JSONModel</a></dt>
+                                <dd id="Reference.__init__" class="function"><a href="base.html#JSONModel.__init__">JSONModel</a></dd>
+                <dd id="Reference.raw_json" class="function"><a href="base.html#JSONModel.raw_json">raw_json</a></dd>
+                <dd id="Reference.parse_obj" class="function"><a href="base.html#JSONModel.parse_obj">parse_obj</a></dd>
+
+            </div>
+            <div><dt>pydantic.main.BaseModel</dt>
+                                <dd id="Reference.Config" class="class">Config</dd>
                 <dd id="Reference.dict" class="function">dict</dd>
                 <dd id="Reference.json" class="function">json</dd>
                 <dd id="Reference.parse_raw" class="function">parse_raw</dd>
@@ -1662,11 +1713,6 @@ Otherwise these enhancements might lead to unintended consequences.</p>
                 <dd id="Reference.schema_json" class="function">schema_json</dd>
                 <dd id="Reference.validate" class="function">validate</dd>
                 <dd id="Reference.update_forward_refs" class="function">update_forward_refs</dd>
-
-            </div>
-            <div><dt><a href="base.html#JSONModel">iridium.inveniordm.models.base.JSONModel</a></dt>
-                                <dd id="Reference.raw_json" class="function"><a href="base.html#JSONModel.raw_json">raw_json</a></dd>
-                <dd id="Reference.parse_obj" class="function"><a href="base.html#JSONModel.parse_obj">parse_obj</a></dd>
 
             </div>
                                 </dl>
@@ -1696,6 +1742,7 @@ Otherwise these enhancements might lead to unintended consequences.</p>
 
 <ul>
 <li>automatically are pretty-printed as JSON (for user convenience)</li>
+<li>can have read-only attributes declared that prevent direct setting</li>
 <li>can be toggled to return original, raw JSON dict (for debugging)</li>
 </ul>
 
@@ -1707,9 +1754,14 @@ Otherwise these enhancements might lead to unintended consequences.</p>
                             <div class="inherited">
                                 <h5>Inherited Members</h5>
                                 <dl>
-                                    <div><dt>pydantic.main.BaseModel</dt>
-                                <dd id="Props.__init__" class="function">BaseModel</dd>
-                <dd id="Props.Config" class="class">Config</dd>
+                                    <div><dt><a href="base.html#JSONModel">iridium.inveniordm.models.base.JSONModel</a></dt>
+                                <dd id="Props.__init__" class="function"><a href="base.html#JSONModel.__init__">JSONModel</a></dd>
+                <dd id="Props.raw_json" class="function"><a href="base.html#JSONModel.raw_json">raw_json</a></dd>
+                <dd id="Props.parse_obj" class="function"><a href="base.html#JSONModel.parse_obj">parse_obj</a></dd>
+
+            </div>
+            <div><dt>pydantic.main.BaseModel</dt>
+                                <dd id="Props.Config" class="class">Config</dd>
                 <dd id="Props.dict" class="function">dict</dd>
                 <dd id="Props.json" class="function">json</dd>
                 <dd id="Props.parse_raw" class="function">parse_raw</dd>
@@ -1721,11 +1773,6 @@ Otherwise these enhancements might lead to unintended consequences.</p>
                 <dd id="Props.schema_json" class="function">schema_json</dd>
                 <dd id="Props.validate" class="function">validate</dd>
                 <dd id="Props.update_forward_refs" class="function">update_forward_refs</dd>
-
-            </div>
-            <div><dt><a href="base.html#JSONModel">iridium.inveniordm.models.base.JSONModel</a></dt>
-                                <dd id="Props.raw_json" class="function"><a href="base.html#JSONModel.raw_json">raw_json</a></dd>
-                <dd id="Props.parse_obj" class="function"><a href="base.html#JSONModel.parse_obj">parse_obj</a></dd>
 
             </div>
                                 </dl>
@@ -1760,6 +1807,7 @@ Otherwise these enhancements might lead to unintended consequences.</p>
 
 <ul>
 <li>automatically are pretty-printed as JSON (for user convenience)</li>
+<li>can have read-only attributes declared that prevent direct setting</li>
 <li>can be toggled to return original, raw JSON dict (for debugging)</li>
 </ul>
 
@@ -1771,9 +1819,14 @@ Otherwise these enhancements might lead to unintended consequences.</p>
                             <div class="inherited">
                                 <h5>Inherited Members</h5>
                                 <dl>
-                                    <div><dt>pydantic.main.BaseModel</dt>
-                                <dd id="Rights.__init__" class="function">BaseModel</dd>
-                <dd id="Rights.Config" class="class">Config</dd>
+                                    <div><dt><a href="base.html#JSONModel">iridium.inveniordm.models.base.JSONModel</a></dt>
+                                <dd id="Rights.__init__" class="function"><a href="base.html#JSONModel.__init__">JSONModel</a></dd>
+                <dd id="Rights.raw_json" class="function"><a href="base.html#JSONModel.raw_json">raw_json</a></dd>
+                <dd id="Rights.parse_obj" class="function"><a href="base.html#JSONModel.parse_obj">parse_obj</a></dd>
+
+            </div>
+            <div><dt>pydantic.main.BaseModel</dt>
+                                <dd id="Rights.Config" class="class">Config</dd>
                 <dd id="Rights.dict" class="function">dict</dd>
                 <dd id="Rights.json" class="function">json</dd>
                 <dd id="Rights.parse_raw" class="function">parse_raw</dd>
@@ -1785,11 +1838,6 @@ Otherwise these enhancements might lead to unintended consequences.</p>
                 <dd id="Rights.schema_json" class="function">schema_json</dd>
                 <dd id="Rights.validate" class="function">validate</dd>
                 <dd id="Rights.update_forward_refs" class="function">update_forward_refs</dd>
-
-            </div>
-            <div><dt><a href="base.html#JSONModel">iridium.inveniordm.models.base.JSONModel</a></dt>
-                                <dd id="Rights.raw_json" class="function"><a href="base.html#JSONModel.raw_json">raw_json</a></dd>
-                <dd id="Rights.parse_obj" class="function"><a href="base.html#JSONModel.parse_obj">parse_obj</a></dd>
 
             </div>
                                 </dl>
@@ -1835,6 +1883,7 @@ Otherwise these enhancements might lead to unintended consequences.</p>
 
 <ul>
 <li>automatically are pretty-printed as JSON (for user convenience)</li>
+<li>can have read-only attributes declared that prevent direct setting</li>
 <li>can be toggled to return original, raw JSON dict (for debugging)</li>
 </ul>
 
@@ -1878,9 +1927,14 @@ Otherwise these enhancements might lead to unintended consequences.</p>
                             <div class="inherited">
                                 <h5>Inherited Members</h5>
                                 <dl>
-                                    <div><dt>pydantic.main.BaseModel</dt>
-                                <dd id="Location.__init__" class="function">BaseModel</dd>
-                <dd id="Location.Config" class="class">Config</dd>
+                                    <div><dt><a href="base.html#JSONModel">iridium.inveniordm.models.base.JSONModel</a></dt>
+                                <dd id="Location.__init__" class="function"><a href="base.html#JSONModel.__init__">JSONModel</a></dd>
+                <dd id="Location.raw_json" class="function"><a href="base.html#JSONModel.raw_json">raw_json</a></dd>
+                <dd id="Location.parse_obj" class="function"><a href="base.html#JSONModel.parse_obj">parse_obj</a></dd>
+
+            </div>
+            <div><dt>pydantic.main.BaseModel</dt>
+                                <dd id="Location.Config" class="class">Config</dd>
                 <dd id="Location.dict" class="function">dict</dd>
                 <dd id="Location.json" class="function">json</dd>
                 <dd id="Location.parse_raw" class="function">parse_raw</dd>
@@ -1892,11 +1946,6 @@ Otherwise these enhancements might lead to unintended consequences.</p>
                 <dd id="Location.schema_json" class="function">schema_json</dd>
                 <dd id="Location.validate" class="function">validate</dd>
                 <dd id="Location.update_forward_refs" class="function">update_forward_refs</dd>
-
-            </div>
-            <div><dt><a href="base.html#JSONModel">iridium.inveniordm.models.base.JSONModel</a></dt>
-                                <dd id="Location.raw_json" class="function"><a href="base.html#JSONModel.raw_json">raw_json</a></dd>
-                <dd id="Location.parse_obj" class="function"><a href="base.html#JSONModel.parse_obj">parse_obj</a></dd>
 
             </div>
                                 </dl>
@@ -1925,6 +1974,7 @@ Otherwise these enhancements might lead to unintended consequences.</p>
 
 <ul>
 <li>automatically are pretty-printed as JSON (for user convenience)</li>
+<li>can have read-only attributes declared that prevent direct setting</li>
 <li>can be toggled to return original, raw JSON dict (for debugging)</li>
 </ul>
 
@@ -1936,9 +1986,14 @@ Otherwise these enhancements might lead to unintended consequences.</p>
                             <div class="inherited">
                                 <h5>Inherited Members</h5>
                                 <dl>
-                                    <div><dt>pydantic.main.BaseModel</dt>
-                                <dd id="Feature.__init__" class="function">BaseModel</dd>
-                <dd id="Feature.Config" class="class">Config</dd>
+                                    <div><dt><a href="base.html#JSONModel">iridium.inveniordm.models.base.JSONModel</a></dt>
+                                <dd id="Feature.__init__" class="function"><a href="base.html#JSONModel.__init__">JSONModel</a></dd>
+                <dd id="Feature.raw_json" class="function"><a href="base.html#JSONModel.raw_json">raw_json</a></dd>
+                <dd id="Feature.parse_obj" class="function"><a href="base.html#JSONModel.parse_obj">parse_obj</a></dd>
+
+            </div>
+            <div><dt>pydantic.main.BaseModel</dt>
+                                <dd id="Feature.Config" class="class">Config</dd>
                 <dd id="Feature.dict" class="function">dict</dd>
                 <dd id="Feature.json" class="function">json</dd>
                 <dd id="Feature.parse_raw" class="function">parse_raw</dd>
@@ -1950,11 +2005,6 @@ Otherwise these enhancements might lead to unintended consequences.</p>
                 <dd id="Feature.schema_json" class="function">schema_json</dd>
                 <dd id="Feature.validate" class="function">validate</dd>
                 <dd id="Feature.update_forward_refs" class="function">update_forward_refs</dd>
-
-            </div>
-            <div><dt><a href="base.html#JSONModel">iridium.inveniordm.models.base.JSONModel</a></dt>
-                                <dd id="Feature.raw_json" class="function"><a href="base.html#JSONModel.raw_json">raw_json</a></dd>
-                <dd id="Feature.parse_obj" class="function"><a href="base.html#JSONModel.parse_obj">parse_obj</a></dd>
 
             </div>
                                 </dl>
@@ -2005,6 +2055,7 @@ Otherwise these enhancements might lead to unintended consequences.</p>
 
 <ul>
 <li>automatically are pretty-printed as JSON (for user convenience)</li>
+<li>can have read-only attributes declared that prevent direct setting</li>
 <li>can be toggled to return original, raw JSON dict (for debugging)</li>
 </ul>
 
@@ -2016,9 +2067,14 @@ Otherwise these enhancements might lead to unintended consequences.</p>
                             <div class="inherited">
                                 <h5>Inherited Members</h5>
                                 <dl>
-                                    <div><dt>pydantic.main.BaseModel</dt>
-                                <dd id="BibMetadata.__init__" class="function">BaseModel</dd>
-                <dd id="BibMetadata.Config" class="class">Config</dd>
+                                    <div><dt><a href="base.html#JSONModel">iridium.inveniordm.models.base.JSONModel</a></dt>
+                                <dd id="BibMetadata.__init__" class="function"><a href="base.html#JSONModel.__init__">JSONModel</a></dd>
+                <dd id="BibMetadata.raw_json" class="function"><a href="base.html#JSONModel.raw_json">raw_json</a></dd>
+                <dd id="BibMetadata.parse_obj" class="function"><a href="base.html#JSONModel.parse_obj">parse_obj</a></dd>
+
+            </div>
+            <div><dt>pydantic.main.BaseModel</dt>
+                                <dd id="BibMetadata.Config" class="class">Config</dd>
                 <dd id="BibMetadata.dict" class="function">dict</dd>
                 <dd id="BibMetadata.json" class="function">json</dd>
                 <dd id="BibMetadata.parse_raw" class="function">parse_raw</dd>
@@ -2030,11 +2086,6 @@ Otherwise these enhancements might lead to unintended consequences.</p>
                 <dd id="BibMetadata.schema_json" class="function">schema_json</dd>
                 <dd id="BibMetadata.validate" class="function">validate</dd>
                 <dd id="BibMetadata.update_forward_refs" class="function">update_forward_refs</dd>
-
-            </div>
-            <div><dt><a href="base.html#JSONModel">iridium.inveniordm.models.base.JSONModel</a></dt>
-                                <dd id="BibMetadata.raw_json" class="function"><a href="base.html#JSONModel.raw_json">raw_json</a></dd>
-                <dd id="BibMetadata.parse_obj" class="function"><a href="base.html#JSONModel.parse_obj">parse_obj</a></dd>
 
             </div>
                                 </dl>

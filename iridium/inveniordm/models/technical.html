@@ -443,6 +443,16 @@
 <span class="sd">    https://github.com/inveniosoftware/invenio-records-resources/blob/master/invenio_records_resources/services/records/schema.py#L22</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">_read_only</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">_read_only</span> <span class="o">+</span> <span class="p">[</span>
+            <span class="s2">&quot;id&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;created&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;updated&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;links&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;revision_id&quot;</span><span class="p">,</span>
+        <span class="p">]</span>
+
     <span class="nb">id</span><span class="p">:</span> <span class="nb">str</span>
     <span class="n">created</span><span class="p">:</span> <span class="n">datetime</span>  <span class="c1"># dump_only</span>
     <span class="n">updated</span><span class="p">:</span> <span class="n">datetime</span>  <span class="c1"># dump_only</span>
@@ -473,6 +483,17 @@
     <span class="k">class</span> <span class="nc">Config</span><span class="p">:</span>
         <span class="n">extra</span> <span class="o">=</span> <span class="n">Extra</span><span class="o">.</span><span class="n">forbid</span>
 
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">_read_only</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">_read_only</span> <span class="o">+</span> <span class="p">[</span>
+            <span class="s2">&quot;parent&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;versions&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;is_published&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;pids&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;expires_at&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;errors&quot;</span><span class="p">,</span>
+        <span class="p">]</span>
+
     <span class="c1"># RecordSchema(overridden)</span>
     <span class="n">parent</span><span class="p">:</span> <span class="n">Parent</span>
     <span class="n">versions</span><span class="p">:</span> <span class="n">Versions</span>  <span class="c1"># dump_only</span>
@@ -487,7 +508,6 @@
     <span class="c1"># revision: int  # dump_only, seems to be unused</span>
 
     <span class="n">expires_at</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">datetime</span><span class="p">]</span>  <span class="c1"># seems to be only used in drafts</span>
-
     <span class="n">errors</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">ValidationError</span><span class="p">]]</span>  <span class="c1"># seems to be only used in drafts</span>
 </pre></div>
 
@@ -522,9 +542,14 @@
                             <div class="inherited">
                                 <h5>Inherited Members</h5>
                                 <dl>
-                                    <div><dt>pydantic.main.BaseModel</dt>
-                                <dd id="Agent.__init__" class="function">BaseModel</dd>
-                <dd id="Agent.Config" class="class">Config</dd>
+                                    <div><dt><a href="base.html#JSONModel">iridium.inveniordm.models.base.JSONModel</a></dt>
+                                <dd id="Agent.__init__" class="function"><a href="base.html#JSONModel.__init__">JSONModel</a></dd>
+                <dd id="Agent.raw_json" class="function"><a href="base.html#JSONModel.raw_json">raw_json</a></dd>
+                <dd id="Agent.parse_obj" class="function"><a href="base.html#JSONModel.parse_obj">parse_obj</a></dd>
+
+            </div>
+            <div><dt>pydantic.main.BaseModel</dt>
+                                <dd id="Agent.Config" class="class">Config</dd>
                 <dd id="Agent.dict" class="function">dict</dd>
                 <dd id="Agent.json" class="function">json</dd>
                 <dd id="Agent.parse_raw" class="function">parse_raw</dd>
@@ -536,11 +561,6 @@
                 <dd id="Agent.schema_json" class="function">schema_json</dd>
                 <dd id="Agent.validate" class="function">validate</dd>
                 <dd id="Agent.update_forward_refs" class="function">update_forward_refs</dd>
-
-            </div>
-            <div><dt><a href="base.html#JSONModel">iridium.inveniordm.models.base.JSONModel</a></dt>
-                                <dd id="Agent.raw_json" class="function"><a href="base.html#JSONModel.raw_json">raw_json</a></dd>
-                <dd id="Agent.parse_obj" class="function"><a href="base.html#JSONModel.parse_obj">parse_obj</a></dd>
 
             </div>
                                 </dl>
@@ -576,9 +596,14 @@
                             <div class="inherited">
                                 <h5>Inherited Members</h5>
                                 <dl>
-                                    <div><dt>pydantic.main.BaseModel</dt>
-                                <dd id="Grant.__init__" class="function">BaseModel</dd>
-                <dd id="Grant.Config" class="class">Config</dd>
+                                    <div><dt><a href="base.html#JSONModel">iridium.inveniordm.models.base.JSONModel</a></dt>
+                                <dd id="Grant.__init__" class="function"><a href="base.html#JSONModel.__init__">JSONModel</a></dd>
+                <dd id="Grant.raw_json" class="function"><a href="base.html#JSONModel.raw_json">raw_json</a></dd>
+                <dd id="Grant.parse_obj" class="function"><a href="base.html#JSONModel.parse_obj">parse_obj</a></dd>
+
+            </div>
+            <div><dt>pydantic.main.BaseModel</dt>
+                                <dd id="Grant.Config" class="class">Config</dd>
                 <dd id="Grant.dict" class="function">dict</dd>
                 <dd id="Grant.json" class="function">json</dd>
                 <dd id="Grant.parse_raw" class="function">parse_raw</dd>
@@ -590,11 +615,6 @@
                 <dd id="Grant.schema_json" class="function">schema_json</dd>
                 <dd id="Grant.validate" class="function">validate</dd>
                 <dd id="Grant.update_forward_refs" class="function">update_forward_refs</dd>
-
-            </div>
-            <div><dt><a href="base.html#JSONModel">iridium.inveniordm.models.base.JSONModel</a></dt>
-                                <dd id="Grant.raw_json" class="function"><a href="base.html#JSONModel.raw_json">raw_json</a></dd>
-                <dd id="Grant.parse_obj" class="function"><a href="base.html#JSONModel.parse_obj">parse_obj</a></dd>
 
             </div>
                                 </dl>
@@ -741,9 +761,14 @@
                             <div class="inherited">
                                 <h5>Inherited Members</h5>
                                 <dl>
-                                    <div><dt>pydantic.main.BaseModel</dt>
-                                <dd id="AccessLink.__init__" class="function">BaseModel</dd>
-                <dd id="AccessLink.Config" class="class">Config</dd>
+                                    <div><dt><a href="base.html#JSONModel">iridium.inveniordm.models.base.JSONModel</a></dt>
+                                <dd id="AccessLink.__init__" class="function"><a href="base.html#JSONModel.__init__">JSONModel</a></dd>
+                <dd id="AccessLink.raw_json" class="function"><a href="base.html#JSONModel.raw_json">raw_json</a></dd>
+                <dd id="AccessLink.parse_obj" class="function"><a href="base.html#JSONModel.parse_obj">parse_obj</a></dd>
+
+            </div>
+            <div><dt>pydantic.main.BaseModel</dt>
+                                <dd id="AccessLink.Config" class="class">Config</dd>
                 <dd id="AccessLink.dict" class="function">dict</dd>
                 <dd id="AccessLink.json" class="function">json</dd>
                 <dd id="AccessLink.parse_raw" class="function">parse_raw</dd>
@@ -755,11 +780,6 @@
                 <dd id="AccessLink.schema_json" class="function">schema_json</dd>
                 <dd id="AccessLink.validate" class="function">validate</dd>
                 <dd id="AccessLink.update_forward_refs" class="function">update_forward_refs</dd>
-
-            </div>
-            <div><dt><a href="base.html#JSONModel">iridium.inveniordm.models.base.JSONModel</a></dt>
-                                <dd id="AccessLink.raw_json" class="function"><a href="base.html#JSONModel.raw_json">raw_json</a></dd>
-                <dd id="AccessLink.parse_obj" class="function"><a href="base.html#JSONModel.parse_obj">parse_obj</a></dd>
 
             </div>
                                 </dl>
@@ -798,9 +818,14 @@
                             <div class="inherited">
                                 <h5>Inherited Members</h5>
                                 <dl>
-                                    <div><dt>pydantic.main.BaseModel</dt>
-                                <dd id="ParentAccess.__init__" class="function">BaseModel</dd>
-                <dd id="ParentAccess.Config" class="class">Config</dd>
+                                    <div><dt><a href="base.html#JSONModel">iridium.inveniordm.models.base.JSONModel</a></dt>
+                                <dd id="ParentAccess.__init__" class="function"><a href="base.html#JSONModel.__init__">JSONModel</a></dd>
+                <dd id="ParentAccess.raw_json" class="function"><a href="base.html#JSONModel.raw_json">raw_json</a></dd>
+                <dd id="ParentAccess.parse_obj" class="function"><a href="base.html#JSONModel.parse_obj">parse_obj</a></dd>
+
+            </div>
+            <div><dt>pydantic.main.BaseModel</dt>
+                                <dd id="ParentAccess.Config" class="class">Config</dd>
                 <dd id="ParentAccess.dict" class="function">dict</dd>
                 <dd id="ParentAccess.json" class="function">json</dd>
                 <dd id="ParentAccess.parse_raw" class="function">parse_raw</dd>
@@ -812,11 +837,6 @@
                 <dd id="ParentAccess.schema_json" class="function">schema_json</dd>
                 <dd id="ParentAccess.validate" class="function">validate</dd>
                 <dd id="ParentAccess.update_forward_refs" class="function">update_forward_refs</dd>
-
-            </div>
-            <div><dt><a href="base.html#JSONModel">iridium.inveniordm.models.base.JSONModel</a></dt>
-                                <dd id="ParentAccess.raw_json" class="function"><a href="base.html#JSONModel.raw_json">raw_json</a></dd>
-                <dd id="ParentAccess.parse_obj" class="function"><a href="base.html#JSONModel.parse_obj">parse_obj</a></dd>
 
             </div>
                                 </dl>
@@ -852,9 +872,14 @@
                             <div class="inherited">
                                 <h5>Inherited Members</h5>
                                 <dl>
-                                    <div><dt>pydantic.main.BaseModel</dt>
-                                <dd id="Communities.__init__" class="function">BaseModel</dd>
-                <dd id="Communities.Config" class="class">Config</dd>
+                                    <div><dt><a href="base.html#JSONModel">iridium.inveniordm.models.base.JSONModel</a></dt>
+                                <dd id="Communities.__init__" class="function"><a href="base.html#JSONModel.__init__">JSONModel</a></dd>
+                <dd id="Communities.raw_json" class="function"><a href="base.html#JSONModel.raw_json">raw_json</a></dd>
+                <dd id="Communities.parse_obj" class="function"><a href="base.html#JSONModel.parse_obj">parse_obj</a></dd>
+
+            </div>
+            <div><dt>pydantic.main.BaseModel</dt>
+                                <dd id="Communities.Config" class="class">Config</dd>
                 <dd id="Communities.dict" class="function">dict</dd>
                 <dd id="Communities.json" class="function">json</dd>
                 <dd id="Communities.parse_raw" class="function">parse_raw</dd>
@@ -866,11 +891,6 @@
                 <dd id="Communities.schema_json" class="function">schema_json</dd>
                 <dd id="Communities.validate" class="function">validate</dd>
                 <dd id="Communities.update_forward_refs" class="function">update_forward_refs</dd>
-
-            </div>
-            <div><dt><a href="base.html#JSONModel">iridium.inveniordm.models.base.JSONModel</a></dt>
-                                <dd id="Communities.raw_json" class="function"><a href="base.html#JSONModel.raw_json">raw_json</a></dd>
-                <dd id="Communities.parse_obj" class="function"><a href="base.html#JSONModel.parse_obj">parse_obj</a></dd>
 
             </div>
                                 </dl>
@@ -918,9 +938,14 @@ https://github.com/inveniosoftware/invenio-requests/blob/master/invenio_requests
                             <div class="inherited">
                                 <h5>Inherited Members</h5>
                                 <dl>
-                                    <div><dt>pydantic.main.BaseModel</dt>
-                                <dd id="GenericRequest.__init__" class="function">BaseModel</dd>
-                <dd id="GenericRequest.Config" class="class">Config</dd>
+                                    <div><dt><a href="base.html#JSONModel">iridium.inveniordm.models.base.JSONModel</a></dt>
+                                <dd id="GenericRequest.__init__" class="function"><a href="base.html#JSONModel.__init__">JSONModel</a></dd>
+                <dd id="GenericRequest.raw_json" class="function"><a href="base.html#JSONModel.raw_json">raw_json</a></dd>
+                <dd id="GenericRequest.parse_obj" class="function"><a href="base.html#JSONModel.parse_obj">parse_obj</a></dd>
+
+            </div>
+            <div><dt>pydantic.main.BaseModel</dt>
+                                <dd id="GenericRequest.Config" class="class">Config</dd>
                 <dd id="GenericRequest.dict" class="function">dict</dd>
                 <dd id="GenericRequest.json" class="function">json</dd>
                 <dd id="GenericRequest.parse_raw" class="function">parse_raw</dd>
@@ -932,11 +957,6 @@ https://github.com/inveniosoftware/invenio-requests/blob/master/invenio_requests
                 <dd id="GenericRequest.schema_json" class="function">schema_json</dd>
                 <dd id="GenericRequest.validate" class="function">validate</dd>
                 <dd id="GenericRequest.update_forward_refs" class="function">update_forward_refs</dd>
-
-            </div>
-            <div><dt><a href="base.html#JSONModel">iridium.inveniordm.models.base.JSONModel</a></dt>
-                                <dd id="GenericRequest.raw_json" class="function"><a href="base.html#JSONModel.raw_json">raw_json</a></dd>
-                <dd id="GenericRequest.parse_obj" class="function"><a href="base.html#JSONModel.parse_obj">parse_obj</a></dd>
 
             </div>
                                 </dl>
@@ -977,9 +997,14 @@ https://github.com/inveniosoftware/invenio-drafts-resources/blob/master/invenio_
                             <div class="inherited">
                                 <h5>Inherited Members</h5>
                                 <dl>
-                                    <div><dt>pydantic.main.BaseModel</dt>
-                                <dd id="Parent.__init__" class="function">BaseModel</dd>
-                <dd id="Parent.Config" class="class">Config</dd>
+                                    <div><dt><a href="base.html#JSONModel">iridium.inveniordm.models.base.JSONModel</a></dt>
+                                <dd id="Parent.__init__" class="function"><a href="base.html#JSONModel.__init__">JSONModel</a></dd>
+                <dd id="Parent.raw_json" class="function"><a href="base.html#JSONModel.raw_json">raw_json</a></dd>
+                <dd id="Parent.parse_obj" class="function"><a href="base.html#JSONModel.parse_obj">parse_obj</a></dd>
+
+            </div>
+            <div><dt>pydantic.main.BaseModel</dt>
+                                <dd id="Parent.Config" class="class">Config</dd>
                 <dd id="Parent.dict" class="function">dict</dd>
                 <dd id="Parent.json" class="function">json</dd>
                 <dd id="Parent.parse_raw" class="function">parse_raw</dd>
@@ -991,11 +1016,6 @@ https://github.com/inveniosoftware/invenio-drafts-resources/blob/master/invenio_
                 <dd id="Parent.schema_json" class="function">schema_json</dd>
                 <dd id="Parent.validate" class="function">validate</dd>
                 <dd id="Parent.update_forward_refs" class="function">update_forward_refs</dd>
-
-            </div>
-            <div><dt><a href="base.html#JSONModel">iridium.inveniordm.models.base.JSONModel</a></dt>
-                                <dd id="Parent.raw_json" class="function"><a href="base.html#JSONModel.raw_json">raw_json</a></dd>
-                <dd id="Parent.parse_obj" class="function"><a href="base.html#JSONModel.parse_obj">parse_obj</a></dd>
 
             </div>
                                 </dl>
@@ -1134,9 +1154,14 @@ https://github.com/inveniosoftware/invenio-drafts-resources/blob/master/invenio_
                             <div class="inherited">
                                 <h5>Inherited Members</h5>
                                 <dl>
-                                    <div><dt>pydantic.main.BaseModel</dt>
-                                <dd id="ExternalPID.__init__" class="function">BaseModel</dd>
-                <dd id="ExternalPID.Config" class="class">Config</dd>
+                                    <div><dt><a href="base.html#JSONModel">iridium.inveniordm.models.base.JSONModel</a></dt>
+                                <dd id="ExternalPID.__init__" class="function"><a href="base.html#JSONModel.__init__">JSONModel</a></dd>
+                <dd id="ExternalPID.raw_json" class="function"><a href="base.html#JSONModel.raw_json">raw_json</a></dd>
+                <dd id="ExternalPID.parse_obj" class="function"><a href="base.html#JSONModel.parse_obj">parse_obj</a></dd>
+
+            </div>
+            <div><dt>pydantic.main.BaseModel</dt>
+                                <dd id="ExternalPID.Config" class="class">Config</dd>
                 <dd id="ExternalPID.dict" class="function">dict</dd>
                 <dd id="ExternalPID.json" class="function">json</dd>
                 <dd id="ExternalPID.parse_raw" class="function">parse_raw</dd>
@@ -1148,11 +1173,6 @@ https://github.com/inveniosoftware/invenio-drafts-resources/blob/master/invenio_
                 <dd id="ExternalPID.schema_json" class="function">schema_json</dd>
                 <dd id="ExternalPID.validate" class="function">validate</dd>
                 <dd id="ExternalPID.update_forward_refs" class="function">update_forward_refs</dd>
-
-            </div>
-            <div><dt><a href="base.html#JSONModel">iridium.inveniordm.models.base.JSONModel</a></dt>
-                                <dd id="ExternalPID.raw_json" class="function"><a href="base.html#JSONModel.raw_json">raw_json</a></dd>
-                <dd id="ExternalPID.parse_obj" class="function"><a href="base.html#JSONModel.parse_obj">parse_obj</a></dd>
 
             </div>
                                 </dl>
@@ -1316,9 +1336,14 @@ https://github.com/inveniosoftware/invenio-drafts-resources/blob/master/invenio_
                             <div class="inherited">
                                 <h5>Inherited Members</h5>
                                 <dl>
-                                    <div><dt>pydantic.main.BaseModel</dt>
-                                <dd id="Embargo.__init__" class="function">BaseModel</dd>
-                <dd id="Embargo.Config" class="class">Config</dd>
+                                    <div><dt><a href="base.html#JSONModel">iridium.inveniordm.models.base.JSONModel</a></dt>
+                                <dd id="Embargo.__init__" class="function"><a href="base.html#JSONModel.__init__">JSONModel</a></dd>
+                <dd id="Embargo.raw_json" class="function"><a href="base.html#JSONModel.raw_json">raw_json</a></dd>
+                <dd id="Embargo.parse_obj" class="function"><a href="base.html#JSONModel.parse_obj">parse_obj</a></dd>
+
+            </div>
+            <div><dt>pydantic.main.BaseModel</dt>
+                                <dd id="Embargo.Config" class="class">Config</dd>
                 <dd id="Embargo.dict" class="function">dict</dd>
                 <dd id="Embargo.json" class="function">json</dd>
                 <dd id="Embargo.parse_raw" class="function">parse_raw</dd>
@@ -1330,11 +1355,6 @@ https://github.com/inveniosoftware/invenio-drafts-resources/blob/master/invenio_
                 <dd id="Embargo.schema_json" class="function">schema_json</dd>
                 <dd id="Embargo.validate" class="function">validate</dd>
                 <dd id="Embargo.update_forward_refs" class="function">update_forward_refs</dd>
-
-            </div>
-            <div><dt><a href="base.html#JSONModel">iridium.inveniordm.models.base.JSONModel</a></dt>
-                                <dd id="Embargo.raw_json" class="function"><a href="base.html#JSONModel.raw_json">raw_json</a></dd>
-                <dd id="Embargo.parse_obj" class="function"><a href="base.html#JSONModel.parse_obj">parse_obj</a></dd>
 
             </div>
                                 </dl>
@@ -1371,9 +1391,14 @@ https://github.com/inveniosoftware/invenio-drafts-resources/blob/master/invenio_
                             <div class="inherited">
                                 <h5>Inherited Members</h5>
                                 <dl>
-                                    <div><dt>pydantic.main.BaseModel</dt>
-                                <dd id="AccessControl.__init__" class="function">BaseModel</dd>
-                <dd id="AccessControl.Config" class="class">Config</dd>
+                                    <div><dt><a href="base.html#JSONModel">iridium.inveniordm.models.base.JSONModel</a></dt>
+                                <dd id="AccessControl.__init__" class="function"><a href="base.html#JSONModel.__init__">JSONModel</a></dd>
+                <dd id="AccessControl.raw_json" class="function"><a href="base.html#JSONModel.raw_json">raw_json</a></dd>
+                <dd id="AccessControl.parse_obj" class="function"><a href="base.html#JSONModel.parse_obj">parse_obj</a></dd>
+
+            </div>
+            <div><dt>pydantic.main.BaseModel</dt>
+                                <dd id="AccessControl.Config" class="class">Config</dd>
                 <dd id="AccessControl.dict" class="function">dict</dd>
                 <dd id="AccessControl.json" class="function">json</dd>
                 <dd id="AccessControl.parse_raw" class="function">parse_raw</dd>
@@ -1385,11 +1410,6 @@ https://github.com/inveniosoftware/invenio-drafts-resources/blob/master/invenio_
                 <dd id="AccessControl.schema_json" class="function">schema_json</dd>
                 <dd id="AccessControl.validate" class="function">validate</dd>
                 <dd id="AccessControl.update_forward_refs" class="function">update_forward_refs</dd>
-
-            </div>
-            <div><dt><a href="base.html#JSONModel">iridium.inveniordm.models.base.JSONModel</a></dt>
-                                <dd id="AccessControl.raw_json" class="function"><a href="base.html#JSONModel.raw_json">raw_json</a></dd>
-                <dd id="AccessControl.parse_obj" class="function"><a href="base.html#JSONModel.parse_obj">parse_obj</a></dd>
 
             </div>
                                 </dl>
@@ -1442,9 +1462,14 @@ https://github.com/inveniosoftware/invenio-drafts-resources/blob/master/invenio_
                             <div class="inherited">
                                 <h5>Inherited Members</h5>
                                 <dl>
-                                    <div><dt>pydantic.main.BaseModel</dt>
-                                <dd id="FileMetadata.__init__" class="function">BaseModel</dd>
-                <dd id="FileMetadata.dict" class="function">dict</dd>
+                                    <div><dt><a href="base.html#JSONModel">iridium.inveniordm.models.base.JSONModel</a></dt>
+                                <dd id="FileMetadata.__init__" class="function"><a href="base.html#JSONModel.__init__">JSONModel</a></dd>
+                <dd id="FileMetadata.raw_json" class="function"><a href="base.html#JSONModel.raw_json">raw_json</a></dd>
+                <dd id="FileMetadata.parse_obj" class="function"><a href="base.html#JSONModel.parse_obj">parse_obj</a></dd>
+
+            </div>
+            <div><dt>pydantic.main.BaseModel</dt>
+                                <dd id="FileMetadata.dict" class="function">dict</dd>
                 <dd id="FileMetadata.json" class="function">json</dd>
                 <dd id="FileMetadata.parse_raw" class="function">parse_raw</dd>
                 <dd id="FileMetadata.parse_file" class="function">parse_file</dd>
@@ -1455,11 +1480,6 @@ https://github.com/inveniosoftware/invenio-drafts-resources/blob/master/invenio_
                 <dd id="FileMetadata.schema_json" class="function">schema_json</dd>
                 <dd id="FileMetadata.validate" class="function">validate</dd>
                 <dd id="FileMetadata.update_forward_refs" class="function">update_forward_refs</dd>
-
-            </div>
-            <div><dt><a href="base.html#JSONModel">iridium.inveniordm.models.base.JSONModel</a></dt>
-                                <dd id="FileMetadata.raw_json" class="function"><a href="base.html#JSONModel.raw_json">raw_json</a></dd>
-                <dd id="FileMetadata.parse_obj" class="function"><a href="base.html#JSONModel.parse_obj">parse_obj</a></dd>
 
             </div>
                                 </dl>
@@ -1536,9 +1556,14 @@ https://github.com/inveniosoftware/invenio-drafts-resources/blob/master/invenio_
                             <div class="inherited">
                                 <h5>Inherited Members</h5>
                                 <dl>
-                                    <div><dt>pydantic.main.BaseModel</dt>
-                                <dd id="Files.__init__" class="function">BaseModel</dd>
-                <dd id="Files.Config" class="class">Config</dd>
+                                    <div><dt><a href="base.html#JSONModel">iridium.inveniordm.models.base.JSONModel</a></dt>
+                                <dd id="Files.__init__" class="function"><a href="base.html#JSONModel.__init__">JSONModel</a></dd>
+                <dd id="Files.raw_json" class="function"><a href="base.html#JSONModel.raw_json">raw_json</a></dd>
+                <dd id="Files.parse_obj" class="function"><a href="base.html#JSONModel.parse_obj">parse_obj</a></dd>
+
+            </div>
+            <div><dt>pydantic.main.BaseModel</dt>
+                                <dd id="Files.Config" class="class">Config</dd>
                 <dd id="Files.dict" class="function">dict</dd>
                 <dd id="Files.json" class="function">json</dd>
                 <dd id="Files.parse_raw" class="function">parse_raw</dd>
@@ -1550,11 +1575,6 @@ https://github.com/inveniosoftware/invenio-drafts-resources/blob/master/invenio_
                 <dd id="Files.schema_json" class="function">schema_json</dd>
                 <dd id="Files.validate" class="function">validate</dd>
                 <dd id="Files.update_forward_refs" class="function">update_forward_refs</dd>
-
-            </div>
-            <div><dt><a href="base.html#JSONModel">iridium.inveniordm.models.base.JSONModel</a></dt>
-                                <dd id="Files.raw_json" class="function"><a href="base.html#JSONModel.raw_json">raw_json</a></dd>
-                <dd id="Files.parse_obj" class="function"><a href="base.html#JSONModel.parse_obj">parse_obj</a></dd>
 
             </div>
                                 </dl>
@@ -1592,9 +1612,14 @@ https://github.com/inveniosoftware/invenio-drafts-resources/blob/master/invenio_
                             <div class="inherited">
                                 <h5>Inherited Members</h5>
                                 <dl>
-                                    <div><dt>pydantic.main.BaseModel</dt>
-                                <dd id="Versions.__init__" class="function">BaseModel</dd>
-                <dd id="Versions.Config" class="class">Config</dd>
+                                    <div><dt><a href="base.html#JSONModel">iridium.inveniordm.models.base.JSONModel</a></dt>
+                                <dd id="Versions.__init__" class="function"><a href="base.html#JSONModel.__init__">JSONModel</a></dd>
+                <dd id="Versions.raw_json" class="function"><a href="base.html#JSONModel.raw_json">raw_json</a></dd>
+                <dd id="Versions.parse_obj" class="function"><a href="base.html#JSONModel.parse_obj">parse_obj</a></dd>
+
+            </div>
+            <div><dt>pydantic.main.BaseModel</dt>
+                                <dd id="Versions.Config" class="class">Config</dd>
                 <dd id="Versions.dict" class="function">dict</dd>
                 <dd id="Versions.json" class="function">json</dd>
                 <dd id="Versions.parse_raw" class="function">parse_raw</dd>
@@ -1606,11 +1631,6 @@ https://github.com/inveniosoftware/invenio-drafts-resources/blob/master/invenio_
                 <dd id="Versions.schema_json" class="function">schema_json</dd>
                 <dd id="Versions.validate" class="function">validate</dd>
                 <dd id="Versions.update_forward_refs" class="function">update_forward_refs</dd>
-
-            </div>
-            <div><dt><a href="base.html#JSONModel">iridium.inveniordm.models.base.JSONModel</a></dt>
-                                <dd id="Versions.raw_json" class="function"><a href="base.html#JSONModel.raw_json">raw_json</a></dd>
-                <dd id="Versions.parse_obj" class="function"><a href="base.html#JSONModel.parse_obj">parse_obj</a></dd>
 
             </div>
                                 </dl>
@@ -1634,6 +1654,16 @@ https://github.com/inveniosoftware/invenio-drafts-resources/blob/master/invenio_
 <span class="sd">    https://github.com/inveniosoftware/invenio-records-resources/blob/master/invenio_records_resources/services/records/schema.py#L22</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">_read_only</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">_read_only</span> <span class="o">+</span> <span class="p">[</span>
+            <span class="s2">&quot;id&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;created&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;updated&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;links&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;revision_id&quot;</span><span class="p">,</span>
+        <span class="p">]</span>
+
     <span class="nb">id</span><span class="p">:</span> <span class="nb">str</span>
     <span class="n">created</span><span class="p">:</span> <span class="n">datetime</span>  <span class="c1"># dump_only</span>
     <span class="n">updated</span><span class="p">:</span> <span class="n">datetime</span>  <span class="c1"># dump_only</span>
@@ -1652,9 +1682,14 @@ https://github.com/inveniosoftware/invenio-drafts-resources/blob/master/invenio_
                             <div class="inherited">
                                 <h5>Inherited Members</h5>
                                 <dl>
-                                    <div><dt>pydantic.main.BaseModel</dt>
-                                <dd id="Entity.__init__" class="function">BaseModel</dd>
-                <dd id="Entity.Config" class="class">Config</dd>
+                                    <div><dt><a href="base.html#JSONModel">iridium.inveniordm.models.base.JSONModel</a></dt>
+                                <dd id="Entity.__init__" class="function"><a href="base.html#JSONModel.__init__">JSONModel</a></dd>
+                <dd id="Entity.raw_json" class="function"><a href="base.html#JSONModel.raw_json">raw_json</a></dd>
+                <dd id="Entity.parse_obj" class="function"><a href="base.html#JSONModel.parse_obj">parse_obj</a></dd>
+
+            </div>
+            <div><dt>pydantic.main.BaseModel</dt>
+                                <dd id="Entity.Config" class="class">Config</dd>
                 <dd id="Entity.dict" class="function">dict</dd>
                 <dd id="Entity.json" class="function">json</dd>
                 <dd id="Entity.parse_raw" class="function">parse_raw</dd>
@@ -1666,11 +1701,6 @@ https://github.com/inveniosoftware/invenio-drafts-resources/blob/master/invenio_
                 <dd id="Entity.schema_json" class="function">schema_json</dd>
                 <dd id="Entity.validate" class="function">validate</dd>
                 <dd id="Entity.update_forward_refs" class="function">update_forward_refs</dd>
-
-            </div>
-            <div><dt><a href="base.html#JSONModel">iridium.inveniordm.models.base.JSONModel</a></dt>
-                                <dd id="Entity.raw_json" class="function"><a href="base.html#JSONModel.raw_json">raw_json</a></dd>
-                <dd id="Entity.parse_obj" class="function"><a href="base.html#JSONModel.parse_obj">parse_obj</a></dd>
 
             </div>
                                 </dl>
@@ -1699,6 +1729,7 @@ https://github.com/inveniosoftware/invenio-drafts-resources/blob/master/invenio_
 
 <ul>
 <li>automatically are pretty-printed as JSON (for user convenience)</li>
+<li>can have read-only attributes declared that prevent direct setting</li>
 <li>can be toggled to return original, raw JSON dict (for debugging)</li>
 </ul>
 
@@ -1710,9 +1741,14 @@ Otherwise these enhancements might lead to unintended consequences.</p>
                             <div class="inherited">
                                 <h5>Inherited Members</h5>
                                 <dl>
-                                    <div><dt>pydantic.main.BaseModel</dt>
-                                <dd id="PIDs.__init__" class="function">BaseModel</dd>
-                <dd id="PIDs.Config" class="class">Config</dd>
+                                    <div><dt><a href="base.html#JSONModel">iridium.inveniordm.models.base.JSONModel</a></dt>
+                                <dd id="PIDs.__init__" class="function"><a href="base.html#JSONModel.__init__">JSONModel</a></dd>
+                <dd id="PIDs.raw_json" class="function"><a href="base.html#JSONModel.raw_json">raw_json</a></dd>
+                <dd id="PIDs.parse_obj" class="function"><a href="base.html#JSONModel.parse_obj">parse_obj</a></dd>
+
+            </div>
+            <div><dt>pydantic.main.BaseModel</dt>
+                                <dd id="PIDs.Config" class="class">Config</dd>
                 <dd id="PIDs.dict" class="function">dict</dd>
                 <dd id="PIDs.json" class="function">json</dd>
                 <dd id="PIDs.parse_raw" class="function">parse_raw</dd>
@@ -1724,11 +1760,6 @@ Otherwise these enhancements might lead to unintended consequences.</p>
                 <dd id="PIDs.schema_json" class="function">schema_json</dd>
                 <dd id="PIDs.validate" class="function">validate</dd>
                 <dd id="PIDs.update_forward_refs" class="function">update_forward_refs</dd>
-
-            </div>
-            <div><dt><a href="base.html#JSONModel">iridium.inveniordm.models.base.JSONModel</a></dt>
-                                <dd id="PIDs.raw_json" class="function"><a href="base.html#JSONModel.raw_json">raw_json</a></dd>
-                <dd id="PIDs.parse_obj" class="function"><a href="base.html#JSONModel.parse_obj">parse_obj</a></dd>
 
             </div>
                                 </dl>
@@ -1758,6 +1789,7 @@ Otherwise these enhancements might lead to unintended consequences.</p>
 
 <ul>
 <li>automatically are pretty-printed as JSON (for user convenience)</li>
+<li>can have read-only attributes declared that prevent direct setting</li>
 <li>can be toggled to return original, raw JSON dict (for debugging)</li>
 </ul>
 
@@ -1769,9 +1801,14 @@ Otherwise these enhancements might lead to unintended consequences.</p>
                             <div class="inherited">
                                 <h5>Inherited Members</h5>
                                 <dl>
-                                    <div><dt>pydantic.main.BaseModel</dt>
-                                <dd id="ValidationError.__init__" class="function">BaseModel</dd>
-                <dd id="ValidationError.Config" class="class">Config</dd>
+                                    <div><dt><a href="base.html#JSONModel">iridium.inveniordm.models.base.JSONModel</a></dt>
+                                <dd id="ValidationError.__init__" class="function"><a href="base.html#JSONModel.__init__">JSONModel</a></dd>
+                <dd id="ValidationError.raw_json" class="function"><a href="base.html#JSONModel.raw_json">raw_json</a></dd>
+                <dd id="ValidationError.parse_obj" class="function"><a href="base.html#JSONModel.parse_obj">parse_obj</a></dd>
+
+            </div>
+            <div><dt>pydantic.main.BaseModel</dt>
+                                <dd id="ValidationError.Config" class="class">Config</dd>
                 <dd id="ValidationError.dict" class="function">dict</dd>
                 <dd id="ValidationError.json" class="function">json</dd>
                 <dd id="ValidationError.parse_raw" class="function">parse_raw</dd>
@@ -1783,11 +1820,6 @@ Otherwise these enhancements might lead to unintended consequences.</p>
                 <dd id="ValidationError.schema_json" class="function">schema_json</dd>
                 <dd id="ValidationError.validate" class="function">validate</dd>
                 <dd id="ValidationError.update_forward_refs" class="function">update_forward_refs</dd>
-
-            </div>
-            <div><dt><a href="base.html#JSONModel">iridium.inveniordm.models.base.JSONModel</a></dt>
-                                <dd id="ValidationError.raw_json" class="function"><a href="base.html#JSONModel.raw_json">raw_json</a></dd>
-                <dd id="ValidationError.parse_obj" class="function"><a href="base.html#JSONModel.parse_obj">parse_obj</a></dd>
 
             </div>
                                 </dl>
@@ -1818,6 +1850,17 @@ Otherwise these enhancements might lead to unintended consequences.</p>
     <span class="k">class</span> <span class="nc">Config</span><span class="p">:</span>
         <span class="n">extra</span> <span class="o">=</span> <span class="n">Extra</span><span class="o">.</span><span class="n">forbid</span>
 
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">_read_only</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">_read_only</span> <span class="o">+</span> <span class="p">[</span>
+            <span class="s2">&quot;parent&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;versions&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;is_published&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;pids&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;expires_at&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;errors&quot;</span><span class="p">,</span>
+        <span class="p">]</span>
+
     <span class="c1"># RecordSchema(overridden)</span>
     <span class="n">parent</span><span class="p">:</span> <span class="n">Parent</span>
     <span class="n">versions</span><span class="p">:</span> <span class="n">Versions</span>  <span class="c1"># dump_only</span>
@@ -1832,7 +1875,6 @@ Otherwise these enhancements might lead to unintended consequences.</p>
     <span class="c1"># revision: int  # dump_only, seems to be unused</span>
 
     <span class="n">expires_at</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">datetime</span><span class="p">]</span>  <span class="c1"># seems to be only used in drafts</span>
-
     <span class="n">errors</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">ValidationError</span><span class="p">]]</span>  <span class="c1"># seems to be only used in drafts</span>
 </pre></div>
 
@@ -1851,9 +1893,14 @@ https://github.com/inveniosoftware/invenio-drafts-resources/blob/master/invenio_
                             <div class="inherited">
                                 <h5>Inherited Members</h5>
                                 <dl>
-                                    <div><dt>pydantic.main.BaseModel</dt>
-                                <dd id="Record.__init__" class="function">BaseModel</dd>
-                <dd id="Record.dict" class="function">dict</dd>
+                                    <div><dt><a href="base.html#JSONModel">iridium.inveniordm.models.base.JSONModel</a></dt>
+                                <dd id="Record.__init__" class="function"><a href="base.html#JSONModel.__init__">JSONModel</a></dd>
+                <dd id="Record.raw_json" class="function"><a href="base.html#JSONModel.raw_json">raw_json</a></dd>
+                <dd id="Record.parse_obj" class="function"><a href="base.html#JSONModel.parse_obj">parse_obj</a></dd>
+
+            </div>
+            <div><dt>pydantic.main.BaseModel</dt>
+                                <dd id="Record.dict" class="function">dict</dd>
                 <dd id="Record.json" class="function">json</dd>
                 <dd id="Record.parse_raw" class="function">parse_raw</dd>
                 <dd id="Record.parse_file" class="function">parse_file</dd>
@@ -1864,11 +1911,6 @@ https://github.com/inveniosoftware/invenio-drafts-resources/blob/master/invenio_
                 <dd id="Record.schema_json" class="function">schema_json</dd>
                 <dd id="Record.validate" class="function">validate</dd>
                 <dd id="Record.update_forward_refs" class="function">update_forward_refs</dd>
-
-            </div>
-            <div><dt><a href="base.html#JSONModel">iridium.inveniordm.models.base.JSONModel</a></dt>
-                                <dd id="Record.raw_json" class="function"><a href="base.html#JSONModel.raw_json">raw_json</a></dd>
-                <dd id="Record.parse_obj" class="function"><a href="base.html#JSONModel.parse_obj">parse_obj</a></dd>
 
             </div>
                                 </dl>
