@@ -17,7 +17,7 @@
 -->
 
 The metal Iridium is used to refine and enhance metal alloys.
-Similarly, this package provides an enhanced Python coating around the Invenio RDM APIs.
+Similarly, this package provides an enhanced Python coating around the [Invenio RDM APIs](https://inveniordm.docs.cern.ch/reference/rest_api_index/).
 
 It provides:
 * a lower-level Python API wrapping the public Invenio RDM backend APIs
