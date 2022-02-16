@@ -76,22 +76,22 @@ iridium    </h1>
 <h2 id="introduction">Introduction</h2>
 
 <p>The goal of Iridium is to provide an easy-to-use Python interface for interacting
-with <a href="https://inveniordm.docs.cern.ch/">Invenio RDM</a>.</p>
+with <a href="https://inveniordm.docs.cern.ch/">InvenioRDM</a>.</p>
 
-<p>Invenio RDM has a <a href="https://inveniordm.docs.cern.ch/reference/rest_api_index/">REST API</a>,
+<p>InvenioRDM has a <a href="https://inveniordm.docs.cern.ch/reference/rest_api_index/">REST API</a>,
 but this API is <em>"[...] intended for advanced users, and developers of InvenioRDM
 that have some experience with using REST APIs [...]"</em>.</p>
 
-<p>Iridium is intended for <em>everyone else</em> who needs a programmatic interface to Invenio RDM,
+<p>Iridium is intended for <em>everyone else</em> who needs a programmatic interface to InvenioRDM,
 e.g.:</p>
 
 <ul>
 <li><strong>domain researchers and data scientists</strong> with basic user-level Python competence
 who would like to use an environment such as Jupyter notebooks
 e.g. in order to reuse or analyse available data.</li>
-<li><strong>developers</strong> who need to build lightweight external tooling around Invenio RDM
+<li><strong>developers</strong> who need to build lightweight external tooling around InvenioRDM
 e.g. as a part of bigger domain-specific solutions and workflows
-that use Invenio RDM as the underlying repository.</li>
+that use InvenioRDM as the underlying repository.</li>
 </ul>
 
 <p>In this tutorial you will learn how to use most of the Iridium interface.
@@ -101,7 +101,7 @@ classes in the <code><a href="">iridium</a></code> package.</p>
 <h2 id="import-iridium">Import Iridium</h2>
 
 <p><strong>IMPORTANT:</strong> in order to use all the APIs, you need to get an <strong>API token</strong> from the
-Invenio RDM you are going to use. For this, sign in to your Invenio RDM, and go to
+InvenioRDM you are going to use. For this, sign in to your InvenioRDM, and go to
 <em>Settings -> Applications -> Personal access tokens</em> to create one.
 Without a token you will only be able to have read-only access to published records.</p>
 
@@ -112,12 +112,12 @@ Without a token you will only be able to have read-only access to published reco
 </code></pre></div>
 
 <p>A <code>Repository</code> object represents the top-level entry point from which all exposed
-functionality can be accessed. Get access to the Invenio RDM instance:</p>
+functionality can be accessed. Get access to the InvenioRDM instance:</p>
 
 <div class="codehilite"><pre><span></span><code><span class="n">rdm</span> <span class="o">=</span> <span class="n">Repository</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="s2">&quot;https://www.your-invenio-rdm.org&quot;</span><span class="p">,</span> <span class="s2">&quot;YOUR_API_TOKEN&quot;</span><span class="p">)</span>
 </code></pre></div>
 
-<p><strong>Remark:</strong> If you are using a test instance of Invenio RDM that uses a self-signed
+<p><strong>Remark:</strong> If you are using a test instance of InvenioRDM that uses a self-signed
 certificate, you need to pass an extra argument <code>verify=False</code> to the <code>connect</code> method.
 Otherwise the connection will fail due to security reasons.</p>
 
@@ -145,7 +145,7 @@ Create a draft for a new record like this:</p>
   <span class="s1">&#39;versions&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;index&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;is_latest&#39;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span> <span class="s1">&#39;is_latest_draft&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">}}</span>
 </code></pre></div>
 
-<p><strong>Remark:</strong> This is a slightly censored view at what Invenio RDM stores about drafts and
+<p><strong>Remark:</strong> This is a slightly censored view at what InvenioRDM stores about drafts and
 records. Iridium will hide some fields that are confusing or too technical (you can still
 access them, if you know what you are doing).</p>
 
@@ -160,7 +160,7 @@ Note that <code>publish()</code> will also automatically <code>save()</code> you
 <div class="codehilite"><pre><span></span><code><span class="n">draft</span><span class="o">.</span><span class="n">publish</span><span class="p">()</span>
 </code></pre></div>
 
-<p>We will get back a number of validation errors from Invenio RDM:</p>
+<p>We will get back a number of validation errors from InvenioRDM:</p>
 
 <div class="codehilite"><pre><span></span><code><span class="p">{</span> <span class="s1">&#39;files.enabled&#39;</span><span class="p">:</span> <span class="s1">&#39;Missing uploaded files. To disable files for this record &#39;</span>
                    <span class="s1">&#39;please mark it as metadata-only.&#39;</span><span class="p">,</span>
@@ -222,7 +222,7 @@ in the terminal and compare the checksum strings - they must be equal).</p>
 you can edit the <code>draft.access</code> and <code>draft.metadata</code> fields directly
 (don't forget to <code>save()</code> afterwards).</p>
 
-<p>Now let us add the missing information Invenio RDM was complaining about.
+<p>Now let us add the missing information InvenioRDM was complaining about.
 Iridium does not hide away or simplify the internal metadata model, but it provides
 classes that help you constructing the required entities (that is why we imported
 <code><a href="iridium/inveniordm/models.html">iridium.inveniordm.models</a></code> at the start).</p>
@@ -273,7 +273,7 @@ For example, let us change the title of the record that we created:</p>
 update the metadata and <code>publish()</code> the changes - that's it.</p>
 
 <p>If our mistake is in the files that we uploaded, though, there is some more work involved.
-<strong>Invenio RDM only allows to update the files attached to a record if we create a new
+<strong>InvenioRDM only allows to update the files attached to a record if we create a new
 version of that record. The old files will forever remain accessible in the previous
 versions.</strong></p>
 
@@ -368,7 +368,7 @@ You can also apply filters you know from the web interface, e.g. the query</p>
 
 <p>will return only records that have no files attached.</p>
 
-<p>Internally, Invenio RDM does not return all results at once, but <em>paginates</em> them, i.e.
+<p>Internally, InvenioRDM does not return all results at once, but <em>paginates</em> them, i.e.
 groups them into pages of a fixed size and allows to request these pages. While this
 is a natural fit for a web interface, this is a technical detail you most likely don't
 want to think much about. Therefore, <strong>Iridium will take care of loading result pages on
@@ -386,14 +386,14 @@ number of results that are loaded "at once" so you can adjust this to your use-c
 </code></pre></div>
 
 <p>does the same as above, but your code will load 200 results at once,
-instead of the default of 10 of the Invenio RDM API. By default, Iridium keeps 10 as the
+instead of the default of 10 of the InvenioRDM API. By default, Iridium keeps 10 as the
 default for record queries (where often you might want only the "top results"), but
 increases the page size for vocabulary queries. You can experiment with the <code>size</code>
 argument and find out what works best for you.</p>
 
 <h2 id="access-and-query-vocabularies">Access and query vocabularies</h2>
 
-<p>Invenio RDM provides a number of vocabularies that can be queried.
+<p>InvenioRDM provides a number of vocabularies that can be queried.
 See the <code>VocType</code> class for a list of the supported vocabularies.</p>
 
 <p>For example, we can print all software licenses as follows:</p>

@@ -68,11 +68,11 @@
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Get environment variable.</span>
 
-<span class="sd">    If no default value is given and value is missing, raises a runtime error.</span>
+<span class="sd">    If no default value is given and value is missing, shows a custom exception.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">env</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">var_name</span><span class="p">,</span> <span class="n">def_val</span><span class="p">)</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">env</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">var_name</span><span class="si">}</span><span class="s2"> is not set in shell environment or .env file!&quot;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">var_name</span><span class="si">}</span><span class="s2"> is not set in shell environment or .env file!&quot;</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">env</span>
 
 
@@ -117,11 +117,11 @@
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Get environment variable.</span>
 
-<span class="sd">    If no default value is given and value is missing, raises a runtime error.</span>
+<span class="sd">    If no default value is given and value is missing, shows a custom exception.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">env</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">var_name</span><span class="p">,</span> <span class="n">def_val</span><span class="p">)</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">env</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">var_name</span><span class="si">}</span><span class="s2"> is not set in shell environment or .env file!&quot;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">var_name</span><span class="si">}</span><span class="s2"> is not set in shell environment or .env file!&quot;</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">env</span>
 </pre></div>
 
@@ -129,7 +129,7 @@
 
             <div class="docstring"><p>Get environment variable.</p>
 
-<p>If no default value is given and value is missing, raises a runtime error.</p>
+<p>If no default value is given and value is missing, shows a custom exception.</p>
 </div>
 
 

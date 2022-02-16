@@ -208,7 +208,7 @@ Working with this API is essentially like using <code>curl</code>.</p>
 <p><strong>You probably should not use this API directly</strong>,
 unless the high-level API does not suit your needs for some reason.
 If you do want to use it, you are basically on your own - consult the official
-<a href="https://inveniordm.docs.cern.ch/reference/rest_api_index/">Invenio RDM documentation</a>
+<a href="https://inveniordm.docs.cern.ch/reference/rest_api_index/">InvenioRDM documentation</a>
 and then find the corresponding methods in this module.</p>
 </div>
 
@@ -232,7 +232,7 @@ and then find the corresponding methods in this module.</p>
 <span class="sd">**You probably should not use this API directly**,</span>
 <span class="sd">unless the high-level API does not suit your needs for some reason.</span>
 <span class="sd">If you do want to use it, you are basically on your own - consult the official</span>
-<span class="sd">[Invenio RDM documentation](https://inveniordm.docs.cern.ch/reference/rest_api_index/)</span>
+<span class="sd">[InvenioRDM documentation](https://inveniordm.docs.cern.ch/reference/rest_api_index/)</span>
 <span class="sd">and then find the corresponding methods in this module.</span>
 <span class="sd">&quot;&quot;&quot;</span>
 
@@ -267,6 +267,12 @@ and then find the corresponding methods in this module.</p>
 <span class="p">)</span>
 
 <span class="c1"># TODO: if big file downloads make problems with memory, check out client.stream()</span>
+<span class="c1"># see https://www.python-httpx.org/advanced/#monitoring-download-progress</span>
+
+<span class="c1"># NOTE: uploads are streamed by default, see here:</span>
+<span class="c1"># https://www.python-httpx.org/advanced/#multipart-file-encoding</span>
+<span class="c1"># but no idea how to do it non-blocking and e.g. show upload progress</span>
+<span class="c1"># also see: https://github.com/encode/httpx/issues/1015</span>
 
 <span class="n">_debug</span> <span class="o">=</span> <span class="kc">False</span>
 <span class="sd">&quot;&quot;&quot;If set to true, will print HTTP returned exceptions.&quot;&quot;&quot;</span>
@@ -289,7 +295,7 @@ and then find the corresponding methods in this module.</p>
 
 
 <span class="k">class</span> <span class="nc">InvenioRDMClient</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;Class for access to the Invenio RDM API.&quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;Class for access to the InvenioRDM API.&quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="nf">_endpoint</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Return complete URL based on configured base URL and relative API path.&quot;&quot;&quot;</span>
@@ -297,7 +303,7 @@ and then find the corresponding methods in this module.</p>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">irdm_url</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">irdm_token</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">httpx_kwargs</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Create an instance of the Invenio RDM API.</span>
+<span class="sd">        Create an instance of the InvenioRDM API.</span>
 
 <span class="sd">        The instance is configured for the provided credentials and arguments.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -322,7 +328,7 @@ and then find the corresponding methods in this module.</p>
             <span class="k">pass</span>
 
     <span class="k">def</span> <span class="nf">connected</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Check that Invenio RDM is accessible.&quot;&quot;&quot;</span>
+        <span class="sd">&quot;&quot;&quot;Check that InvenioRDM is accessible.&quot;&quot;&quot;</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="n">r</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_endpoint</span><span class="p">(</span><span class="s2">&quot;/records?size=1&quot;</span><span class="p">))</span>
             <span class="n">_raise_on_error_status</span><span class="p">(</span><span class="n">r</span><span class="p">)</span>
@@ -805,7 +811,7 @@ and then find the corresponding methods in this module.</p>
                 <details>
             <summary>View Source</summary>
             <div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">InvenioRDMClient</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;Class for access to the Invenio RDM API.&quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;Class for access to the InvenioRDM API.&quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="nf">_endpoint</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Return complete URL based on configured base URL and relative API path.&quot;&quot;&quot;</span>
@@ -813,7 +819,7 @@ and then find the corresponding methods in this module.</p>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">irdm_url</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">irdm_token</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">httpx_kwargs</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Create an instance of the Invenio RDM API.</span>
+<span class="sd">        Create an instance of the InvenioRDM API.</span>
 
 <span class="sd">        The instance is configured for the provided credentials and arguments.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -838,7 +844,7 @@ and then find the corresponding methods in this module.</p>
             <span class="k">pass</span>
 
     <span class="k">def</span> <span class="nf">connected</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Check that Invenio RDM is accessible.&quot;&quot;&quot;</span>
+        <span class="sd">&quot;&quot;&quot;Check that InvenioRDM is accessible.&quot;&quot;&quot;</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="n">r</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_endpoint</span><span class="p">(</span><span class="s2">&quot;/records?size=1&quot;</span><span class="p">))</span>
             <span class="n">_raise_on_error_status</span><span class="p">(</span><span class="n">r</span><span class="p">)</span>
@@ -861,7 +867,7 @@ and then find the corresponding methods in this module.</p>
 
         </details>
 
-            <div class="docstring"><p>Class for access to the Invenio RDM API.</p>
+            <div class="docstring"><p>Class for access to the InvenioRDM API.</p>
 </div>
 
 
@@ -880,7 +886,7 @@ and then find the corresponding methods in this module.</p>
             <summary>View Source</summary>
             <div class="codehilite"><pre><span></span>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">irdm_url</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">irdm_token</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">httpx_kwargs</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Create an instance of the Invenio RDM API.</span>
+<span class="sd">        Create an instance of the InvenioRDM API.</span>
 
 <span class="sd">        The instance is configured for the provided credentials and arguments.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -900,7 +906,7 @@ and then find the corresponding methods in this module.</p>
 
         </details>
 
-            <div class="docstring"><p>Create an instance of the Invenio RDM API.</p>
+            <div class="docstring"><p>Create an instance of the InvenioRDM API.</p>
 
 <p>The instance is configured for the provided credentials and arguments.</p>
 </div>
@@ -918,7 +924,7 @@ and then find the corresponding methods in this module.</p>
                 <details>
             <summary>View Source</summary>
             <div class="codehilite"><pre><span></span>    <span class="k">def</span> <span class="nf">connected</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Check that Invenio RDM is accessible.&quot;&quot;&quot;</span>
+        <span class="sd">&quot;&quot;&quot;Check that InvenioRDM is accessible.&quot;&quot;&quot;</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="n">r</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_endpoint</span><span class="p">(</span><span class="s2">&quot;/records?size=1&quot;</span><span class="p">))</span>
             <span class="n">_raise_on_error_status</span><span class="p">(</span><span class="n">r</span><span class="p">)</span>
@@ -929,7 +935,7 @@ and then find the corresponding methods in this module.</p>
 
         </details>
 
-            <div class="docstring"><p>Check that Invenio RDM is accessible.</p>
+            <div class="docstring"><p>Check that InvenioRDM is accessible.</p>
 </div>
 
 

@@ -245,7 +245,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="p">:</span> <span class="n">InvenioRDMClient</span> <span class="o">=</span> <span class="n">cl</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_record</span><span class="p">:</span> <span class="n">Record</span> <span class="o">=</span> <span class="n">rec</span>
 
-        <span class="c1"># there is no such &quot;field&quot; in Invenio RDM, these are really 2 APIs!</span>
+        <span class="c1"># there is no such &quot;field&quot; in InvenioRDM, these are really 2 APIs!</span>
         <span class="c1"># so we track the difference on our own.</span>
         <span class="c1">#</span>
         <span class="c1"># Also, this must come BEFORE initializing files,</span>
@@ -296,7 +296,7 @@
 
     <span class="k">def</span> <span class="nf">is_saved</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Check whether the current draft is in sync with the draft on in Invenio RDM.</span>
+<span class="sd">        Check whether the current draft is in sync with the draft on in InvenioRDM.</span>
 
 <span class="sd">        This means that they must agree on `access`, `metadata` and `files`</span>
 <span class="sd">        attributes, as these are the ones modifiable by the user.</span>
@@ -357,7 +357,7 @@
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Save changes to draft record.</span>
 
-<span class="sd">        This commits the changes to this draft object to the Invenio RDM instance.</span>
+<span class="sd">        This commits the changes to this draft object to the InvenioRDM instance.</span>
 <span class="sd">        Returns dict with validation errors from the server.</span>
 
 <span class="sd">        Notice that if the draft belongs to a published record version,</span>
@@ -403,7 +403,7 @@
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Delete this draft record.</span>
 
-<span class="sd">        After deletion, this object is not backed by a draft in Invenio RDM.</span>
+<span class="sd">        After deletion, this object is not backed by a draft in InvenioRDM.</span>
 <span class="sd">        Therefore, all method calls and attribute accesses will be invalid.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_expect_draft</span><span class="p">()</span>
@@ -464,7 +464,7 @@
     <span class="c1"># TODO: the access link is not containing any concrete URL!</span>
     <span class="c1"># there should be a property that constructs the correct URL with the shape:</span>
     <span class="c1"># https://INVENIORDM_BASE/records/REC_ID?token=TOKEN[&amp;preview=1 if preview mode]</span>
-    <span class="c1"># (based on the links generated in the Invenio RDM Web UI)</span>
+    <span class="c1"># (based on the links generated in the InvenioRDM Web UI)</span>
 
     <span class="c1"># TODO: how to access a private record through an access link shared by someone else?</span>
     <span class="c1"># probably need to access the URL for the token to be added to the user identity</span>
@@ -833,7 +833,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="p">:</span> <span class="n">InvenioRDMClient</span> <span class="o">=</span> <span class="n">cl</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_record</span><span class="p">:</span> <span class="n">Record</span> <span class="o">=</span> <span class="n">rec</span>
 
-        <span class="c1"># there is no such &quot;field&quot; in Invenio RDM, these are really 2 APIs!</span>
+        <span class="c1"># there is no such &quot;field&quot; in InvenioRDM, these are really 2 APIs!</span>
         <span class="c1"># so we track the difference on our own.</span>
         <span class="c1">#</span>
         <span class="c1"># Also, this must come BEFORE initializing files,</span>
@@ -884,7 +884,7 @@
 
     <span class="k">def</span> <span class="nf">is_saved</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Check whether the current draft is in sync with the draft on in Invenio RDM.</span>
+<span class="sd">        Check whether the current draft is in sync with the draft on in InvenioRDM.</span>
 
 <span class="sd">        This means that they must agree on `access`, `metadata` and `files`</span>
 <span class="sd">        attributes, as these are the ones modifiable by the user.</span>
@@ -945,7 +945,7 @@
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Save changes to draft record.</span>
 
-<span class="sd">        This commits the changes to this draft object to the Invenio RDM instance.</span>
+<span class="sd">        This commits the changes to this draft object to the InvenioRDM instance.</span>
 <span class="sd">        Returns dict with validation errors from the server.</span>
 
 <span class="sd">        Notice that if the draft belongs to a published record version,</span>
@@ -991,7 +991,7 @@
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Delete this draft record.</span>
 
-<span class="sd">        After deletion, this object is not backed by a draft in Invenio RDM.</span>
+<span class="sd">        After deletion, this object is not backed by a draft in InvenioRDM.</span>
 <span class="sd">        Therefore, all method calls and attribute accesses will be invalid.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_expect_draft</span><span class="p">()</span>
@@ -1074,7 +1074,7 @@ overwriting them will have no effect on the actual data on the server.</p>
         <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="p">:</span> <span class="n">InvenioRDMClient</span> <span class="o">=</span> <span class="n">cl</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_record</span><span class="p">:</span> <span class="n">Record</span> <span class="o">=</span> <span class="n">rec</span>
 
-        <span class="c1"># there is no such &quot;field&quot; in Invenio RDM, these are really 2 APIs!</span>
+        <span class="c1"># there is no such &quot;field&quot; in InvenioRDM, these are really 2 APIs!</span>
         <span class="c1"># so we track the difference on our own.</span>
         <span class="c1">#</span>
         <span class="c1"># Also, this must come BEFORE initializing files,</span>
@@ -1153,7 +1153,7 @@ overwriting them will have no effect on the actual data on the server.</p>
             <summary>View Source</summary>
             <div class="codehilite"><pre><span></span>    <span class="k">def</span> <span class="nf">is_saved</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Check whether the current draft is in sync with the draft on in Invenio RDM.</span>
+<span class="sd">        Check whether the current draft is in sync with the draft on in InvenioRDM.</span>
 
 <span class="sd">        This means that they must agree on `access`, `metadata` and `files`</span>
 <span class="sd">        attributes, as these are the ones modifiable by the user.</span>
@@ -1177,7 +1177,7 @@ overwriting them will have no effect on the actual data on the server.</p>
 
         </details>
 
-            <div class="docstring"><p>Check whether the current draft is in sync with the draft on in Invenio RDM.</p>
+            <div class="docstring"><p>Check whether the current draft is in sync with the draft on in InvenioRDM.</p>
 
 <p>This means that they must agree on <code>access</code>, <code>metadata</code> and <code><a href="#WrappedRecord.files">files</a></code>
 attributes, as these are the ones modifiable by the user.</p>
@@ -1276,7 +1276,7 @@ rec.edit()
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Save changes to draft record.</span>
 
-<span class="sd">        This commits the changes to this draft object to the Invenio RDM instance.</span>
+<span class="sd">        This commits the changes to this draft object to the InvenioRDM instance.</span>
 <span class="sd">        Returns dict with validation errors from the server.</span>
 
 <span class="sd">        Notice that if the draft belongs to a published record version,</span>
@@ -1300,7 +1300,7 @@ rec.edit()
 
             <div class="docstring"><p>Save changes to draft record.</p>
 
-<p>This commits the changes to this draft object to the Invenio RDM instance.
+<p>This commits the changes to this draft object to the InvenioRDM instance.
 Returns dict with validation errors from the server.</p>
 
 <p>Notice that if the draft belongs to a published record version,
@@ -1373,7 +1373,7 @@ The changes will only be visible to others after calling <code><a href="#Wrapped
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Delete this draft record.</span>
 
-<span class="sd">        After deletion, this object is not backed by a draft in Invenio RDM.</span>
+<span class="sd">        After deletion, this object is not backed by a draft in InvenioRDM.</span>
 <span class="sd">        Therefore, all method calls and attribute accesses will be invalid.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_expect_draft</span><span class="p">()</span>
@@ -1387,7 +1387,7 @@ The changes will only be visible to others after calling <code><a href="#Wrapped
 
             <div class="docstring"><p>Delete this draft record.</p>
 
-<p>After deletion, this object is not backed by a draft in Invenio RDM.
+<p>After deletion, this object is not backed by a draft in InvenioRDM.
 Therefore, all method calls and attribute accesses will be invalid.</p>
 </div>
 
@@ -1418,7 +1418,7 @@ Therefore, all method calls and attribute accesses will be invalid.</p>
     <span class="c1"># TODO: the access link is not containing any concrete URL!</span>
     <span class="c1"># there should be a property that constructs the correct URL with the shape:</span>
     <span class="c1"># https://INVENIORDM_BASE/records/REC_ID?token=TOKEN[&amp;preview=1 if preview mode]</span>
-    <span class="c1"># (based on the links generated in the Invenio RDM Web UI)</span>
+    <span class="c1"># (based on the links generated in the InvenioRDM Web UI)</span>
 
     <span class="c1"># TODO: how to access a private record through an access link shared by someone else?</span>
     <span class="c1"># probably need to access the URL for the token to be added to the user identity</span>

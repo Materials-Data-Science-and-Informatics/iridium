@@ -84,7 +84,7 @@
 <span class="sd">&quot;&quot;&quot;Globally used pprint settings.&quot;&quot;&quot;</span>
 
 <span class="k">if</span> <span class="n">sys</span><span class="o">.</span><span class="n">version_info</span> <span class="o">&gt;=</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">8</span><span class="p">):</span>
-    <span class="n">pprint_args</span><span class="p">[</span><span class="s2">&quot;sort_dicts&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">pprint_args</span><span class="p">[</span><span class="s2">&quot;sort_dicts&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>  <span class="c1"># pragma: no cover</span>
 
 
 <span class="k">def</span> <span class="nf">pp</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
