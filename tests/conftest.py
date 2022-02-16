@@ -6,6 +6,7 @@ from typing import Optional
 
 import pytest
 
+from iridium import Repository
 from iridium.inveniordm import BibMetadata, InvenioRDMClient
 
 DUMMYFILE_NAMELEN = 8
@@ -79,7 +80,7 @@ def dummy_file(testutils, tmp_path_factory):
 
 @pytest.fixture(scope="session")
 def rdm():
-    """Return an API instance configured from environment variables."""
+    """Return an low-level API instance configured from environment variables."""
     cl = InvenioRDMClient.from_env(verify=False)
 
     # clean up all drafts from possible previous unclean runs
@@ -89,6 +90,12 @@ def rdm():
             cl.draft.delete(d.id)
 
     return cl
+
+
+@pytest.fixture(scope="session")
+def irdm(rdm):
+    """Return an high-level API instance configured from environment variables."""
+    return Repository(client=rdm)
 
 
 @pytest.fixture(scope="session")

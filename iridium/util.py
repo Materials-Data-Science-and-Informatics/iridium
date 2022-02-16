@@ -9,11 +9,11 @@ def get_env(var_name, def_val=None):
     """
     Get environment variable.
 
-    If no default value is given and value is missing, raises a runtime error.
+    If no default value is given and value is missing, shows a custom exception.
     """
     env = os.environ.get(var_name, def_val)
     if not env:
-        raise RuntimeError(f"{var_name} is not set in shell environment or .env file!")
+        raise KeyError(f"{var_name} is not set in shell environment or .env file!")
     return env
 
 

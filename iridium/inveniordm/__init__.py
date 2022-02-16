@@ -51,6 +51,12 @@ from .models import (
 )
 
 # TODO: if big file downloads make problems with memory, check out client.stream()
+# see https://www.python-httpx.org/advanced/#monitoring-download-progress
+
+# NOTE: uploads are streamed by default, see here:
+# https://www.python-httpx.org/advanced/#multipart-file-encoding
+# but no idea how to do it non-blocking and e.g. show upload progress
+# also see: https://github.com/encode/httpx/issues/1015
 
 _debug = False
 """If set to true, will print HTTP returned exceptions."""

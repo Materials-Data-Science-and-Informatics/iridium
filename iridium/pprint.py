@@ -13,7 +13,7 @@ pprint_args: Dict[str, Any] = {
 """Globally used pprint settings."""
 
 if sys.version_info >= (3, 8):
-    pprint_args["sort_dicts"] = False
+    pprint_args["sort_dicts"] = False  # pragma: no cover
 
 
 def pp(obj) -> str:

@@ -141,7 +141,9 @@ def test_number_access_proxy():
     assert repr(ap).find("['0', '1', '2'") >= 0
     assert repr(ap(end=10)).find("['0', '1', '2'") >= 0
 
+    # test __getattr__ and __iter__
     assert list(ap.keys()) == [str(n) for n in range(DummyQuery.MAX)]
+    assert list(ap) == [Dummy(n) for n in range(DummyQuery.MAX)]
 
     # test __contains__
     assert "11" in ap
