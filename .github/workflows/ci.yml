@@ -68,7 +68,7 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
 
-      - name: Set up Invenio RDM instance
+      - name: Set up InvenioRDM instance
         uses: ./.github/actions/setup-inveniordm
         with:
           rdm-version: v7.0

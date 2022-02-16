@@ -1,16 +1,16 @@
-name: 'Setup Invenio RDM Test Instance'
-description: 'Prepares containerized Invenio RDM instance and returns a test user and API token'
+name: 'Setup InvenioRDM Test Instance'
+description: 'Prepares containerized InvenioRDM instance and returns a test user and API token'
 
 inputs:
   rdm-version:
-    description: 'Invenio RDM version tag for checkout'
+    description: 'InvenioRDM version tag for checkout'
     required: true
   rdm-user:
-    description: 'Invenio RDM user e-mail'
+    description: 'InvenioRDM user e-mail'
     required: false
     default: 'tester@example.com'
   rdm-password:
-    description: 'Password of Invenio RDM test user'
+    description: 'Password of InvenioRDM test user'
     required: false
     default: '123456'
   dotenv-path:
@@ -20,10 +20,10 @@ inputs:
 
 outputs:
   rdm-url:
-    description: "Invenio RDM instance URL"
+    description: "InvenioRDM instance URL"
     value: ${{ steps.env-to-output.outputs.rdm-url }}
   rdm-token:
-    description: "Invenio RDM API token of created test user"
+    description: "InvenioRDM API token of created test user"
     value: ${{ steps.env-to-output.outputs.rdm-token }}
 
 runs:
@@ -33,7 +33,7 @@ runs:
       with:
         node-version: '14'
 
-    - name: Install Invenio RDM
+    - name: Install InvenioRDM
       shell: bash
       run: |
         # pip install invenio-cli

@@ -1,7 +1,7 @@
 """
-Models for bibliographic metadata stored in an Invenio RDM record.
+Models for bibliographic metadata stored in an InvenioRDM record.
 
-Based on Invenio RDM documentation and source.
+Based on InvenioRDM documentation and source.
 https://github.com/inveniosoftware/invenio-rdm-records/blob/master/invenio_rdm_records/services/schemas/metadata.py
 """
 from datetime import date

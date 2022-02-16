@@ -90,7 +90,7 @@ class SortOrder(str, Enum):
 
 
 class VocType(str, Enum):
-    """Vocabulary types available for query in Invenio RDM API."""
+    """Vocabulary types available for query in InvenioRDM API."""
 
     languages = "languages"
     licenses = "licenses"

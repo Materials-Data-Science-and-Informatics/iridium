@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # It takes some time until the vocabularies and demo data
-# of a default Invenio RDM instance are indexed and everything works correctly.
+# of a default InvenioRDM instance are indexed and everything works correctly.
 # This script basically just waits until demo records start to appear.
 # After that, the test suite can be started against the instance.
 
@@ -12,7 +12,7 @@ if [ -n "$1" ]; then
     source $1
 fi
 
-# takes environment variables with invenio RDM credentials, waits for demo records to appear
+# takes environment variables with InvenioRDM credentials, waits for demo records to appear
 url="${INVENIORDM_URL}/api/records?access_token=${INVENIORDM_TOKEN}"
 echo Query URL: $url
 
