@@ -3,21 +3,21 @@
 ## Introduction
 
 The goal of Iridium is to provide an easy-to-use Python interface for interacting
-with [Invenio RDM](https://inveniordm.docs.cern.ch/).
+with [InvenioRDM](https://inveniordm.docs.cern.ch/).
 
-Invenio RDM has a [REST API](https://inveniordm.docs.cern.ch/reference/rest_api_index/),
+InvenioRDM has a [REST API](https://inveniordm.docs.cern.ch/reference/rest_api_index/),
 but this API is *"[...] intended for advanced users, and developers of InvenioRDM
 that have some experience with using REST APIs [...]"*.
 
-Iridium is intended for *everyone else* who needs a programmatic interface to Invenio RDM,
+Iridium is intended for *everyone else* who needs a programmatic interface to InvenioRDM,
 e.g.:
 
 * **domain researchers and data scientists** with basic user-level Python competence
   who would like to use an environment such as Jupyter notebooks
   e.g. in order to reuse or analyse available data.
-* **developers** who need to build lightweight external tooling around Invenio RDM
+* **developers** who need to build lightweight external tooling around InvenioRDM
   e.g. as a part of bigger domain-specific solutions and workflows
-  that use Invenio RDM as the underlying repository.
+  that use InvenioRDM as the underlying repository.
 
 In this tutorial you will learn how to use most of the Iridium interface.
 For a deeper look, consider looking into the more technical documentation of
@@ -26,7 +26,7 @@ classes in the `iridium` package.
 ## Import Iridium
 
 **IMPORTANT:** in order to use all the APIs, you need to get an **API token** from the
-Invenio RDM you are going to use. For this, sign in to your Invenio RDM, and go to
+InvenioRDM you are going to use. For this, sign in to your InvenioRDM, and go to
 *Settings -> Applications -> Personal access tokens* to create one.
 Without a token you will only be able to have read-only access to published records.
 
@@ -38,13 +38,13 @@ from iridium.inveniordm.models import *
 ```
 
 A `Repository` object represents the top-level entry point from which all exposed
-functionality can be accessed. Get access to the Invenio RDM instance:
+functionality can be accessed. Get access to the InvenioRDM instance:
 
 ```python
 rdm = Repository.connect("https://www.your-invenio-rdm.org", "YOUR_API_TOKEN")
 ```
 
-**Remark:** If you are using a test instance of Invenio RDM that uses a self-signed
+**Remark:** If you are using a test instance of InvenioRDM that uses a self-signed
 certificate, you need to pass an extra argument `verify=False` to the `connect` method.
 Otherwise the connection will fail due to security reasons.
 
@@ -74,7 +74,7 @@ When you print or evaluate `draft` in your notebook, you will see something like
   'versions': {'index': 1, 'is_latest': False, 'is_latest_draft': True}}
 ```
 
-**Remark:** This is a slightly censored view at what Invenio RDM stores about drafts and
+**Remark:** This is a slightly censored view at what InvenioRDM stores about drafts and
 records. Iridium will hide some fields that are confusing or too technical (you can still
 access them, if you know what you are doing).
 
@@ -90,7 +90,7 @@ We can try publishing the draft without adding any metadata:
 draft.publish()
 ```
 
-We will get back a number of validation errors from Invenio RDM:
+We will get back a number of validation errors from InvenioRDM:
 
 ```python
 { 'files.enabled': 'Missing uploaded files. To disable files for this record '
@@ -156,7 +156,7 @@ In order to modify access restrictions or bibliographic metadata of a draft,
 you can edit the `draft.access` and `draft.metadata` fields directly
 (don't forget to `save()` afterwards).
 
-Now let us add the missing information Invenio RDM was complaining about.
+Now let us add the missing information InvenioRDM was complaining about.
 Iridium does not hide away or simplify the internal metadata model, but it provides
 classes that help you constructing the required entities (that is why we imported
 `iridium.inveniordm.models` at the start).
@@ -210,7 +210,7 @@ So we access the record, set it into editable mode (technically, we switch to a 
 update the metadata and `publish()` the changes - that's it.
 
 If our mistake is in the files that we uploaded, though, there is some more work involved.
-**Invenio RDM only allows to update the files attached to a record if we create a new
+**InvenioRDM only allows to update the files attached to a record if we create a new
 version of that record. The old files will forever remain accessible in the previous
 versions.**
 
@@ -306,7 +306,7 @@ rdm.records(access_status=["metadata-only"])
 
 will return only records that have no files attached.
 
-Internally, Invenio RDM does not return all results at once, but *paginates* them, i.e.
+Internally, InvenioRDM does not return all results at once, but *paginates* them, i.e.
 groups them into pages of a fixed size and allows to request these pages. While this
 is a natural fit for a web interface, this is a technical detail you most likely don't
 want to think much about. Therefore, **Iridium will take care of loading result pages on
@@ -325,14 +325,14 @@ for rec in rdm.records(q="amazing", size=200):
 ```
 
 does the same as above, but your code will load 200 results at once,
-instead of the default of 10 of the Invenio RDM API. By default, Iridium keeps 10 as the
+instead of the default of 10 of the InvenioRDM API. By default, Iridium keeps 10 as the
 default for record queries (where often you might want only the "top results"), but
 increases the page size for vocabulary queries. You can experiment with the `size`
 argument and find out what works best for you.
 
 ## Access and query vocabularies
 
-Invenio RDM provides a number of vocabularies that can be queried.
+InvenioRDM provides a number of vocabularies that can be queried.
 See the `VocType` class for a list of the supported vocabularies.
 
 For example, we can print all software licenses as follows:

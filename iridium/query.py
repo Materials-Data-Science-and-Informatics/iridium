@@ -106,7 +106,7 @@ class Drafts(AccessProxy):
 
     It will **not** find drafts of editing existing record versions by the user,
     as these drafts cannot be efficiently queried for (yet) due to the way
-    the search indices in Invenio RDM are set up.
+    the search indices in InvenioRDM are set up.
     (There exists `has_draft:true`, but this does not allow to filter for owned records).
     See: https://github.com/inveniosoftware/invenio-app-rdm/issues/714
     """

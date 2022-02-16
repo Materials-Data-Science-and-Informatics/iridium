@@ -2,7 +2,7 @@
 Generic useful classes for the high-level API.
 
 `AccessProxy` serves as the wrapper class to accessing various entities
-that are returned by Invenio RDM from its ElasticSearch index.
+that are returned by InvenioRDM from its ElasticSearch index.
 
 This includes: records, drafts, versions, access links, vocabularies and more.
 """

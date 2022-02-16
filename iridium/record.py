@@ -51,7 +51,7 @@ class WrappedRecord:
         self._client: InvenioRDMClient = cl
         self._record: Record = rec
 
-        # there is no such "field" in Invenio RDM, these are really 2 APIs!
+        # there is no such "field" in InvenioRDM, these are really 2 APIs!
         # so we track the difference on our own.
         #
         # Also, this must come BEFORE initializing files,
@@ -102,7 +102,7 @@ class WrappedRecord:
 
     def is_saved(self):
         """
-        Check whether the current draft is in sync with the draft on in Invenio RDM.
+        Check whether the current draft is in sync with the draft on in InvenioRDM.
 
         This means that they must agree on `access`, `metadata` and `files`
         attributes, as these are the ones modifiable by the user.
@@ -163,7 +163,7 @@ class WrappedRecord:
         """
         Save changes to draft record.
 
-        This commits the changes to this draft object to the Invenio RDM instance.
+        This commits the changes to this draft object to the InvenioRDM instance.
         Returns dict with validation errors from the server.
 
         Notice that if the draft belongs to a published record version,
@@ -209,7 +209,7 @@ class WrappedRecord:
         """
         Delete this draft record.
 
-        After deletion, this object is not backed by a draft in Invenio RDM.
+        After deletion, this object is not backed by a draft in InvenioRDM.
         Therefore, all method calls and attribute accesses will be invalid.
         """
         self._expect_draft()
@@ -270,7 +270,7 @@ class WrappedAccessLink:
     # TODO: the access link is not containing any concrete URL!
     # there should be a property that constructs the correct URL with the shape:
     # https://INVENIORDM_BASE/records/REC_ID?token=TOKEN[&preview=1 if preview mode]
-    # (based on the links generated in the Invenio RDM Web UI)
+    # (based on the links generated in the InvenioRDM Web UI)
 
     # TODO: how to access a private record through an access link shared by someone else?
     # probably need to access the URL for the token to be added to the user identity

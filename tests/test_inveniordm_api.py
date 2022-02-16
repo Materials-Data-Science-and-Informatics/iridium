@@ -1,4 +1,4 @@
-"""Tests for Invenio RDM backend API."""
+"""Tests for InvenioRDM backend API."""
 
 import time
 from datetime import date
@@ -15,9 +15,9 @@ from iridium.util import hashsum
 
 @pytest.fixture(autouse=True)
 def skip_if_no_invenio(rdm):
-    """Automatically skip a test when Invenio RDM is not available."""
+    """Automatically skip a test when InvenioRDM is not available."""
     if not rdm.connected():
-        pytest.skip("no connection to Invenio RDM!")
+        pytest.skip("no connection to InvenioRDM!")
 
 
 def test_vocabularies(rdm):

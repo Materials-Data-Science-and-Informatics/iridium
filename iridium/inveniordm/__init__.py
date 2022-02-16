@@ -16,7 +16,7 @@ Working with this API is essentially like using `curl`.
 **You probably should not use this API directly**,
 unless the high-level API does not suit your needs for some reason.
 If you do want to use it, you are basically on your own - consult the official
-[Invenio RDM documentation](https://inveniordm.docs.cern.ch/reference/rest_api_index/)
+[InvenioRDM documentation](https://inveniordm.docs.cern.ch/reference/rest_api_index/)
 and then find the corresponding methods in this module.
 """
 
@@ -73,7 +73,7 @@ def _raise_on_error_status(r):
 
 
 class InvenioRDMClient:
-    """Class for access to the Invenio RDM API."""
+    """Class for access to the InvenioRDM API."""
 
     def _endpoint(self, path: str) -> str:
         """Return complete URL based on configured base URL and relative API path."""
@@ -81,7 +81,7 @@ class InvenioRDMClient:
 
     def __init__(self, irdm_url: str, irdm_token: Optional[str] = None, **httpx_kwargs):
         """
-        Create an instance of the Invenio RDM API.
+        Create an instance of the InvenioRDM API.
 
         The instance is configured for the provided credentials and arguments.
         """
@@ -106,7 +106,7 @@ class InvenioRDMClient:
             pass
 
     def connected(self) -> bool:
-        """Check that Invenio RDM is accessible."""
+        """Check that InvenioRDM is accessible."""
         try:
             r = self.client.get(self._endpoint("/records?size=1"))
             _raise_on_error_status(r)

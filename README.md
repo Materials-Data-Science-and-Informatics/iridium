@@ -17,10 +17,10 @@
 -->
 
 The metal Iridium is used to refine and enhance metal alloys.
-Similarly, this package provides an enhanced Python coating around the [Invenio RDM APIs](https://inveniordm.docs.cern.ch/reference/rest_api_index/).
+Similarly, this package provides an enhanced Python coating around the [InvenioRDM APIs](https://inveniordm.docs.cern.ch/reference/rest_api_index/).
 
 It provides:
-* a lower-level Python API wrapping the public Invenio RDM backend APIs
+* a lower-level Python API wrapping the public InvenioRDM backend APIs
 * a higher-level object-oriented convenience API (in progress)
 
 Currently only the Vocabulary and Draft/Record APIs are supported.
@@ -32,7 +32,7 @@ might follow when there is interest and the REST APIs are stabilized.
 
 Probably you are interested in the high-level API. For this, read the [tutorial](TUTORIAL.md).
 
-It is not advised to use the low-level API directly, unless you are an Invenio RDM expert.
+It is not advised to use the low-level API directly, unless you are an InvenioRDM expert.
 The low-level API documentation is minimal and located
 [here](https://materials-data-science-and-informatics.github.io/iridium/iridium/inveniordm.html).
 

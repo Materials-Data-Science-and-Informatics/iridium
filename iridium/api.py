@@ -1,4 +1,4 @@
-"""High-level API for Invenio RDM."""
+"""High-level API for InvenioRDM."""
 
 from typing import Dict, Optional
 
@@ -14,7 +14,7 @@ class Repository:
 
     def __init__(self, *args, **kwargs):
         """
-        Create an instance of the high-level Invenio RDM API.
+        Create an instance of the high-level InvenioRDM API.
 
         Do not use directly. Use `connect` or `from_env` to get an instance.
         """
@@ -49,5 +49,5 @@ class Repository:
         return cls(url, token, **httpx_kwargs)
 
     def connected(self) -> bool:
-        """Check whether the configured Invenio RDM instance is accessible."""
+        """Check whether the configured InvenioRDM instance is accessible."""
         return self._client.connected()

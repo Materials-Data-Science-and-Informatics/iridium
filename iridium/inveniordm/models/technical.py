@@ -1,4 +1,4 @@
-"""Models for Invenio RDM specific, technical metadata."""
+"""Models for InvenioRDM specific, technical metadata."""
 from datetime import date, datetime
 from enum import Enum
 from typing import Dict, List, Optional
