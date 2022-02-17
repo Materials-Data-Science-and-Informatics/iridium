@@ -20,29 +20,58 @@ The metal Iridium is used to refine and enhance metal alloys.
 Similarly, this package provides an enhanced Python coating around the [InvenioRDM APIs](https://inveniordm.docs.cern.ch/reference/rest_api_index/).
 
 It provides:
-* a lower-level Python API wrapping the public InvenioRDM backend APIs
-* a higher-level object-oriented convenience API (in progress)
+* a low-level Python API faithfully wrapping the public InvenioRDM backend APIs
+* a high-level object-oriented easy-to-use convenience API
 
 Currently only the Vocabulary and Draft/Record APIs are supported.
 
 Other APIs (such as Communities and Requests APIs)
 might follow when there is interest and the REST APIs are stabilized.
 
+## Compatibility
+
+This package supports the officially supported Python versions, i.e. `>=3.7`.
+
+Concerning the version of InvenioRDM, we currently do not give any commitment beyond
+supporting the latest official release (i.e. currently `v7`).
+
+If the InvenioRDM REST APIs at some point get a structured versioning and change policy,
+i.e. it becomes possible to
+
+* programmatically detect the InvenioRDM version of an instance
+* clearly understand the API differences between releases
+
+we might reconsider and start committing to support active InvenioRDM LTS releases.
+
 ## Getting Started
 
-Probably you are interested in the high-level API. For this, read the [tutorial](TUTORIAL.md).
+As a user, you can install this package just as any other package into your current
+Python environment using
+```
+$ pip install git+https://github.com/Materials-Data-Science-and-Informatics/iridium.git
+```
+As usual, it is highly recommended that you use a
+[virtual environment](https://stackoverflow.com/questions/41573587/what-is-the-difference-between-venv-pyvenv-pyenv-virtualenv-virtualenvwrappe)
+to ensure isolation of dependencies between unrelated projects
+(or use `poetry` as described further below, which automatically takes care of this).
 
-It is not advised to use the low-level API directly, unless you are an InvenioRDM expert.
+If you installed `iridium` successfully,
+you are probably interested in the high-level API.
+Read the [tutorial](TUTORIAL.md) to learn how to use it.
+
+It is not advised to use the low-level API directly,
+unless you are an InvenioRDM expert.
 The low-level API documentation is minimal and located
 [here](https://materials-data-science-and-informatics.github.io/iridium/iridium/inveniordm.html).
 
 ## Development
 
 This project uses [Poetry](https://python-poetry.org/) for dependency
-management. So you will need to have poetry installed.
-Then you can run the following lines (maybe adapted to your operating
-system). It will clone this repository and run a `poetry install`.
+management, so you will need to have poetry
+[installed](https://python-poetry.org/docs/master/#installing-with-the-official-installer)
+in order to contribute.
 
+Then you can run the following lines to setup the project and install the package:
 ```
 $ git clone https://github.com/Materials-Data-Science-and-Informatics/iridium.git
 $ cd iridium
@@ -56,8 +85,11 @@ Run `pytest` (see [https://docs.pytest.org](https://docs.pytest.org)) before
 merging your changes to make sure you did not break anything. To check
 coverage, use `pytest --cov`.
 
-To generate documentation, run `pdoc --html -o docs iridium` (see
-[https://pdoc.dev](https://pdoc.dev)).
+**Note:** Running the tests requires a recent and functioning
+InvenioRDM instance that you have access to.
+
+To generate local documentation (as the one linked above), run
+`pdoc --html -o docs iridium` (see [https://pdoc.dev](https://pdoc.dev)).
 
 ## Acknowledgements
 
