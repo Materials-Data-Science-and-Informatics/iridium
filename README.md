@@ -38,17 +38,26 @@ The low-level API documentation is minimal and located
 
 ## Development
 
-This project uses [Poetry](https://python-poetry.org/) for dependency management.
+This project uses [Poetry](https://python-poetry.org/) for dependency
+management. So you will need to have poetry installed.
+Then you can run the following lines (maybe adapted to your operating
+system). It will clone this repository and run a `poetry install`.
 
-Clone this repository and run `poetry install`.
+```
+$ git clone https://github.com/Materials-Data-Science-and-Informatics/iridium.git
+$ cd iridium
+$ poetry install
+```
 
-Run `pre-commit install` after cloning to enable pre-commit to enforce the required linting hooks.
+Run `pre-commit install` (see [https://pre-commit.com](https://pre-commit.com))
+after cloning. This enables pre-commit to enforce the required linting hooks.
 
-Run `pytest` before merging your changes to make sure you did not break anything.
+Run `pytest` (see [https://docs.pytest.org](https://docs.pytest.org)) before
+merging your changes to make sure you did not break anything. To check
+coverage, use `pytest --cov`.
 
-To generate documentation, run `pdoc --html -o docs iridium`.
-
-To check coverage, use `pytest --cov`.
+To generate documentation, run `pdoc --html -o docs iridium` (see
+[https://pdoc.dev](https://pdoc.dev)).
 
 ## Acknowledgements
 
