@@ -140,6 +140,11 @@ class PaginatedList(Sequence[T]):
         return obj in iter(self)
 
 
+# TODO: probably this should be refactored into paginated and unpaginated queries
+# and build using composition instead of inheritance
+# (i.e. support batched vs unbatched result providers)
+
+
 class Query(PaginatedList[T]):
     """
     Class for convenient access to query results.

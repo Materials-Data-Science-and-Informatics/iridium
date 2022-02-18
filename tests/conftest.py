@@ -1,6 +1,7 @@
 """Fixtures and general utilities for pytest test suite."""
 import secrets
 from datetime import datetime
+from io import BytesIO
 from pathlib import Path
 from typing import Optional
 
@@ -17,6 +18,10 @@ class UtilFuncs:
     """Helpers used in tests."""
 
     @staticmethod
+    def text2data(text: str):
+        return BytesIO(text.encode("utf-8"))
+
+    @staticmethod
     def random_hex(length: int) -> str:
         """Return hex string of given length."""
         return secrets.token_hex(int(length / 2))
@@ -24,9 +29,10 @@ class UtilFuncs:
     @staticmethod
     def default_bib_metadata():
         """Minimal sufficient metadata for a record yielding no errors."""
+        ts = datetime.now()
         return BibMetadata.parse_obj(
             {
-                "title": "Untitled Dataset",
+                "title": f"Test {ts.strftime('%Y-%m-%d %H:%M:%S')}",
                 "creators": [
                     {
                         "person_or_org": {
@@ -36,7 +42,7 @@ class UtilFuncs:
                         }
                     }
                 ],
-                "publication_date": datetime.strftime(datetime.now(), "%Y-%m-%d"),
+                "publication_date": datetime.strftime(ts, "%Y-%m-%d"),
                 "resource_type": {"id": "other"},
             }
         )
@@ -117,7 +123,6 @@ def get_test_record(rdm, testutils):
         if rec_id is None:
             drft = rdm.draft.create(metadata=testutils.default_bib_metadata())
             drft.files.enabled = False
-            drft.metadata.title = f"Test {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"
             drft.metadata.description = ""
             if tsuf:
                 drft.metadata.description += f"{tsuf}<br>\n"

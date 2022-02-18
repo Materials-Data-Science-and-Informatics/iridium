@@ -58,6 +58,9 @@ from .models import (
 # but no idea how to do it non-blocking and e.g. show upload progress
 # also see: https://github.com/encode/httpx/issues/1015
 
+# TODO: the record and draft sub-apis could be abstracted into a base class
+# with operations supported by both (with only the endpoint being different)
+
 _debug = False
 """If set to true, will print HTTP returned exceptions."""
 

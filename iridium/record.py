@@ -3,7 +3,7 @@ from __future__ import annotations
 
 from datetime import datetime
 from pathlib import Path
-from typing import BinaryIO, Dict, Iterable, Optional, Tuple
+from typing import BinaryIO, Dict, Iterable, List, Optional, Tuple
 
 from .generic import AccessProxy, Query
 from .inveniordm import InvenioRDMClient
@@ -78,6 +78,16 @@ class WrappedRecord:
         return self._access_links
 
     @property
+    def version(self) -> int:
+        """Return index of record version."""
+        return self._record.versions.index
+
+    @property
+    def is_latest(self) -> bool:
+        """Return whether the current record version is the latest available."""
+        return self._record.versions.is_latest
+
+    @property
     def versions(self) -> RecordVersions:
         """Return all versions of the current record."""
         self._expect_published()
@@ -107,7 +117,8 @@ class WrappedRecord:
         This means that they must agree on `access`, `metadata` and `files`
         attributes, as these are the ones modifiable by the user.
         """
-        self._expect_draft()
+        if not self.is_draft:
+            return True  # not draft -> obviously saved
 
         # need to "wrap" to initialize e.g. the 'files' part correctly
         raw = self._client.draft.get(self._record.id)
@@ -120,7 +131,7 @@ class WrappedRecord:
         # compare relevant contents
         same_access = drft.access == self._record.access
         same_metadata = drft.metadata == self._record.metadata
-        same_files = drft.files._files == self.files._files  # compare unwrapped
+        same_files = drft.files.enabled == self.files.enabled
         return same_access and same_metadata and same_files
 
     def edit(self) -> WrappedRecord:
@@ -178,7 +189,7 @@ class WrappedRecord:
         errs: Optional[Dict[str, str]] = None
         if self._record.errors is not None:
             errs = {e.field: " ".join(e.messages) for e in self._record.errors}
-            self._record.errors = None  # no need to keep them
+            self._record.__dict__["errors"] = None  # no need to keep them
         # don't need to wrap None for printing... would print 'None'
         return PrettyRepr(errs) if errs else None
 
@@ -216,6 +227,7 @@ class WrappedRecord:
 
         self._client.draft.delete(self._record.id)
         # to prevent the user from doing anything stupid, make it fail
+        self._is_draft = False
         self._record = None  # type: ignore
 
     # NOTE: the following is a really, really bad idea!
@@ -230,11 +242,10 @@ class WrappedRecord:
         return self._record.__getattribute__(name)
 
     def __setattr__(self, name: str, value):
-        # if name in ["metadata", "access"]:  # the only usefully writable record fields
-        if name[0] != "_":  # the only usefully writable record fields
-            return self._record.__setattr__(name, value)
-        elif name in self.__slots__:  # private, local attribute
+        if name in self.__slots__:  # private, local attribute
             super().__setattr__(name, value)
+        elif name[0] != "_" and name not in ["files", "versions"]:
+            return self._record.__setattr__(name, value)
         else:
             raise ValueError(f"Attribute {name} is read-only!")
 
@@ -370,7 +381,7 @@ class AccessLinks(AccessProxy):
     ):
         """Create an access link for the record that can be shared."""
         lnk = self._client.record.access_links.create(
-            self._parent.id, expires_at, permission
+            self._record_id, expires_at, permission
         )
         return WrappedAccessLink(self._client, self._record_id, lnk)
 
@@ -445,14 +456,19 @@ class WrappedFiles:
         # _files should contain the raw structure as returned by the API,
         # But this is only accessible if file support is enabled for the record.
         self._files: Files = parent._record.files  # stub with just "enabled" state
-        if parent._record.files.enabled:
-            self._files = self._get_fileinfos()
 
-    def _get_fileinfos(self) -> Files:
-        if self._parent.is_draft:
-            return self._client.draft.files(self._parent.id)
-        else:
-            return self._client.record.files(self._parent.id)
+        # we store the entries from the extra-query separately
+        # as we may not have the entries field be filled in drafts
+        self._entries: Optional[List[FileMetadata]] = None
+        if parent._record.files.enabled:
+            self._entries = self._get_fileinfos()
+
+    def _get_fileinfos(self) -> List[FileMetadata]:
+        """Get the actual file metadata entries from the correct endpoint."""
+        api = self._client.draft if self._parent.is_draft else self._client.record
+        ret = api.files(self._parent.id)  # type: ignore
+        assert ret.entries is not None
+        return ret.entries
 
     @property
     def enabled(self) -> bool:
@@ -461,7 +477,8 @@ class WrappedFiles:
 
     @enabled.setter
     def enabled(self, value: bool):
-        if self._files.entries is not None and len(self._files.entries) > 0:
+        self._check_mutable()
+        if self._entries is not None and len(self._entries) > 0:
             raise ValueError("This value can only be modified if there are no files!")
 
         # set files.enabled state on server without committing other record changes
@@ -471,8 +488,8 @@ class WrappedFiles:
         # if no exception happened, update the values locally
         self._parent._record.files.enabled = value
         self._files.enabled = value
-        if self._files.enabled and self._files.entries is None:
-            self._files.entries = []
+        if self._files.enabled and self._entries is None:
+            self._entries = []
 
     def _check_mutable(self):
         if not self._parent.is_draft or self._parent.is_published:
@@ -484,9 +501,9 @@ class WrappedFiles:
 
     def _check_filename(self, filename, should_exist: bool = True):
         """Complain if file does (not) exist."""
-        if should_exist and filename not in self._entries_dict():
+        if should_exist and filename not in self._dict():
             raise ValueError(f"No such file in record: {filename}")
-        if not should_exist and filename in self._entries_dict():
+        if not should_exist and filename in self._dict():
             raise ValueError(f"File with this name already in record: {filename}")
 
     def download(self, filename: str) -> BinaryIO:
@@ -511,19 +528,19 @@ class WrappedFiles:
         self._client.draft.file_delete(self._parent.id, filename)
         # if no exception happened, it worked ->
         # remove the entry locally (thereby avoid reloading data)
-        assert self._files.entries is not None
-        self._files.entries = [fm for fm in self._files.entries if fm.key != filename]
+        assert self._entries is not None
+        self._entries = [fm for fm in self._entries if fm.key != filename]
 
     def import_old(self):
         """Import files from the previous version."""
         self._check_mutable()
         self._check_enabled()
-        if self._parent.versions.index < 2:
+        if self._parent.version < 2:
             raise ValueError("Cannot import files, this is the first record version!")
-        if self._files.entries is not None and len(self._files.entries) > 0:
+        if self._entries is not None and len(self._entries) > 0:
             raise ValueError("Can only import if no new files were uploaded yet!")
 
-        self._files = self._client.draft.files_import(self._parent.id)
+        self._entries = self._client.draft.files_import(self._parent.id).entries
 
     def upload(self, filename: str, data: Optional[BinaryIO] = None):
         """
@@ -550,43 +567,43 @@ class WrappedFiles:
         self._client.draft.file_upload_start(self._parent.id, filename)
         self._client.draft.file_upload_content(self._parent.id, filename, data)
         self._client.draft.file_upload_complete(self._parent.id, filename)
-        self._files = self._get_fileinfos()
+        self._entries = self._get_fileinfos()
 
     # ---- dict-like behaviour to access file metadata ----
 
-    def _entries_dict(self):
+    def _dict(self):
         """Exposes file entries as delivered by backend into a dict."""
         # There should not be a bazillion files per record,
         # so recreating the dict on access should be no problem at all.
         # When need arises, we can switch to something more efficient.
-        if not self.enabled or not self._files.entries:
+        if not self.enabled or not self._entries:
             return {}  # there is no 'entries' key if files are disabled
-        assert self._files.entries is not None  # if enabled, must be present
-        return {fileinfo.key: fileinfo for fileinfo in self._files.entries}
+        assert self._entries is not None  # if enabled, must be present
+        return {fileinfo.key: fileinfo for fileinfo in self._entries}
 
     def keys(self) -> Iterable[str]:
         """Return uploaded filenames."""
-        return self._entries_dict().keys()
+        return self._dict().keys()
 
     def values(self) -> Iterable[FileMetadata]:
         """Return file metadata of uploaded files."""
-        return self._entries_dict().values()
+        return self._dict().values()
 
     def items(self) -> Iterable[Tuple[str, FileMetadata]]:
-        return self._entries_dict().items()
+        return self._dict().items()
 
     def __iter__(self) -> Iterable[str]:
-        return iter(self._entries_dict())
+        return iter(self._dict())
 
     def __len__(self) -> int:
         """Return number of uploaded files."""
-        return len(self._entries_dict())
+        return len(self._dict())
 
     def __getitem__(self, filename) -> FileMetadata:
         """Get file metadata of given filename."""
-        return self._entries_dict()[filename]
+        return self._dict()[filename]
 
     def __repr__(self) -> str:
         # there is too much information in the metadata anyway, just show names
         # and indicate dict-like accessibility
-        return repr({k: NoPrint(v) for k, v in self._entries_dict().items()})
+        return repr({k: NoPrint(v) for k, v in self._dict().items()})

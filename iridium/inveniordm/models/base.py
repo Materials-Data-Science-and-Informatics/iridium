@@ -30,7 +30,7 @@ class JSONModel(BaseModel):
 
     def __setattr__(self, key, value):
         if key in self._read_only:
-            raise AttributeError(f"'{key}' is a read-only attribute!")
+            raise ValueError(f"'{key}' is a read-only attribute!")
         super().__setattr__(key, value)
 
     _raw_json: bool = False

@@ -118,7 +118,9 @@ class Drafts(AccessProxy):
         return WrappedRecord(self._client, self._client.draft.get(draft_id), True)
 
     # this fits here nicely as a general way to create new drafts
-    def create(self, record_id: Optional[str] = None, new_version: bool = True):
+    def create(
+        self, record_id: Optional[str] = None, new_version: bool = True
+    ) -> WrappedRecord:
         """
         Create an empty draft, create new version or edit an existing record.
 
