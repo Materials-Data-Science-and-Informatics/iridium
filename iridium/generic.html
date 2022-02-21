@@ -243,6 +243,11 @@ that are returned by InvenioRDM from its ElasticSearch index.</p>
         <span class="k">return</span> <span class="n">obj</span> <span class="ow">in</span> <span class="nb">iter</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
 
 
+<span class="c1"># TODO: probably this should be refactored into paginated and unpaginated queries</span>
+<span class="c1"># and build using composition instead of inheritance</span>
+<span class="c1"># (i.e. support batched vs unbatched result providers)</span>
+
+
 <span class="k">class</span> <span class="nc">Query</span><span class="p">(</span><span class="n">PaginatedList</span><span class="p">[</span><span class="n">T</span><span class="p">]):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Class for convenient access to query results.</span>

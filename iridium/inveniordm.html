@@ -274,6 +274,9 @@ and then find the corresponding methods in this module.</p>
 <span class="c1"># but no idea how to do it non-blocking and e.g. show upload progress</span>
 <span class="c1"># also see: https://github.com/encode/httpx/issues/1015</span>
 
+<span class="c1"># TODO: the record and draft sub-apis could be abstracted into a base class</span>
+<span class="c1"># with operations supported by both (with only the endpoint being different)</span>
+
 <span class="n">_debug</span> <span class="o">=</span> <span class="kc">False</span>
 <span class="sd">&quot;&quot;&quot;If set to true, will print HTTP returned exceptions.&quot;&quot;&quot;</span>
 
