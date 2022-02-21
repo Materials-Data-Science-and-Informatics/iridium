@@ -1,7 +1,7 @@
 """Test high-level Iridium API."""
 
+import datetime
 import time
-from datetime import datetime
 
 import httpx
 import pytest
@@ -254,7 +254,8 @@ def test_create_record(irdm, testutils, dummy_file):
     assert ver3.access_links[0].id == lnk.id
 
     # try setting and reading
-    dt = datetime.now()
+
+    dt = datetime.datetime.now() + datetime.timedelta(hours=10)
     lnk.expires_at = dt
     assert lnk.expires_at == dt
     perm = LinkPermission.EDIT

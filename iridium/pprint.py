@@ -1,7 +1,6 @@
 """Utilities for pretty printing."""
 
 import pprint
-import sys
 from typing import Any, Dict, Generic, TypeVar
 
 import wrapt
@@ -11,9 +10,6 @@ pprint_args: Dict[str, Any] = {
     "depth": 4,
 }
 """Globally used pprint settings."""
-
-if sys.version_info >= (3, 8):
-    pprint_args["sort_dicts"] = False  # pragma: no cover
 
 
 def pp(obj) -> str:
