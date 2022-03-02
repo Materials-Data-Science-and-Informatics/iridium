@@ -5,7 +5,7 @@ The classes in this module just neatly organize the endpoints to be
 conveniently accessed through an `InvenioRDMClient` instance.
 
 The methods return plain [pydantic](https://pydantic-docs.helpmanual.io/)
-models that serve as somewhat validated Python representation of
+models that serve as a somewhat validated Python representation of
 the corresponding request and response JSON objects.
 
 The 1-to-1 mapping between REST API endpoints and methods and the plain nature of
@@ -151,7 +151,7 @@ class QueryAPI(SubAPI):
         """
         Get the specified vocabulary term names.
 
-        https://inveniordm.docs.cern.ch/reference/rest_api_vocabularies/
+        [InvenioRDM documentation](https://inveniordm.docs.cern.ch/reference/rest_api_vocabularies)
         """
         pref = "/vocabularies" if not voc_special(voc_type) else ""
         pcls = voc_class(voc_type)
@@ -171,7 +171,7 @@ class QueryAPI(SubAPI):
         """
         Get the specified vocabulary term definition.
 
-        https://inveniordm.docs.cern.ch/reference/rest_api_vocabularies/#get-a-vocabulary-record
+        [InvenioRDM documentation](https://inveniordm.docs.cern.ch/reference/rest_api_vocabularies/#get-a-vocabulary-record)
         """
         pref = "/vocabularies" if not voc_special(voc_type) else ""
         pcls = voc_class(voc_type)
@@ -187,8 +187,8 @@ class QueryAPI(SubAPI):
 
         If user=True, will only query within records of the user.
 
-        https://inveniordm.docs.cern.ch/reference/rest_api_drafts_records/#search-records
-        https://inveniordm.docs.cern.ch/reference/rest_api_drafts_records/#user-records
+        [InvenioRDM documentation](https://inveniordm.docs.cern.ch/reference/rest_api_drafts_records/#search-records)
+        [InvenioRDM documentation](https://inveniordm.docs.cern.ch/reference/rest_api_drafts_records/#user-records)
         """
         qargs = RecQueryArgs.parse_obj(kwargs)
         usr = "/user" if user else ""
@@ -210,7 +210,7 @@ class AccessLinkAPI(SubAPI):
         """
         Link access links for record.
 
-        https://inveniordm.docs.cern.ch/reference/rest_api_drafts_records/#list-access-links
+        [InvenioRDM documentation](https://inveniordm.docs.cern.ch/reference/rest_api_drafts_records/#list-access-links)
         """
         r = self._p.client.get(self._p._endpoint(f"/records/{record_id}/access/links"))
         _raise_on_error_status(r)
@@ -224,7 +224,7 @@ class AccessLinkAPI(SubAPI):
         """
         Get information about access link for record.
 
-        https://inveniordm.docs.cern.ch/reference/rest_api_drafts_records/#get-an-access-link
+        [InvenioRDM documentation](https://inveniordm.docs.cern.ch/reference/rest_api_drafts_records/#get-an-access-link)
         """
         url = self._p._endpoint(f"/records/{record_id}/access/links/{link_id}")
         r = self._p.client.get(url)
@@ -235,7 +235,7 @@ class AccessLinkAPI(SubAPI):
         """
         Get information about access link for record.
 
-        https://inveniordm.docs.cern.ch/reference/rest_api_drafts_records/#get-an-access-link
+        [InvenioRDM documentation](https://inveniordm.docs.cern.ch/reference/rest_api_drafts_records/#get-an-access-link)
         """
         url = self._p._endpoint(f"/records/{record_id}/access/links/{link_id}")
         r = self._p.client.delete(url)
@@ -251,7 +251,7 @@ class AccessLinkAPI(SubAPI):
         """
         Create an access link for a record (or update, if link_id is provided).
 
-        https://inveniordm.docs.cern.ch/reference/rest_api_drafts_records/#create-an-access-link
+        [InvenioRDM documentation](https://inveniordm.docs.cern.ch/reference/rest_api_drafts_records/#create-an-access-link)
         """
         create = link_id is None
         if create and not permission:
@@ -276,7 +276,7 @@ class AccessLinkAPI(SubAPI):
         """
         Update an access link for a record (from a modified access link object).
 
-        https://inveniordm.docs.cern.ch/reference/rest_api_drafts_records/#update-an-access-link
+        [InvenioRDM documentation](https://inveniordm.docs.cern.ch/reference/rest_api_drafts_records/#update-an-access-link)
         """
         return self.create(record_id, aclnk.expires_at, aclnk.permission, aclnk.id)
 
@@ -292,7 +292,7 @@ class RecordAPI(SubAPI):
         """
         Get a published record (does not contain information about files).
 
-        https://inveniordm.docs.cern.ch/reference/rest_api_drafts_records/#get-a-record
+        [InvenioRDM documentation](https://inveniordm.docs.cern.ch/reference/rest_api_drafts_records/#get-a-record)
         """
         r = self._p.client.get(self._p._endpoint(f"/records/{record_id}"))
         _raise_on_error_status(r)
@@ -304,7 +304,7 @@ class RecordAPI(SubAPI):
 
         Notice that this contains more information than is included in `RecordAPI.get`.
 
-        https://inveniordm.docs.cern.ch/reference/rest_api_drafts_records/#list-a-drafts-files
+        [InvenioRDM documentation](https://inveniordm.docs.cern.ch/reference/rest_api_drafts_records/#list-a-drafts-files)
         """
         r = self._p.client.get(self._p._endpoint(f"/records/{record_id}/files"))
         _raise_on_error_status(r)
@@ -314,7 +314,7 @@ class RecordAPI(SubAPI):
         """
         Get metadata of a record file.
 
-        https://inveniordm.docs.cern.ch/reference/rest_api_drafts_records/#get-a-record-files-metadata
+        [InvenioRDM documentation](https://inveniordm.docs.cern.ch/reference/rest_api_drafts_records/#get-a-record-files-metadata)
         """
         url = self._p._endpoint(f"/records/{record_id}/files/{filename}")
         r = self._p.client.get(url)
@@ -325,7 +325,7 @@ class RecordAPI(SubAPI):
         """
         Download file from a record.
 
-        https://inveniordm.docs.cern.ch/reference/rest_api_drafts_records/#download-a-record-file
+        [InvenioRDM documentation](https://inveniordm.docs.cern.ch/reference/rest_api_drafts_records/#download-a-record-file)
         """
         url = self._p._endpoint(f"/records/{record_id}/files/{filename}/content")
         r = self._p.client.get(url)
@@ -338,7 +338,7 @@ class RecordAPI(SubAPI):
 
         Basically searches for all entries with same parent.id and sorts by version.
 
-        https://inveniordm.docs.cern.ch/reference/rest_api_drafts_records/#get-all-versions
+        [InvenioRDM documentation](https://inveniordm.docs.cern.ch/reference/rest_api_drafts_records/#get-all-versions)
         """
         # url = self._p._endpoint(f"/records/{record_id}/versions")
         # buggy; see https://github.com/inveniosoftware/invenio-app-rdm/issues/1167
@@ -355,7 +355,7 @@ class RecordAPI(SubAPI):
         """
         Get latest version of a record.
 
-        https://inveniordm.docs.cern.ch/reference/rest_api_drafts_records/#get-latest-version
+        [InvenioRDM documentation](https://inveniordm.docs.cern.ch/reference/rest_api_drafts_records/#get-latest-version)
         """
         url = self._p._endpoint(f"/records/{record_id}/versions/latest")
         r = self._p.client.get(url, follow_redirects=True)
@@ -370,7 +370,7 @@ class DraftAPI(SubAPI):
         """
         Get metadata of a record draft (does not contain information about files).
 
-        https://inveniordm.docs.cern.ch/reference/rest_api_drafts_records/#get-a-draft-record
+        [InvenioRDM documentation](https://inveniordm.docs.cern.ch/reference/rest_api_drafts_records/#get-a-draft-record)
         """
         r = self._p.client.get(self._p._endpoint(f"/records/{draft_id}/draft"))
         _raise_on_error_status(r)
@@ -380,7 +380,7 @@ class DraftAPI(SubAPI):
         """
         Delete a record draft.
 
-        https://inveniordm.docs.cern.ch/reference/rest_api_drafts_records/#get-a-draft-record
+        [InvenioRDM documentation](https://inveniordm.docs.cern.ch/reference/rest_api_drafts_records/#get-a-draft-record)
         """
         r = self._p.client.delete(self._p._endpoint(f"/records/{draft_id}/draft"))
         _raise_on_error_status(r)
@@ -389,7 +389,7 @@ class DraftAPI(SubAPI):
         """
         Publish a record draft.
 
-        https://inveniordm.docs.cern.ch/reference/rest_api_drafts_records/#publish-a-draft-record
+        [InvenioRDM documentation](https://inveniordm.docs.cern.ch/reference/rest_api_drafts_records/#publish-a-draft-record)
         """
         url = self._p._endpoint(f"/records/{draft_id}/draft/actions/publish")
         r = self._p.client.post(url)
@@ -400,7 +400,7 @@ class DraftAPI(SubAPI):
         """
         Create a draft from a published record version (to update attached metadata).
 
-        https://inveniordm.docs.cern.ch/reference/rest_api_drafts_records/#edit-a-published-record-create-a-draft-record-from-a-published-record
+        [InvenioRDM documentation](https://inveniordm.docs.cern.ch/reference/rest_api_drafts_records/#edit-a-published-record-create-a-draft-record-from-a-published-record)
         """
         r = self._p.client.post(self._p._endpoint(f"/records/{record_id}/draft"))
         _raise_on_error_status(r)
@@ -413,7 +413,7 @@ class DraftAPI(SubAPI):
         The publication_date and version are removed, versions.index is incremented
         and a new id is provided for the new version.
 
-        https://inveniordm.docs.cern.ch/reference/rest_api_drafts_records/#create-a-new-version
+        [InvenioRDM documentation](https://inveniordm.docs.cern.ch/reference/rest_api_drafts_records/#create-a-new-version)
         """
         r = self._p.client.post(self._p._endpoint(f"/records/{record_id}/versions"))
         _raise_on_error_status(r)
@@ -430,7 +430,7 @@ class DraftAPI(SubAPI):
         """
         Create a record draft (or update an existing draft, if draft_id provided).
 
-        https://inveniordm.docs.cern.ch/reference/rest_api_drafts_records/#create-a-draft-record
+        [InvenioRDM documentation](https://inveniordm.docs.cern.ch/reference/rest_api_drafts_records/#create-a-draft-record)
         """
         create = draft_id is None
 
@@ -470,7 +470,7 @@ class DraftAPI(SubAPI):
         """
         Update a record draft (from a modified draft object).
 
-        https://inveniordm.docs.cern.ch/reference/rest_api_drafts_records/#update-a-draft-record
+        [InvenioRDM documentation](https://inveniordm.docs.cern.ch/reference/rest_api_drafts_records/#update-a-draft-record)
         """
         return self.create(
             draft.metadata, draft.access, draft.files, draft.id, draft.pids
@@ -482,7 +482,7 @@ class DraftAPI(SubAPI):
 
         Notice that this contains more information than is included in `DraftAPI.get`.
 
-        https://inveniordm.docs.cern.ch/reference/rest_api_drafts_records/#list-a-drafts-files
+        [InvenioRDM documentation](https://inveniordm.docs.cern.ch/reference/rest_api_drafts_records/#list-a-drafts-files)
         """
         r = self._p.client.get(self._p._endpoint(f"/records/{draft_id}/draft/files"))
         _raise_on_error_status(r)
@@ -492,7 +492,7 @@ class DraftAPI(SubAPI):
         """
         Get metadata of a record draft file.
 
-        https://inveniordm.docs.cern.ch/reference/rest_api_drafts_records/#get-a-record-files-metadata
+        [InvenioRDM documentation](https://inveniordm.docs.cern.ch/reference/rest_api_drafts_records/#get-a-record-files-metadata)
         """
         url = self._p._endpoint(f"/records/{draft_id}/draft/files/{filename}")
         r = self._p.client.get(url)
@@ -503,7 +503,7 @@ class DraftAPI(SubAPI):
         """
         Download file from a record draft.
 
-        https://inveniordm.docs.cern.ch/reference/rest_api_drafts_records/#download-a-record-file
+        [InvenioRDM documentation](https://inveniordm.docs.cern.ch/reference/rest_api_drafts_records/#download-a-record-file)
         """
         url = self._p._endpoint(f"/records/{draft_id}/draft/files/{filename}/content")
         r = self._p.client.get(url)
@@ -514,7 +514,7 @@ class DraftAPI(SubAPI):
         """
         Delete a file from the record draft.
 
-        https://inveniordm.docs.cern.ch/reference/rest_api_drafts_records/#delete-a-draft-file
+        [InvenioRDM documentation](https://inveniordm.docs.cern.ch/reference/rest_api_drafts_records/#delete-a-draft-file)
         """
         url = self._p._endpoint(f"/records/{draft_id}/draft/files/{filename}")
         r = self._p.client.delete(url)
@@ -524,7 +524,7 @@ class DraftAPI(SubAPI):
         """
         Register a new file upload for the record draft.
 
-        https://inveniordm.docs.cern.ch/reference/rest_api_drafts_records/#start-draft-file-uploads
+        [InvenioRDM documentation](https://inveniordm.docs.cern.ch/reference/rest_api_drafts_records/#start-draft-file-uploads)
         """
         url = self._p._endpoint(f"/records/{draft_id}/draft/files")
         r = self._p.client.post(url, json=[{"key": filename}])
@@ -535,7 +535,7 @@ class DraftAPI(SubAPI):
         """
         Mark an upload as completed.
 
-        https://inveniordm.docs.cern.ch/reference/rest_api_drafts_records/#complete-a-draft-file-upload
+        [InvenioRDM documentation](https://inveniordm.docs.cern.ch/reference/rest_api_drafts_records/#complete-a-draft-file-upload)
         """
         url = self._p._endpoint(f"/records/{draft_id}/draft/files/{filename}/commit")
         r = self._p.client.post(url)
@@ -548,7 +548,7 @@ class DraftAPI(SubAPI):
         """
         Upload file content to a registered filename.
 
-        https://inveniordm.docs.cern.ch/reference/rest_api_drafts_records/#upload-a-draft-files-content
+        [InvenioRDM documentation](https://inveniordm.docs.cern.ch/reference/rest_api_drafts_records/#upload-a-draft-files-content)
         """
         url = self._p._endpoint(f"/records/{draft_id}/draft/files/{filename}/content")
         hdr = {"content-type": "application/octet-stream"}
