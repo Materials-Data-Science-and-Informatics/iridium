@@ -233,9 +233,9 @@ class AccessLinkAPI(SubAPI):
 
     def delete(self, record_id: str, link_id: str):
         """
-        Get information about access link for record.
+        Delete access link for record.
 
-        [InvenioRDM documentation](https://inveniordm.docs.cern.ch/reference/rest_api_drafts_records/#get-an-access-link)
+        [InvenioRDM documentation](https://inveniordm.docs.cern.ch/reference/rest_api_drafts_records/#delete-an-access-link)
         """
         url = self._p._endpoint(f"/records/{record_id}/access/links/{link_id}")
         r = self._p.client.delete(url)
