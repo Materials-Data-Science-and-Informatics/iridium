@@ -1324,7 +1324,7 @@ rec.edit()
 
         
             <span class="def">def</span>
-            <span class="name">save</span><span class="signature">(self) -&gt; Union[<a href="pprint.html#PrettyRepr">iridium.pprint.PrettyRepr</a>[Dict[str, str]], NoneType]</span>:
+            <span class="name">save</span><span class="signature">(self) -&gt; Optional[<a href="pprint.html#PrettyRepr">iridium.pprint.PrettyRepr</a>[Dict[str, str]]]</span>:
     </div>
 
                 <details>
@@ -1575,7 +1575,7 @@ the fields <code><a href="#WrappedAccessLink.expires_at">expires_at</a></code> a
                             <div id="WrappedAccessLink.expires_at" class="classattr">
                                             <div class="attr variable"><a class="headerlink" href="#WrappedAccessLink.expires_at">#&nbsp;&nbsp</a>
 
-        <span class="name">expires_at</span><span class="annotation">: Union[datetime.datetime, NoneType]</span>
+        <span class="name">expires_at</span><span class="annotation">: Optional[datetime.datetime]</span>
     </div>
 
     
@@ -1584,7 +1584,7 @@ the fields <code><a href="#WrappedAccessLink.expires_at">expires_at</a></code> a
                             <div id="WrappedAccessLink.permission" class="classattr">
                                             <div class="attr variable"><a class="headerlink" href="#WrappedAccessLink.permission">#&nbsp;&nbsp</a>
 
-        <span class="name">permission</span><span class="annotation">: Union[<a href="inveniordm/models/technical.html#LinkPermission">iridium.inveniordm.models.technical.LinkPermission</a>, NoneType]</span>
+        <span class="name">permission</span><span class="annotation">: Optional[<a href="inveniordm/models/technical.html#LinkPermission">iridium.inveniordm.models.technical.LinkPermission</a>]</span>
     </div>
 
     
@@ -1593,7 +1593,7 @@ the fields <code><a href="#WrappedAccessLink.expires_at">expires_at</a></code> a
                             <div id="WrappedAccessLink.id" class="classattr">
                                             <div class="attr variable"><a class="headerlink" href="#WrappedAccessLink.id">#&nbsp;&nbsp</a>
 
-        <span class="name">id</span><span class="annotation">: Union[str, NoneType]</span>
+        <span class="name">id</span><span class="annotation">: Optional[str]</span>
     </div>
 
     
@@ -1602,7 +1602,7 @@ the fields <code><a href="#WrappedAccessLink.expires_at">expires_at</a></code> a
                             <div id="WrappedAccessLink.token" class="classattr">
                                             <div class="attr variable"><a class="headerlink" href="#WrappedAccessLink.token">#&nbsp;&nbsp</a>
 
-        <span class="name">token</span><span class="annotation">: Union[str, NoneType]</span>
+        <span class="name">token</span><span class="annotation">: Optional[str]</span>
     </div>
 
     
@@ -1611,7 +1611,7 @@ the fields <code><a href="#WrappedAccessLink.expires_at">expires_at</a></code> a
                             <div id="WrappedAccessLink.created_at" class="classattr">
                                             <div class="attr variable"><a class="headerlink" href="#WrappedAccessLink.created_at">#&nbsp;&nbsp</a>
 
-        <span class="name">created_at</span><span class="annotation">: Union[datetime.datetime, NoneType]</span>
+        <span class="name">created_at</span><span class="annotation">: Optional[datetime.datetime]</span>
     </div>
 
     
@@ -1801,8 +1801,8 @@ while a larger batch size is more efficient for traversing all results.</p>
             <span class="def">def</span>
             <span class="name">create</span><span class="signature">(
     self,
-    expires_at: Union[datetime.datetime, NoneType] = None,
-    permission: Union[<a href="inveniordm/models/technical.html#LinkPermission">iridium.inveniordm.models.technical.LinkPermission</a>, NoneType] = None
+    expires_at: Optional[datetime.datetime] = None,
+    permission: Optional[<a href="inveniordm/models/technical.html#LinkPermission">iridium.inveniordm.models.technical.LinkPermission</a>] = None
 )</span>:
     </div>
 
@@ -2374,7 +2374,7 @@ and, if needed, e.g. write to a file.</p>
 
         
             <span class="def">def</span>
-            <span class="name">upload</span><span class="signature">(self, filename: str, data: Union[BinaryIO, NoneType] = None)</span>:
+            <span class="name">upload</span><span class="signature">(self, filename: str, data: Optional[BinaryIO] = None)</span>:
     </div>
 
                 <details>
