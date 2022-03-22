@@ -89,7 +89,7 @@ coverage, use `pytest --cov`.
 InvenioRDM instance that you have access to.
 
 To generate local documentation (as the one linked above), run
-`pdoc --html -o docs iridium` (see [https://pdoc.dev](https://pdoc.dev)).
+`pdoc -o docs iridium` (see [https://pdoc.dev](https://pdoc.dev)).
 
 ## Acknowledgements
 
