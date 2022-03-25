@@ -160,7 +160,7 @@ is used to access these queries.</p>
 
     <span class="k">def</span> <span class="nf">_query_items</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Results</span><span class="p">:</span>
         <span class="n">ret</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="o">.</span><span class="n">query</span><span class="o">.</span><span class="n">records</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_user_only</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-        <span class="n">ret</span><span class="o">.</span><span class="n">hits</span><span class="o">.</span><span class="n">hits</span> <span class="o">=</span> <span class="p">[</span><span class="n">WrappedRecord</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">ret</span><span class="o">.</span><span class="n">hits</span><span class="o">.</span><span class="n">hits</span><span class="p">]</span>
+        <span class="n">ret</span><span class="o">.</span><span class="n">hits</span><span class="o">.</span><span class="n">hits</span> <span class="o">=</span> <span class="p">[</span><span class="n">WrappedRecord</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">ret</span><span class="o">.</span><span class="n">hits</span><span class="o">.</span><span class="n">hits</span><span class="p">]</span>
         <span class="k">return</span> <span class="n">ret</span>
 
 
@@ -180,7 +180,12 @@ is used to access these queries.</p>
         <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;q&quot;</span><span class="p">]</span> <span class="o">+=</span> <span class="s2">&quot; is_published:false&quot;</span>
 
         <span class="n">ret</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="o">.</span><span class="n">query</span><span class="o">.</span><span class="n">records</span><span class="p">(</span><span class="n">user</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-        <span class="n">ret</span><span class="o">.</span><span class="n">hits</span><span class="o">.</span><span class="n">hits</span> <span class="o">=</span> <span class="p">[</span><span class="n">WrappedRecord</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">ret</span><span class="o">.</span><span class="n">hits</span><span class="o">.</span><span class="n">hits</span><span class="p">]</span>
+        <span class="c1"># HACK because is_draft is broken:</span>
+        <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">ret</span><span class="o">.</span><span class="n">hits</span><span class="o">.</span><span class="n">hits</span><span class="p">:</span>
+            <span class="n">x</span><span class="o">.</span><span class="n">is_draft</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="c1"># ----</span>
+
+        <span class="n">ret</span><span class="o">.</span><span class="n">hits</span><span class="o">.</span><span class="n">hits</span> <span class="o">=</span> <span class="p">[</span><span class="n">WrappedRecord</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">ret</span><span class="o">.</span><span class="n">hits</span><span class="o">.</span><span class="n">hits</span><span class="p">]</span>
         <span class="k">return</span> <span class="n">ret</span>
 
 
@@ -214,7 +219,7 @@ is used to access these queries.</p>
         <span class="k">return</span> <span class="n">RecordQuery</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="p">,</span> <span class="n">user</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_get_entity</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">record_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
-        <span class="k">return</span> <span class="n">WrappedRecord</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="o">.</span><span class="n">record</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">record_id</span><span class="p">),</span> <span class="kc">False</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">WrappedRecord</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="o">.</span><span class="n">record</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">record_id</span><span class="p">))</span>
 
 
 <span class="k">class</span> <span class="nc">Drafts</span><span class="p">(</span><span class="n">AccessProxy</span><span class="p">):</span>
@@ -236,7 +241,7 @@ is used to access these queries.</p>
         <span class="k">return</span> <span class="n">DraftQuery</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_get_entity</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">draft_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
-        <span class="k">return</span> <span class="n">WrappedRecord</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="o">.</span><span class="n">draft</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">draft_id</span><span class="p">),</span> <span class="kc">True</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">WrappedRecord</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="o">.</span><span class="n">draft</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">draft_id</span><span class="p">))</span>
 
     <span class="c1"># this fits here nicely as a general way to create new drafts</span>
     <span class="k">def</span> <span class="nf">create</span><span class="p">(</span>
@@ -259,7 +264,7 @@ is used to access these queries.</p>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">rec</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="o">.</span><span class="n">draft</span><span class="o">.</span><span class="n">from_record</span><span class="p">(</span><span class="n">record_id</span><span class="p">)</span>
 
-        <span class="k">return</span> <span class="n">WrappedRecord</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="p">,</span> <span class="n">rec</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">WrappedRecord</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="p">,</span> <span class="n">rec</span><span class="p">)</span>
 </pre></div>
 
         </details>
@@ -385,7 +390,7 @@ while a larger batch size is more efficient for traversing all results.</p>
 
     <span class="k">def</span> <span class="nf">_query_items</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Results</span><span class="p">:</span>
         <span class="n">ret</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="o">.</span><span class="n">query</span><span class="o">.</span><span class="n">records</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_user_only</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-        <span class="n">ret</span><span class="o">.</span><span class="n">hits</span><span class="o">.</span><span class="n">hits</span> <span class="o">=</span> <span class="p">[</span><span class="n">WrappedRecord</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">ret</span><span class="o">.</span><span class="n">hits</span><span class="o">.</span><span class="n">hits</span><span class="p">]</span>
+        <span class="n">ret</span><span class="o">.</span><span class="n">hits</span><span class="o">.</span><span class="n">hits</span> <span class="o">=</span> <span class="p">[</span><span class="n">WrappedRecord</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">ret</span><span class="o">.</span><span class="n">hits</span><span class="o">.</span><span class="n">hits</span><span class="p">]</span>
         <span class="k">return</span> <span class="n">ret</span>
 </pre></div>
 
@@ -488,7 +493,12 @@ while a larger batch size is more efficient for traversing all results.</p>
         <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;q&quot;</span><span class="p">]</span> <span class="o">+=</span> <span class="s2">&quot; is_published:false&quot;</span>
 
         <span class="n">ret</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="o">.</span><span class="n">query</span><span class="o">.</span><span class="n">records</span><span class="p">(</span><span class="n">user</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-        <span class="n">ret</span><span class="o">.</span><span class="n">hits</span><span class="o">.</span><span class="n">hits</span> <span class="o">=</span> <span class="p">[</span><span class="n">WrappedRecord</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">ret</span><span class="o">.</span><span class="n">hits</span><span class="o">.</span><span class="n">hits</span><span class="p">]</span>
+        <span class="c1"># HACK because is_draft is broken:</span>
+        <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">ret</span><span class="o">.</span><span class="n">hits</span><span class="o">.</span><span class="n">hits</span><span class="p">:</span>
+            <span class="n">x</span><span class="o">.</span><span class="n">is_draft</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="c1"># ----</span>
+
+        <span class="n">ret</span><span class="o">.</span><span class="n">hits</span><span class="o">.</span><span class="n">hits</span> <span class="o">=</span> <span class="p">[</span><span class="n">WrappedRecord</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">ret</span><span class="o">.</span><span class="n">hits</span><span class="o">.</span><span class="n">hits</span><span class="p">]</span>
         <span class="k">return</span> <span class="n">ret</span>
 </pre></div>
 
@@ -641,7 +651,7 @@ while a larger batch size is more efficient for traversing all results.</p>
         <span class="k">return</span> <span class="n">RecordQuery</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="p">,</span> <span class="n">user</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_get_entity</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">record_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
-        <span class="k">return</span> <span class="n">WrappedRecord</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="o">.</span><span class="n">record</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">record_id</span><span class="p">),</span> <span class="kc">False</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">WrappedRecord</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="o">.</span><span class="n">record</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">record_id</span><span class="p">))</span>
 </pre></div>
 
         </details>
@@ -690,7 +700,7 @@ while a larger batch size is more efficient for traversing all results.</p>
         <span class="k">return</span> <span class="n">DraftQuery</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_get_entity</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">draft_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
-        <span class="k">return</span> <span class="n">WrappedRecord</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="o">.</span><span class="n">draft</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">draft_id</span><span class="p">),</span> <span class="kc">True</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">WrappedRecord</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="o">.</span><span class="n">draft</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">draft_id</span><span class="p">))</span>
 
     <span class="c1"># this fits here nicely as a general way to create new drafts</span>
     <span class="k">def</span> <span class="nf">create</span><span class="p">(</span>
@@ -713,7 +723,7 @@ while a larger batch size is more efficient for traversing all results.</p>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">rec</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="o">.</span><span class="n">draft</span><span class="o">.</span><span class="n">from_record</span><span class="p">(</span><span class="n">record_id</span><span class="p">)</span>
 
-        <span class="k">return</span> <span class="n">WrappedRecord</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="p">,</span> <span class="n">rec</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">WrappedRecord</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="p">,</span> <span class="n">rec</span><span class="p">)</span>
 </pre></div>
 
         </details>
@@ -769,7 +779,7 @@ See: https://github.com/inveniosoftware/invenio-app-rdm/issues/714</p>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">rec</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="o">.</span><span class="n">draft</span><span class="o">.</span><span class="n">from_record</span><span class="p">(</span><span class="n">record_id</span><span class="p">)</span>
 
-        <span class="k">return</span> <span class="n">WrappedRecord</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="p">,</span> <span class="n">rec</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">WrappedRecord</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="p">,</span> <span class="n">rec</span><span class="p">)</span>
 </pre></div>
 
         </details>

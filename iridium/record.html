@@ -52,9 +52,6 @@
                                 <a class="variable" href="#WrappedRecord.versions">versions</a>
                         </li>
                         <li>
-                                <a class="variable" href="#WrappedRecord.is_draft">is_draft</a>
-                        </li>
-                        <li>
                                 <a class="function" href="#WrappedRecord.is_saved">is_saved</a>
                         </li>
                         <li>
@@ -241,23 +238,15 @@
     <span class="vm">__slots__</span> <span class="o">=</span> <span class="p">[</span>
         <span class="s2">&quot;_client&quot;</span><span class="p">,</span>
         <span class="s2">&quot;_record&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;_is_draft&quot;</span><span class="p">,</span>
         <span class="s2">&quot;_files&quot;</span><span class="p">,</span>
         <span class="s2">&quot;_access_links&quot;</span><span class="p">,</span>
         <span class="s2">&quot;_versions&quot;</span><span class="p">,</span>
     <span class="p">]</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cl</span><span class="p">:</span> <span class="n">InvenioRDMClient</span><span class="p">,</span> <span class="n">rec</span><span class="p">:</span> <span class="n">Record</span><span class="p">,</span> <span class="n">is_draft</span><span class="p">:</span> <span class="nb">bool</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cl</span><span class="p">:</span> <span class="n">InvenioRDMClient</span><span class="p">,</span> <span class="n">rec</span><span class="p">:</span> <span class="n">Record</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="p">:</span> <span class="n">InvenioRDMClient</span> <span class="o">=</span> <span class="n">cl</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_record</span><span class="p">:</span> <span class="n">Record</span> <span class="o">=</span> <span class="n">rec</span>
-
-        <span class="c1"># there is no such &quot;field&quot; in InvenioRDM, these are really 2 APIs!</span>
-        <span class="c1"># so we track the difference on our own.</span>
-        <span class="c1">#</span>
-        <span class="c1"># Also, this must come BEFORE initializing files,</span>
-        <span class="c1"># as `WrappedFiles` accesses the property is_draft,</span>
-        <span class="c1"># which only works correctly once `_is_draft` is set.</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_is_draft</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="n">is_draft</span>
+        <span class="nb">print</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">is_draft</span><span class="p">)</span>
 
         <span class="c1"># this is very interlinked with the wrapper, so we pass ourselves as parent</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_files</span><span class="p">:</span> <span class="n">WrappedFiles</span> <span class="o">=</span> <span class="n">WrappedFiles</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
@@ -293,15 +282,6 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_expect_published</span><span class="p">()</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_versions</span>
 
-    <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">is_draft</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Return whether the current object is an editable draft of a record.</span>
-
-<span class="sd">        Only drafts can be saved, published or deleted.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_draft</span>
-
     <span class="k">def</span> <span class="nf">_expect_draft</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_draft</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;Operation supported only for drafts!&quot;</span><span class="p">)</span>
@@ -322,7 +302,7 @@
 
         <span class="c1"># need to &quot;wrap&quot; to initialize e.g. the &#39;files&#39; part correctly</span>
         <span class="n">raw</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="o">.</span><span class="n">draft</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_record</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
-        <span class="n">drft</span> <span class="o">=</span> <span class="n">WrappedRecord</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="p">,</span> <span class="n">raw</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+        <span class="n">drft</span> <span class="o">=</span> <span class="n">WrappedRecord</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="p">,</span> <span class="n">raw</span><span class="p">)</span>
 
         <span class="c1"># TODO: track https://github.com/inveniosoftware/invenio-app-rdm/issues/1233</span>
         <span class="c1"># for now, workaround: ignore access.status:</span>
@@ -367,7 +347,6 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_expect_published</span><span class="p">()</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_record</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="o">.</span><span class="n">draft</span><span class="o">.</span><span class="n">from_record</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_record</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_is_draft</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="k">return</span> <span class="bp">self</span>
 
     <span class="k">def</span> <span class="nf">save</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">PrettyRepr</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]]]:</span>
@@ -414,7 +393,6 @@
             <span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_record</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="o">.</span><span class="n">draft</span><span class="o">.</span><span class="n">publish</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_record</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_is_draft</span> <span class="o">=</span> <span class="kc">False</span>
 
     <span class="k">def</span> <span class="nf">delete</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -427,7 +405,6 @@
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="o">.</span><span class="n">draft</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_record</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
         <span class="c1"># to prevent the user from doing anything stupid, make it fail</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_is_draft</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_record</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># type: ignore</span>
 
     <span class="c1"># NOTE: the following is a really, really bad idea!</span>
@@ -599,7 +576,7 @@
         <span class="c1"># versions are special, so here we ignore the passed kwargs, because</span>
         <span class="c1"># they take no query parameters. yet, the interface requires accepting them</span>
         <span class="n">ret</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="o">.</span><span class="n">record</span><span class="o">.</span><span class="n">versions</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_record_id</span><span class="p">)</span>
-        <span class="n">ret</span><span class="o">.</span><span class="n">hits</span><span class="o">.</span><span class="n">hits</span> <span class="o">=</span> <span class="p">[</span><span class="n">WrappedRecord</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">ret</span><span class="o">.</span><span class="n">hits</span><span class="o">.</span><span class="n">hits</span><span class="p">]</span>
+        <span class="n">ret</span><span class="o">.</span><span class="n">hits</span><span class="o">.</span><span class="n">hits</span> <span class="o">=</span> <span class="p">[</span><span class="n">WrappedRecord</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">ret</span><span class="o">.</span><span class="n">hits</span><span class="o">.</span><span class="n">hits</span><span class="p">]</span>
         <span class="k">return</span> <span class="n">ret</span>
 
 
@@ -617,7 +594,7 @@
 
     <span class="k">def</span> <span class="nf">_get_entity</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">record_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
         <span class="n">rec</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="o">.</span><span class="n">record</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">record_id</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">WrappedRecord</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="p">,</span> <span class="n">rec</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">WrappedRecord</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="p">,</span> <span class="n">rec</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">create</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">WrappedRecord</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -631,12 +608,12 @@
 <span class="sd">        `rdm.drafts.create(&quot;REC_ID&quot;)`</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">drft</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="o">.</span><span class="n">draft</span><span class="o">.</span><span class="n">new_version</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_record_id</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">WrappedRecord</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="p">,</span> <span class="n">drft</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">WrappedRecord</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="p">,</span> <span class="n">drft</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">latest</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">WrappedRecord</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Return latest version of the current record.&quot;&quot;&quot;</span>
         <span class="n">rec</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="o">.</span><span class="n">record</span><span class="o">.</span><span class="n">latest_version</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_record_id</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">WrappedRecord</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="p">,</span> <span class="n">rec</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">WrappedRecord</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="p">,</span> <span class="n">rec</span><span class="p">)</span>
 
 
 <span class="c1"># ---- file API wrappers ----</span>
@@ -665,6 +642,7 @@
 
     <span class="k">def</span> <span class="nf">_get_fileinfos</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">FileMetadata</span><span class="p">]:</span>
         <span class="sd">&quot;&quot;&quot;Get the actual file metadata entries from the correct endpoint.&quot;&quot;&quot;</span>
+        <span class="nb">print</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_parent</span><span class="o">.</span><span class="n">is_draft</span><span class="p">)</span>
         <span class="n">api</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="o">.</span><span class="n">draft</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parent</span><span class="o">.</span><span class="n">is_draft</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="o">.</span><span class="n">record</span>
         <span class="n">ret</span> <span class="o">=</span> <span class="n">api</span><span class="o">.</span><span class="n">files</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_parent</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>  <span class="c1"># type: ignore</span>
         <span class="k">assert</span> <span class="n">ret</span><span class="o">.</span><span class="n">entries</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
@@ -846,23 +824,15 @@
     <span class="vm">__slots__</span> <span class="o">=</span> <span class="p">[</span>
         <span class="s2">&quot;_client&quot;</span><span class="p">,</span>
         <span class="s2">&quot;_record&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;_is_draft&quot;</span><span class="p">,</span>
         <span class="s2">&quot;_files&quot;</span><span class="p">,</span>
         <span class="s2">&quot;_access_links&quot;</span><span class="p">,</span>
         <span class="s2">&quot;_versions&quot;</span><span class="p">,</span>
     <span class="p">]</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cl</span><span class="p">:</span> <span class="n">InvenioRDMClient</span><span class="p">,</span> <span class="n">rec</span><span class="p">:</span> <span class="n">Record</span><span class="p">,</span> <span class="n">is_draft</span><span class="p">:</span> <span class="nb">bool</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cl</span><span class="p">:</span> <span class="n">InvenioRDMClient</span><span class="p">,</span> <span class="n">rec</span><span class="p">:</span> <span class="n">Record</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="p">:</span> <span class="n">InvenioRDMClient</span> <span class="o">=</span> <span class="n">cl</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_record</span><span class="p">:</span> <span class="n">Record</span> <span class="o">=</span> <span class="n">rec</span>
-
-        <span class="c1"># there is no such &quot;field&quot; in InvenioRDM, these are really 2 APIs!</span>
-        <span class="c1"># so we track the difference on our own.</span>
-        <span class="c1">#</span>
-        <span class="c1"># Also, this must come BEFORE initializing files,</span>
-        <span class="c1"># as `WrappedFiles` accesses the property is_draft,</span>
-        <span class="c1"># which only works correctly once `_is_draft` is set.</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_is_draft</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="n">is_draft</span>
+        <span class="nb">print</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">is_draft</span><span class="p">)</span>
 
         <span class="c1"># this is very interlinked with the wrapper, so we pass ourselves as parent</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_files</span><span class="p">:</span> <span class="n">WrappedFiles</span> <span class="o">=</span> <span class="n">WrappedFiles</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
@@ -898,15 +868,6 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_expect_published</span><span class="p">()</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_versions</span>
 
-    <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">is_draft</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Return whether the current object is an editable draft of a record.</span>
-
-<span class="sd">        Only drafts can be saved, published or deleted.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_draft</span>
-
     <span class="k">def</span> <span class="nf">_expect_draft</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_draft</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;Operation supported only for drafts!&quot;</span><span class="p">)</span>
@@ -927,7 +888,7 @@
 
         <span class="c1"># need to &quot;wrap&quot; to initialize e.g. the &#39;files&#39; part correctly</span>
         <span class="n">raw</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="o">.</span><span class="n">draft</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_record</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
-        <span class="n">drft</span> <span class="o">=</span> <span class="n">WrappedRecord</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="p">,</span> <span class="n">raw</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+        <span class="n">drft</span> <span class="o">=</span> <span class="n">WrappedRecord</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="p">,</span> <span class="n">raw</span><span class="p">)</span>
 
         <span class="c1"># TODO: track https://github.com/inveniosoftware/invenio-app-rdm/issues/1233</span>
         <span class="c1"># for now, workaround: ignore access.status:</span>
@@ -972,7 +933,6 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_expect_published</span><span class="p">()</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_record</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="o">.</span><span class="n">draft</span><span class="o">.</span><span class="n">from_record</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_record</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_is_draft</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="k">return</span> <span class="bp">self</span>
 
     <span class="k">def</span> <span class="nf">save</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">PrettyRepr</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]]]:</span>
@@ -1019,7 +979,6 @@
             <span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_record</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="o">.</span><span class="n">draft</span><span class="o">.</span><span class="n">publish</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_record</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_is_draft</span> <span class="o">=</span> <span class="kc">False</span>
 
     <span class="k">def</span> <span class="nf">delete</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -1032,7 +991,6 @@
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="o">.</span><span class="n">draft</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_record</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
         <span class="c1"># to prevent the user from doing anything stupid, make it fail</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_is_draft</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_record</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># type: ignore</span>
 
     <span class="c1"># NOTE: the following is a really, really bad idea!</span>
@@ -1097,24 +1055,16 @@ overwriting them will have no effect on the actual data on the server.</p>
         
             <span class="name">WrappedRecord</span><span class="signature">(
     cl: <a href="inveniordm.html#InvenioRDMClient">iridium.inveniordm.InvenioRDMClient</a>,
-    rec: <a href="inveniordm/models/technical.html#Record">iridium.inveniordm.models.technical.Record</a>,
-    is_draft: bool
+    rec: <a href="inveniordm/models/technical.html#Record">iridium.inveniordm.models.technical.Record</a>
 )</span>
     </div>
 
                 <details>
             <summary>View Source</summary>
-            <div class="codehilite"><pre><span></span>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cl</span><span class="p">:</span> <span class="n">InvenioRDMClient</span><span class="p">,</span> <span class="n">rec</span><span class="p">:</span> <span class="n">Record</span><span class="p">,</span> <span class="n">is_draft</span><span class="p">:</span> <span class="nb">bool</span><span class="p">):</span>
+            <div class="codehilite"><pre><span></span>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cl</span><span class="p">:</span> <span class="n">InvenioRDMClient</span><span class="p">,</span> <span class="n">rec</span><span class="p">:</span> <span class="n">Record</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="p">:</span> <span class="n">InvenioRDMClient</span> <span class="o">=</span> <span class="n">cl</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_record</span><span class="p">:</span> <span class="n">Record</span> <span class="o">=</span> <span class="n">rec</span>
-
-        <span class="c1"># there is no such &quot;field&quot; in InvenioRDM, these are really 2 APIs!</span>
-        <span class="c1"># so we track the difference on our own.</span>
-        <span class="c1">#</span>
-        <span class="c1"># Also, this must come BEFORE initializing files,</span>
-        <span class="c1"># as `WrappedFiles` accesses the property is_draft,</span>
-        <span class="c1"># which only works correctly once `_is_draft` is set.</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_is_draft</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="n">is_draft</span>
+        <span class="nb">print</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">is_draft</span><span class="p">)</span>
 
         <span class="c1"># this is very interlinked with the wrapper, so we pass ourselves as parent</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_files</span><span class="p">:</span> <span class="n">WrappedFiles</span> <span class="o">=</span> <span class="n">WrappedFiles</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
@@ -1184,19 +1134,6 @@ overwriting them will have no effect on the actual data on the server.</p>
 
 
                             </div>
-                            <div id="WrappedRecord.is_draft" class="classattr">
-                                            <div class="attr variable"><a class="headerlink" href="#WrappedRecord.is_draft">#&nbsp;&nbsp</a>
-
-        <span class="name">is_draft</span>
-    </div>
-
-            <div class="docstring"><p>Return whether the current object is an editable draft of a record.</p>
-
-<p>Only drafts can be saved, published or deleted.</p>
-</div>
-
-
-                            </div>
                             <div id="WrappedRecord.is_saved" class="classattr">
                                         <div class="attr function"><a class="headerlink" href="#WrappedRecord.is_saved">#&nbsp;&nbsp</a>
 
@@ -1219,7 +1156,7 @@ overwriting them will have no effect on the actual data on the server.</p>
 
         <span class="c1"># need to &quot;wrap&quot; to initialize e.g. the &#39;files&#39; part correctly</span>
         <span class="n">raw</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="o">.</span><span class="n">draft</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_record</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
-        <span class="n">drft</span> <span class="o">=</span> <span class="n">WrappedRecord</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="p">,</span> <span class="n">raw</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+        <span class="n">drft</span> <span class="o">=</span> <span class="n">WrappedRecord</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="p">,</span> <span class="n">raw</span><span class="p">)</span>
 
         <span class="c1"># TODO: track https://github.com/inveniosoftware/invenio-app-rdm/issues/1233</span>
         <span class="c1"># for now, workaround: ignore access.status:</span>
@@ -1285,7 +1222,6 @@ attributes, as these are the ones modifiable by the user.</p>
         <span class="bp">self</span><span class="o">.</span><span class="n">_expect_published</span><span class="p">()</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_record</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="o">.</span><span class="n">draft</span><span class="o">.</span><span class="n">from_record</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_record</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_is_draft</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="k">return</span> <span class="bp">self</span>
 </pre></div>
 
@@ -1398,7 +1334,6 @@ The changes will only be visible to others after calling <code><a href="#Wrapped
             <span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_record</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="o">.</span><span class="n">draft</span><span class="o">.</span><span class="n">publish</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_record</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_is_draft</span> <span class="o">=</span> <span class="kc">False</span>
 </pre></div>
 
         </details>
@@ -1437,7 +1372,6 @@ The changes will only be visible to others after calling <code><a href="#Wrapped
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="o">.</span><span class="n">draft</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_record</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
         <span class="c1"># to prevent the user from doing anything stupid, make it fail</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_is_draft</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_record</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># type: ignore</span>
 </pre></div>
 
@@ -1849,7 +1783,7 @@ while a larger batch size is more efficient for traversing all results.</p>
         <span class="c1"># versions are special, so here we ignore the passed kwargs, because</span>
         <span class="c1"># they take no query parameters. yet, the interface requires accepting them</span>
         <span class="n">ret</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="o">.</span><span class="n">record</span><span class="o">.</span><span class="n">versions</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_record_id</span><span class="p">)</span>
-        <span class="n">ret</span><span class="o">.</span><span class="n">hits</span><span class="o">.</span><span class="n">hits</span> <span class="o">=</span> <span class="p">[</span><span class="n">WrappedRecord</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">ret</span><span class="o">.</span><span class="n">hits</span><span class="o">.</span><span class="n">hits</span><span class="p">]</span>
+        <span class="n">ret</span><span class="o">.</span><span class="n">hits</span><span class="o">.</span><span class="n">hits</span> <span class="o">=</span> <span class="p">[</span><span class="n">WrappedRecord</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">ret</span><span class="o">.</span><span class="n">hits</span><span class="o">.</span><span class="n">hits</span><span class="p">]</span>
         <span class="k">return</span> <span class="n">ret</span>
 </pre></div>
 
@@ -1940,7 +1874,7 @@ while a larger batch size is more efficient for traversing all results.</p>
 
     <span class="k">def</span> <span class="nf">_get_entity</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">record_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
         <span class="n">rec</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="o">.</span><span class="n">record</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">record_id</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">WrappedRecord</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="p">,</span> <span class="n">rec</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">WrappedRecord</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="p">,</span> <span class="n">rec</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">create</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">WrappedRecord</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -1954,12 +1888,12 @@ while a larger batch size is more efficient for traversing all results.</p>
 <span class="sd">        `rdm.drafts.create(&quot;REC_ID&quot;)`</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">drft</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="o">.</span><span class="n">draft</span><span class="o">.</span><span class="n">new_version</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_record_id</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">WrappedRecord</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="p">,</span> <span class="n">drft</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">WrappedRecord</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="p">,</span> <span class="n">drft</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">latest</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">WrappedRecord</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Return latest version of the current record.&quot;&quot;&quot;</span>
         <span class="n">rec</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="o">.</span><span class="n">record</span><span class="o">.</span><span class="n">latest_version</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_record_id</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">WrappedRecord</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="p">,</span> <span class="n">rec</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">WrappedRecord</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="p">,</span> <span class="n">rec</span><span class="p">)</span>
 </pre></div>
 
         </details>
@@ -2009,7 +1943,7 @@ while a larger batch size is more efficient for traversing all results.</p>
 <span class="sd">        `rdm.drafts.create(&quot;REC_ID&quot;)`</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">drft</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="o">.</span><span class="n">draft</span><span class="o">.</span><span class="n">new_version</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_record_id</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">WrappedRecord</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="p">,</span> <span class="n">drft</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">WrappedRecord</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="p">,</span> <span class="n">drft</span><span class="p">)</span>
 </pre></div>
 
         </details>
@@ -2039,7 +1973,7 @@ is equivalent to:
             <div class="codehilite"><pre><span></span>    <span class="k">def</span> <span class="nf">latest</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">WrappedRecord</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Return latest version of the current record.&quot;&quot;&quot;</span>
         <span class="n">rec</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="o">.</span><span class="n">record</span><span class="o">.</span><span class="n">latest_version</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_record_id</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">WrappedRecord</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="p">,</span> <span class="n">rec</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">WrappedRecord</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="p">,</span> <span class="n">rec</span><span class="p">)</span>
 </pre></div>
 
         </details>
@@ -2084,6 +2018,7 @@ is equivalent to:
 
     <span class="k">def</span> <span class="nf">_get_fileinfos</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">FileMetadata</span><span class="p">]:</span>
         <span class="sd">&quot;&quot;&quot;Get the actual file metadata entries from the correct endpoint.&quot;&quot;&quot;</span>
+        <span class="nb">print</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_parent</span><span class="o">.</span><span class="n">is_draft</span><span class="p">)</span>
         <span class="n">api</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="o">.</span><span class="n">draft</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parent</span><span class="o">.</span><span class="n">is_draft</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="o">.</span><span class="n">record</span>
         <span class="n">ret</span> <span class="o">=</span> <span class="n">api</span><span class="o">.</span><span class="n">files</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_parent</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>  <span class="c1"># type: ignore</span>
         <span class="k">assert</span> <span class="n">ret</span><span class="o">.</span><span class="n">entries</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
