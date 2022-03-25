@@ -46,8 +46,6 @@ def test_readonly_fields_draft(irdm):
         draft.pids = "foo"
     # ...and also from wrapper itself
     with pytest.raises(ValueError):
-        draft.is_draft = "foo"  # type: ignore
-    with pytest.raises(ValueError):
         draft.access_links = "foo"  # type: ignore
     with pytest.raises(ValueError):
         draft.files = "foo"  # type: ignore
@@ -69,7 +67,7 @@ def test_readonly_fields_draft(irdm):
     # delete and check that it worked
     did = draft.id
     draft.delete()
-    assert not draft.is_draft
+    assert draft._record is None
     with pytest.raises(AttributeError):
         draft.metadata.title
     assert did not in irdm.drafts()

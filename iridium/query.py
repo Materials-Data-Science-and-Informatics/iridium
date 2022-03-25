@@ -39,7 +39,7 @@ class RecordQuery(Query):
 
     def _query_items(self, **kwargs) -> Results:
         ret = self._client.query.records(self._user_only, **kwargs)
-        ret.hits.hits = [WrappedRecord(self._client, x, False) for x in ret.hits.hits]
+        ret.hits.hits = [WrappedRecord(self._client, x) for x in ret.hits.hits]
         return ret
 
 
@@ -59,7 +59,12 @@ class DraftQuery(Query):
         kwargs["q"] += " is_published:false"
 
         ret = self._client.query.records(user=True, **kwargs)
-        ret.hits.hits = [WrappedRecord(self._client, x, True) for x in ret.hits.hits]
+        # HACK because is_draft is broken:
+        for x in ret.hits.hits:
+            x.is_draft = True
+        # ----
+
+        ret.hits.hits = [WrappedRecord(self._client, x) for x in ret.hits.hits]
         return ret
 
 
@@ -93,7 +98,7 @@ class Records(AccessProxy):
         return RecordQuery(self._client, user, **kwargs)
 
     def _get_entity(self, record_id: str):
-        return WrappedRecord(self._client, self._client.record.get(record_id), False)
+        return WrappedRecord(self._client, self._client.record.get(record_id))
 
 
 class Drafts(AccessProxy):
@@ -115,7 +120,7 @@ class Drafts(AccessProxy):
         return DraftQuery(self._client, **kwargs)
 
     def _get_entity(self, draft_id: str):
-        return WrappedRecord(self._client, self._client.draft.get(draft_id), True)
+        return WrappedRecord(self._client, self._client.draft.get(draft_id))
 
     # this fits here nicely as a general way to create new drafts
     def create(
@@ -138,4 +143,4 @@ class Drafts(AccessProxy):
             else:
                 rec = self._client.draft.from_record(record_id)
 
-        return WrappedRecord(self._client, rec, True)
+        return WrappedRecord(self._client, rec)

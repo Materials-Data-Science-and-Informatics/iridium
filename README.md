@@ -33,7 +33,7 @@ might follow when there is interest and the REST APIs are stabilized.
 This package supports the officially supported Python versions, i.e. `>=3.7`.
 
 Concerning the version of InvenioRDM, we currently do not give any commitment beyond
-supporting the latest official release (i.e. currently `v7`).
+supporting the latest official release (i.e. currently `v8`).
 
 If the InvenioRDM REST APIs at some point get a structured versioning and change policy,
 i.e. it becomes possible to

@@ -41,23 +41,15 @@ class WrappedRecord:
     __slots__ = [
         "_client",
         "_record",
-        "_is_draft",
         "_files",
         "_access_links",
         "_versions",
     ]
 
-    def __init__(self, cl: InvenioRDMClient, rec: Record, is_draft: bool):
+    def __init__(self, cl: InvenioRDMClient, rec: Record):
         self._client: InvenioRDMClient = cl
         self._record: Record = rec
-
-        # there is no such "field" in InvenioRDM, these are really 2 APIs!
-        # so we track the difference on our own.
-        #
-        # Also, this must come BEFORE initializing files,
-        # as `WrappedFiles` accesses the property is_draft,
-        # which only works correctly once `_is_draft` is set.
-        self._is_draft: bool = is_draft
+        print(self.is_draft)
 
         # this is very interlinked with the wrapper, so we pass ourselves as parent
         self._files: WrappedFiles = WrappedFiles(self)
@@ -93,15 +85,6 @@ class WrappedRecord:
         self._expect_published()
         return self._versions
 
-    @property
-    def is_draft(self):
-        """
-        Return whether the current object is an editable draft of a record.
-
-        Only drafts can be saved, published or deleted.
-        """
-        return self._is_draft
-
     def _expect_draft(self):
         if not self.is_draft:
             raise TypeError("Operation supported only for drafts!")
@@ -122,7 +105,7 @@ class WrappedRecord:
 
         # need to "wrap" to initialize e.g. the 'files' part correctly
         raw = self._client.draft.get(self._record.id)
-        drft = WrappedRecord(self._client, raw, True)
+        drft = WrappedRecord(self._client, raw)
 
         # TODO: track https://github.com/inveniosoftware/invenio-app-rdm/issues/1233
         # for now, workaround: ignore access.status:
@@ -167,7 +150,6 @@ class WrappedRecord:
         self._expect_published()
 
         self._record = self._client.draft.from_record(self._record.id)
-        self._is_draft = True
         return self
 
     def save(self) -> Optional[PrettyRepr[Dict[str, str]]]:
@@ -214,7 +196,6 @@ class WrappedRecord:
             )
 
         self._record = self._client.draft.publish(self._record.id)
-        self._is_draft = False
 
     def delete(self) -> None:
         """
@@ -227,7 +208,6 @@ class WrappedRecord:
 
         self._client.draft.delete(self._record.id)
         # to prevent the user from doing anything stupid, make it fail
-        self._is_draft = False
         self._record = None  # type: ignore
 
     # NOTE: the following is a really, really bad idea!
@@ -399,7 +379,7 @@ class RecordVersionsQuery(Query):
         # versions are special, so here we ignore the passed kwargs, because
         # they take no query parameters. yet, the interface requires accepting them
         ret = self._client.record.versions(self._record_id)
-        ret.hits.hits = [WrappedRecord(self._client, x, False) for x in ret.hits.hits]
+        ret.hits.hits = [WrappedRecord(self._client, x) for x in ret.hits.hits]
         return ret
 
 
@@ -417,7 +397,7 @@ class RecordVersions(AccessProxy):
 
     def _get_entity(self, record_id: str):
         rec = self._client.record.get(record_id)
-        return WrappedRecord(self._client, rec, False)
+        return WrappedRecord(self._client, rec)
 
     def create(self) -> WrappedRecord:
         """
@@ -431,12 +411,12 @@ class RecordVersions(AccessProxy):
         `rdm.drafts.create("REC_ID")`
         """
         drft = self._client.draft.new_version(self._record_id)
-        return WrappedRecord(self._client, drft, True)
+        return WrappedRecord(self._client, drft)
 
     def latest(self) -> WrappedRecord:
         """Return latest version of the current record."""
         rec = self._client.record.latest_version(self._record_id)
-        return WrappedRecord(self._client, rec, False)
+        return WrappedRecord(self._client, rec)
 
 
 # ---- file API wrappers ----
@@ -465,6 +445,7 @@ class WrappedFiles:
 
     def _get_fileinfos(self) -> List[FileMetadata]:
         """Get the actual file metadata entries from the correct endpoint."""
+        print(self._parent.is_draft)
         api = self._client.draft if self._parent.is_draft else self._client.record
         ret = api.files(self._parent.id)  # type: ignore
         assert ret.entries is not None

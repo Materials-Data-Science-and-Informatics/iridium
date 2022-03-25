@@ -71,7 +71,7 @@ jobs:
       - name: Set up InvenioRDM instance
         uses: ./.github/actions/setup-inveniordm
         with:
-          rdm-version: v7.0
+          rdm-version: v8.0
           dotenv-path: .env
 
       - name: Install Poetry

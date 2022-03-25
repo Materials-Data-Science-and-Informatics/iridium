@@ -277,6 +277,7 @@ class Record(Entity):
     parent: Parent
     versions: Versions  # dump_only
     is_published: bool  # dump_only
+    is_draft: bool  # dump_only
 
     # RDMRecordSchema
     pids: PIDs
